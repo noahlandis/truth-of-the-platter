@@ -1,6 +1,8 @@
 from bs4 import BeautifulSoup
 import requests
-
+from fuzzywuzzy import fuzz
+from fuzzywuzzy import process
+import re
 # to do
 # 1. Refactor
 # 2. Add tests
@@ -26,38 +28,48 @@ def url_builder_yelp(name, location):
     return f"https://www.yelp.com/search?find_desc={name}&find_loc={location}"
 
 def scrape(name, location):
-    # name = "Luigi's Restaraunt"
-    # location = "fairfield"    
-
     soup = get_html(name, location)
-    potential_intended_restaurant_names = soup.findAll(string="Home Slice Pizza") # this should use regex to match against multiple possible spellings
-    # if location was left blank, we can end show results here once we get the reviews
-    restaraunts_matching_location_criteria = list()
-    for restaraunt in potential_intended_restaurant_names:
-        location_info = restaraunt.parent['href'] 
-        print(location_info)
-        if location in location_info: #this shouldnt be a direct contains, again it should use regex to account for user error and get things that are 'close enough': Fairfield ct, ct Fairfield, CT fairfield, ct-fairfield, etc
-            restaraunts_matching_location_criteria.append(location_info)
+    buisness_name_tags = soup.select('[class*="businessName"]', limit=10)
 
-    print(restaraunts_matching_location_criteria) # this can be renamed as results to display
-    for restaraunt in restaraunts_matching_location_criteria:
-        url = "https://www.yelp.com" + restaraunt
-        individual_restaraunt = requests.get(url, headers={'User-Agent': "Mozilla/5.0"})
+    # get the text from the buisness name tags
+    potential_intended_restaurant_names = []
+    for tag in buisness_name_tags:
+        buisness_name = tag.get_text(strip=True)
 
+        # As sponsored results are irrelevant to the search, we ignore them. Only non-sponsored results are in the format "integer.<name>. 
+        if re.match(r'^\d\.', buisness_name):
+            potential_intended_restaurant_names.append(buisness_name)
 
-
-        # url = "https://www.yelp.com" + restaraunts_matching_location_criteria[0]
-        # individual_restaraunt = requests.get(url, headers={'User-Agent': "Mozilla/5.0"})
-        
-        soup = BeautifulSoup(individual_restaraunt.text, 'html.parser')
-        element = soup.find(string="Get Directions")
-        location = element.parent.parent.next_sibling.string
-        print("NAME " + name)
-        print("LOCATION " + location)
-        # rating = soup.find(href="#reviews")
-        # print(rating.string)
+    # in case of multiple sponsored results, we only consider numbered results
+    filtered_matches = get_fuzzy_matches(name, potential_intended_restaurant_names)
+    print(filtered_matches)
+    
+    
 
 
+
+
+def remove_non_alphanumeric_chars(a_string):
+    return re.sub(r'\W+', '', a_string)
+
+def get_fuzzy_matches(query, choices):
+    query = remove_non_alphanumeric_chars(query)
+    choices_copy = [remove_non_alphanumeric_chars(element) for element in choices]
+    matches = process.extract(query, choices_copy, scorer=fuzz.partial_token_set_ratio) 
+    # only extract matches with ratio above 75
+    filtered_matches = []
+    for i in range(len(matches)):
+        # choices copy is what we used for filtering, we want to add the names of the original restaraunts when we match to the HTML parsing
+        name = choices[i]
+        ratio = matches[i][1]
+        if ratio > 75:
+            filtered_matches.append(name)
+
+    return filtered_matches
+
+
+
+    
 
 
 
@@ -68,8 +80,5 @@ def main():
     # string in second search box: fairfield
 
     url = "https://www.yelp.com/search?find_desc=luigis&find_loc=fairfield"
-    read_input()
-    # scrape(url)
-
-if __name__ == "__main__":
-    main()
+    scrape("homeslice", "austin")
+main()
