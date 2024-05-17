@@ -33,10 +33,19 @@ def scrape(name, location):
     # collect buisness name tags
     filtered_tags = get_filtered_tags(name, soup)
     pages, search_results = get_pages_and_search_results(filtered_tags)
+
+    i = get_user_selection(search_results)
+    print(i)
     
 
-    print(search_results)
-    
+def get_user_selection(search_results):
+    for i in range(len(search_results)):
+        print(str(i) + ": " + str(search_results[i]))
+    selection = input("Enter a number to select what restaraunt you had in mind: ")
+    return selection
+        
+
+
 def get_filtered_tags(name, soup):
     buisness_name_tags = soup.select('[class*="businessName"]', limit=10)
     filtered_tags = []
