@@ -9,6 +9,10 @@ class Website(ABC):
     @abstractmethod
     def get_rating_and_review_count(self, page):
         pass
+
+    @abstractmethod
+    def get_root(self):
+        pass
     
 
 

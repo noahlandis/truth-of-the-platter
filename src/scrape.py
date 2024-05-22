@@ -1,152 +1,126 @@
-from bs4 import BeautifulSoup
+# import all the necessary libraries
 import requests
-from fuzzywuzzy import fuzz
-from fuzzywuzzy import process
-import re
-# to do
-# 1. Refactor
-# 2. Add tests
-# 2. Create URL builder (interface/higher order functions?)
-# 3. Find best way to switch with google: see below
-# 4. Create front end
-YELP_ROOT = "https://www.yelp.com"
-GOOGLE_ROOT = "https://www.google.com"
+from bs4 import BeautifulSoup
+
+
+# import the websites so that they are resolved
+
+
+from model.yelp import Yelp
+from model.googl import Googl
+from model.website import Website
+from input import get_user_selection, read_input
+from string_utils import is_potential_match, extract_review_count
+
+
+
+
+# Modules
+# Scrape: main scrape function and get_soup, get_html, get_pages_and_search_results
+# String utils: remove_non_alphanumeric_chars, is_fuzzy_match, extract_review_count
+# Command Line: read_input, get_user_selection
 
 """
-Concatanate name and location to search google : home slice pizza 502 austin
+Concatanate name and city to search google : home slice pizza 502 austin
 Search google, identify matching place
 Get review and rating score
 """
 
-def read_input():
-    name = input("Enter a restaraunt name: ")
-    location = input("Enter the name of a city: ")
-    scrape(name, location)
+YELP_ROOT = "https://www.yelp.com"
 
-def get_html(name, location):
-    url = url_builder_yelp(name, location)
+
+# setup: reads input, gets list of sites
+# get yelp city and names
+
+
+
+def get_html(website: Website, name: str, city: str):
+    """
+    Builds the URL and returns displayed HTML 
+    :param website - class representing a paticular website (Yelp, Google, etc.)
+    :param name - name of restaraunt to view reviews for
+    :param city - the city where the restaraunt is located
+    """
+    url = website.build_url(name, city)
+    return get_soup(url)
+
+def get_soup(url):
+    """
+    Gets the HTML for a paticular url
+    :param - The URL to get the HTML for
+    
+    returns - the HTML for the given URL
+    """
     response = requests.get(url, headers={'User-Agent': "Mozilla/5.0"})
     print(response.status_code) # test to make sure this is 200
     soup = BeautifulSoup(response.text, 'html.parser')
     return soup
 
-def url_builder_yelp(name, location):
-    return f"{YELP_ROOT}/search?find_desc={name}&find_loc={location}"
 
-def scrape(name, location):
-    soup = get_html(name, location)    
-    
-    # collect buisness name tags
-    filtered_tags = get_filtered_tags(name, soup)
-    pages, search_results = get_pages_and_search_results(filtered_tags)
-    i = 0
-    selected_page = pages[i]
+def scrape(name, city):
+    # list of websites to scrape
+    websites = [Yelp(), Googl()]
+    results = []
+    for i in range(len(websites)):
 
-    name = search_results[i][0]
-    location = search_results[i][1]
+        # search results page
+        page = get_html(websites[i], name, city)
 
-    results = [["Yelp", None, None], ["Google", None, None]]
-    results[0][1] = get_yelp_rating(selected_page)[0]
-    results[0][2] = get_yelp_rating(selected_page)[1]
-    results[1][1] = get_google_rating(name, location)[0]
-    results[1][2] = get_google_rating(name, location)[1]
-    print(results)
+        # We first the matching Yelp results and ask user to select which address they intended
+        if i == 0:
 
+            # collect pages for each yelp buisness, as well as their city
+            yelp_pages, search_results = get_pages_and_search_results(name, page)
+            i = get_user_selection(search_results)
+
+            # we determined the intended restaraunt, so we can get the matching page
+            page = yelp_pages[i]
+            name = search_results[i][0]
+            city = search_results[i][1]
+
+        # After we got the yelp results, we can get the ratings and review count for the intended result
+        website_name = websites[i].__class__.__name__
+        rating = websites[i].get_rating_and_review_count(page)[0]
+        review_count = extract_review_count(websites[i].get_rating_and_review_count(page)[1])
+        results.append((website_name, rating, review_count))
+    return results
         
-    
 
-    
-    
-    
-
-def get_user_selection(search_results):
-    for i in range(len(search_results)):
-        print(str(i) + ": " + str(search_results[i]))
-    selection = input("Enter a number to select what restaraunt you had in mind: ")
-    return int(selection)
-        
-def get_yelp_rating(page):
-    div = page.find('div', class_='arrange-unit__09f24__rqHTg arrange-unit-fill__09f24__CUubG y-css-lbeyaq')
-    span_tags = div.find_all('span')
-    rating = span_tags[0].get_text(strip=True)
-    review_count = span_tags[1].get_text(strip=True)
-    return rating, review_count
-
-def get_google_rating(name, location):
-    # FOR OTHER RESTARAUNTS, WE CAN NARROW DOWN SEARCH RESULTS NOW THAT WE KNOW USER'S INTENDED LOCATION 
-    print("Google")   
-    response = requests.get(get_google_url(name, location), headers={'User-Agent': "Mozilla/5.0"})
-    soup = BeautifulSoup(response.text, 'html.parser')
-    div = soup.find('div', class_='BNeawe tAd8D AP7Wnd')
-    rating_tag = div.find('span', class_='oqSTJd')
-    rating = rating_tag.get_text(strip=True)
-    review_count = rating_tag.next_sibling.next_sibling.next_sibling.next_sibling.get_text(strip=True)
-    return rating, review_count
-
-def get_google_url(name, location):
-    return f"{GOOGLE_ROOT}/search?q={name} {location}"
-
-def get_filtered_tags(name, soup):
+def get_pages_and_search_results(name, soup):
+    """
+    Searches Yelp to get the HTML tags and names of buisnesses which are good candidates for the user's intended restaraunt
+    """
     buisness_name_tags = soup.select('[class*="businessName"]', limit=10)
-    filtered_tags = []
+    pages = []
+
+    # aggregate in form (buisness name, city)
+    search_results = []
+    
     # only collect tags that match name
     for tag in buisness_name_tags:
         buisness_name = tag.get_text(strip=True)
         # As sponsored results are irrelevant to the search, we ignore them. Only non-sponsored results are in the format "integer.<name>. 
-        if re.match(r'^\d\.', buisness_name) and is_fuzzy_match(name, buisness_name):
+        if is_potential_match(name, buisness_name):
             # remove integer and period as it isn't relevant
             buisness_name = buisness_name[2::]
 
             # we store the buisness name as well so we don't need another list
-            filtered_tags.append((tag, buisness_name))
-    return filtered_tags
+            restaraunt_url = tag.find('a', href=True)['href']
+            url = f"{YELP_ROOT}" + restaraunt_url
+            page = get_soup(url)
 
-
-def get_pages_and_search_results(filtered_tags):
-
-    # get the individual page url's for the filtered tags
-    pages = []
-
-    # aggregate in form (buisness name, location)
-    search_results = []
-    
-    # we collect address info here. We don't collect ratings, because it's only needed for the restaraunt the user selects
-    for filtered_tag, buisness_name in filtered_tags:
-        restaraunt_url = filtered_tag.find('a', href=True)['href']
-        url = f"{YELP_ROOT}" + restaraunt_url
-        individual_restaraunt_page = requests.get(url, headers={'User-Agent': "Mozilla/5.0"})
-        page = BeautifulSoup(individual_restaraunt_page.text, 'html.parser')
-        # we only need to get the rating for the one the user clicks, so we store every web page just in case
-        pages.append(page)
-        element = page.find(string="Get Directions")
-        location = element.parent.parent.next_sibling.string
-        search_results.append((buisness_name, location))
+            # we only need to get the rating for the one the user clicks, so we store every web page just in case
+            pages.append(page)
+            element = page.find(string="Get Directions")
+            address = element.parent.parent.next_sibling.string
+            search_results.append((buisness_name, address))
     return pages, search_results
 
-def remove_non_alphanumeric_chars(a_string):
-    return re.sub(r'\W+', '', a_string)
-
-def is_fuzzy_match(user_input, search_result):
-    user_input = remove_non_alphanumeric_chars(user_input)
-    search_result = remove_non_alphanumeric_chars(search_result)
-    match_ratio = fuzz.partial_token_set_ratio(user_input, search_result)
-    return match_ratio > 70
-
-
-
-
-
-    
-
-
-
-   
 
 def main():
-    # string in first search box: luigis
-    # string in second search box: fairfield
-
-    read_input()
+    name, city = read_input()
+    ratings_and_reviews = scrape(name, city)
+    print(ratings_and_reviews)
 
 if __name__ == "__main__":
     main()

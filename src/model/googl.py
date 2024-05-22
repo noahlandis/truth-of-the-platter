@@ -1,11 +1,8 @@
-
-
-
-import website
+from model.website import Website
 
 ROOT = "https://www.google.com"
 
-class Googl(website.Website):
+class Googl(Website):
     def build_url(self, name, city):
         return f"{ROOT}/search?q={name} {city}"
 
@@ -15,3 +12,6 @@ class Googl(website.Website):
         rating = rating_tag.get_text(strip=True)
         review_count = rating_tag.next_sibling.next_sibling.next_sibling.next_sibling.get_text(strip=True)
         return rating, review_count
+    
+    def get_root(self):
+        return ROOT
