@@ -9,7 +9,11 @@ def read_input() -> tuple:
     Reads the user input to be used in website search
     :return tuple - a tuple containing the user's inputted restaurant name and city
     """
-    name = input("Enter a restaraunt name: ")
+    while True:
+        name = input("Enter a restaraunt name: ")
+        if name:
+            break
+        print("The restaraunt name cannot be blank")
     city = input("Enter the name of a city: ")
     return name, city
 
