@@ -8,9 +8,9 @@ Author: Noah Landis
 
 import requests
 from bs4 import BeautifulSoup
-from model.yelp import Yelp, ROOT as YELP_ROOT
+from model.yelp import Yelp
 from model.google import Google
-from input import get_user_selection
+from input import get_intended_restaurant_index
 from string_utils import is_potential_match, extract_review_count
 
 # list of websites to scrape
@@ -35,7 +35,7 @@ def scrape(name: str, city: str) -> list:
             yelp_potential_matches = get_yelp_potential_matches(name, page)
 
             # determine the intended restaurant
-            selected_index = get_user_selection(yelp_potential_matches)
+            selected_index = get_intended_restaurant_index(yelp_potential_matches)
             yelp_page = yelp_potential_matches[selected_index][0]
             yelp_name = yelp_potential_matches[selected_index][1]
             yelp_address = yelp_potential_matches[selected_index][2]
@@ -91,7 +91,7 @@ def get_yelp_potential_matches(name: str, yelp_search_results: BeautifulSoup) ->
 
             # we store the pages of the individual restaurants so we can scrape the rating and review count of the intended restaurant later
             restaurant_url = tag.find('a', href=True)['href']
-            url = f"{YELP_ROOT}" + restaurant_url
+            url = f"{Yelp.ROOT}" + restaurant_url
             yelp_page = get_html(url)
 
             # get the address of the restaurant

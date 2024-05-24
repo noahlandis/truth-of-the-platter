@@ -1,17 +1,24 @@
-def read_input():
+"""
+This module handles the user input logic.
+It reads the user input to be used in website search and allows the user to select their intended restaurant from a list of potential matches.
+Author: Noah Landis
+"""
+
+def read_input() -> tuple:
     """
-    Reads the user input to be used in website search 
+    Reads the user input to be used in website search
+    :return tuple - a tuple containing the user's inputted restaurant name and city
     """
     name = input("Enter a restaraunt name: ")
     city = input("Enter the name of a city: ")
     return name, city
 
 
-def get_user_selection(search_results: list):
+def get_intended_restaurant_index(search_results: list) -> int:
     """
-    :param search_results - a list of search results in the form of (name, address)
-    
-    return - the index of the selected search result
+    Allows the user to select their intended restaurant from a list of potential matches
+    :param list search_results - a list of tuples, where each tuple is in the form (<website page>, <name>, <address>)
+    :return int selection - the index of the user's selected restaurant
     """
     for i in range(len(search_results)):
         print(str(i) + ": " + str(search_results[i][1] + " - " + search_results[i][2]))

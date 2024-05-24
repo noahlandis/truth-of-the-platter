@@ -15,17 +15,17 @@ def is_potential_match(name: str, yelp_name: str) -> bool:
     :param str yelp_name - the name of the restaurant on Yelp
     :return bool - True if the Yelp name is a potential match for the user's inputted name, False otherwise
     """
-    return is_not_sponsored(yelp_name) and is_fuzzy_match(name, yelp_name)
+    return (not is_sponsored(yelp_name)) and is_fuzzy_match(name, yelp_name)
 
-def is_not_sponsored(yelp_name: str) -> bool:
+def is_sponsored(yelp_name: str) -> bool:
     """
-    Determines if the Yelp name is not a sponsored result
+    Determines if the Yelp name is a sponsored result
     :param str yelp_name - the name of the restaurant on Yelp
-    :return bool - True if the Yelp name is not a sponsored result, False otherwise
+    :return bool - True if the Yelp name is a sponsored result, False otherwise
     """
 
     # On Yelp, only non-sponsored results have a number followed by a period at the beginning of the name
-    return re.match(r'^\d\.', yelp_name) 
+    return not bool(re.match(r'^\d+\.', yelp_name))
 
 def is_fuzzy_match(name: str, yelp_name: str) -> bool:
     """
