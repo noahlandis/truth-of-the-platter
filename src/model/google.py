@@ -2,7 +2,7 @@ from model.website import Website
 
 ROOT = "https://www.google.com"
 
-class Googl(Website):
+class Google(Website):
     def build_url(self, name, city):
         return f"{ROOT}/search?q={name} {city}"
 

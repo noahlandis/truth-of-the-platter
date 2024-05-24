@@ -1,6 +1,6 @@
 
-from src.scrape import scrape
-from src.input import read_input
+from scrape import scrape
+from input import read_input
 
 
 def main():

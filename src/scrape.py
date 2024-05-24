@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from model.yelp import Yelp
-from model.googl import Googl
+from model.google import Google
 from model.website import Website
 from input import get_user_selection
 from string_utils import is_potential_match, extract_review_count
@@ -13,7 +13,7 @@ YELP_ROOT = "https://www.yelp.com"
 
 def scrape(name, city):
     # list of websites to scrape
-    websites = [Yelp(), Googl()]
+    websites = [Yelp(), Google()]
     results = []
     for i in range(len(websites)):
 
@@ -24,7 +24,7 @@ def scrape(name, city):
         # We first the matching Yelp results and ask user to select which address they intended
         if i == 0:
 
-            # collect pages for each yelp buisness, as well as their city
+            # collect pages for each yelp restaraunt that is a good candidate base, as well as their city
             yelp_pages, search_results = get_pages_and_search_results(name, page)
             selected_index = get_user_selection(search_results)
 
