@@ -13,5 +13,4 @@ class Google(Website):
         review_count = rating_tag.next_sibling.next_sibling.next_sibling.next_sibling.get_text(strip=True)
         return rating, review_count
     
-    def get_root(self):
-        return ROOT
+ 

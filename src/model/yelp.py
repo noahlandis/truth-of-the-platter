@@ -2,6 +2,7 @@
 
 
 from model.website import Website
+
 ROOT = "https://www.yelp.com"
 
 class Yelp(Website):
@@ -15,6 +16,4 @@ class Yelp(Website):
         review_count = span_tags[1].get_text(strip=True)
         return rating, review_count
     
-    def get_root(self):
-        return ROOT
-    
+  

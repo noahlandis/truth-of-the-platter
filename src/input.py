@@ -14,6 +14,6 @@ def get_user_selection(search_results: list):
     return - the index of the selected search result
     """
     for i in range(len(search_results)):
-        print(str(i) + ": " + str(search_results[i]))
+        print(str(i) + ": " + str(search_results[i][1] + " - " + search_results[i][2]))
     selection = input("Enter a number to select what restaraunt you had in mind: ")
     return int(selection)
