@@ -7,27 +7,48 @@ Author: Noah Landis
 def read_input() -> tuple:
     """
     Reads the user input to be used in website search
-    :return tuple - a tuple containing the user's inputted restaurant name and city
+    :return tuple - a tuple containing the user's inputted restaurant in the format (<name>, <city>)
     """
     while True:
         name = input("Enter a restaurant name: ")
         if name:
             break
-        print("The restaurant name cannot be blank")
+        print("The restaurant name cannot be blank.")
     city = input("Enter the name of a city: ")
     return name, city
 
-
-def get_intended_restaurant_index(search_results: list) -> int:
+def get_intended_restaurant(yelp_potential_matches: list) -> tuple:
     """
-    Allows the user to select their intended restaurant from a list of potential matches
+    Allows the user to select their intended restaurant from a list of potential matches (if multiple matches exist)
     :param list search_results - a list of tuples, where each tuple is in the form (<website page>, <name>, <address>)
-    :return int selection - the index of the user's selected restaurant
+    :return tuple intended_restaurant - a tuple representing the restaurant selected by the user, in the form (<website page>, <name>, <address>)
     """
-    for i in range(len(search_results)):
-        print(str(i) + ": " + str(search_results[i][1] + " - " + search_results[i][2]))
-    selection = input("Enter a number to select what restaraunt you had in mind: ")
-    return int(selection)
+
+    # if there's only one potential match, return it
+    if len(yelp_potential_matches) == 1:
+        return yelp_potential_matches[0]
+    
+    # otherwise, determine the intended restaurant
+    for i in range(len(yelp_potential_matches)):
+        print(str(i) + ": " + str(yelp_potential_matches[i][1] + " - " + yelp_potential_matches[i][2]))  
+
+    # continuously prompt user to indicate their intended restaurant until they provide valid input 
+    while True:
+        try:    
+            selected_index = int(input("Enter a number to select what restaurant you had in mind: "))
+
+            # although valid, we prevent -1 indexing for clarity 
+            if selected_index == -1:
+                raise IndexError
+            intended_restaurant = yelp_potential_matches[selected_index]
+            break
+        except (IndexError, ValueError):
+            print("The number you enter must correspond to one of the listed restaurants.")
+    return intended_restaurant
+
+
+
+
 
 def output_site_ratings(site_ratings):
     """

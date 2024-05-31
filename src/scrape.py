@@ -10,7 +10,7 @@ import requests
 from bs4 import BeautifulSoup
 from model.yelp import Yelp
 from model.google import Google
-from input import get_intended_restaurant_index
+from input import get_intended_restaurant
 from string_utils import is_potential_match, extract_review_count
 
 # list of websites to scrape
@@ -34,16 +34,13 @@ def scrape(name: str, city: str) -> list:
             # get the pages, full names, and addresses of potential yelp restaurants
             yelp_potential_matches = get_yelp_potential_matches(name, page)
 
-            # determine the intended restaurant
-            if len(yelp_potential_matches) > 1:
-                selected_index = get_intended_restaurant_index(yelp_potential_matches)
-            else:
-                # only one potential match
-                selected_index = 0
-
-            yelp_page = yelp_potential_matches[selected_index][0]
-            yelp_name = yelp_potential_matches[selected_index][1]
-            yelp_address = yelp_potential_matches[selected_index][2]
+            
+            # get the intended restaurant
+            intended_restaurant = get_intended_restaurant(yelp_potential_matches)
+        
+            yelp_page = intended_restaurant[0]
+            yelp_name = intended_restaurant[1]
+            yelp_address = intended_restaurant[2]
 
             # we update the page to the individual restaurant's yelp page so we can scrape the rating and review count
             page = yelp_page
