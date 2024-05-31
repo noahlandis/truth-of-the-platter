@@ -6,10 +6,18 @@ Author: Noah Landis
 
 from scrape import scrape
 from input import read_input, output_site_ratings
+from no_results_found_error import NoResultsFoundError
 
 def main():
     name, city = read_input()
-    site_ratings = scrape(name, city)
+    while True:
+        try:
+            site_ratings = scrape(name, city)
+            break
+        except NoResultsFoundError as e:
+            print(e)
+            name, city = read_input()
+
     output_site_ratings(site_ratings)
 
 if __name__ == "__main__":

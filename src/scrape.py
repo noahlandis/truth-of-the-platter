@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 from model.yelp import Yelp
 from model.google import Google
 from input import get_intended_restaurant
+from no_results_found_error import NoResultsFoundError
 from string_utils import is_potential_match, extract_review_count
 
 # list of websites to scrape
@@ -33,7 +34,8 @@ def scrape(name: str, city: str) -> list:
 
             # get the pages, full names, and addresses of potential yelp restaurants
             yelp_potential_matches = get_yelp_potential_matches(name, page)
-
+            if len(yelp_potential_matches) == 0:
+                raise NoResultsFoundError(f"No results could be found for \"{name}\" located in \"{city}\". Please try again...")
             
             # get the intended restaurant
             intended_restaurant = get_intended_restaurant(yelp_potential_matches)
@@ -64,8 +66,9 @@ def get_html(url: str) -> BeautifulSoup:
     :param str url - The URL to get the HTML for
     :return BeautifulSoup page - the HTML for the given URL
     """
+    
     response = requests.get(url, headers={'User-Agent': "Mozilla/5.0"})
-    print(response.status_code) # test to make sure this is 200
+    response.raise_for_status()
     page = BeautifulSoup(response.text, 'html.parser')
     return page
 
