@@ -1,5 +1,5 @@
 """
-This module contains the concrete class Google.
+This module contains the concrete class Yelp.
 Author: Noah Landis
 """
 

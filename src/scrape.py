@@ -14,7 +14,7 @@ from input import get_intended_restaurant
 from string_utils import is_potential_match, extract_review_count
 
 # list of websites to scrape
-WEBSITES = [Yelp(), Google()]
+WEBSITES = [Yelp, Google]
 
 def scrape(name: str, city: str) -> list:
     """
@@ -50,7 +50,7 @@ def scrape(name: str, city: str) -> list:
             city = yelp_address
 
         # get the rating and review count for the given website
-        website_name = WEBSITES[i].__class__.__name__
+        website_name = WEBSITES[i].__name__
         rating_and_review_count = WEBSITES[i].get_rating_and_review_count(page)
         rating = rating_and_review_count[0]
         review_count = extract_review_count(rating_and_review_count[1])
