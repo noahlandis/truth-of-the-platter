@@ -5,12 +5,12 @@ Author: Noah Landis
 """
 
 from scrape import scrape
-from input import read_input
+from input import read_input, output_site_ratings
 
 def main():
     name, city = read_input()
-    ratings_and_reviews = scrape(name, city)
-    print(ratings_and_reviews)
+    site_ratings = scrape(name, city)
+    output_site_ratings(site_ratings)
 
 if __name__ == "__main__":
     main()

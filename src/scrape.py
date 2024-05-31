@@ -35,7 +35,12 @@ def scrape(name: str, city: str) -> list:
             yelp_potential_matches = get_yelp_potential_matches(name, page)
 
             # determine the intended restaurant
-            selected_index = get_intended_restaurant_index(yelp_potential_matches)
+            if len(yelp_potential_matches) > 1:
+                selected_index = get_intended_restaurant_index(yelp_potential_matches)
+            else:
+                # only one potential match
+                selected_index = 0
+
             yelp_page = yelp_potential_matches[selected_index][0]
             yelp_name = yelp_potential_matches[selected_index][1]
             yelp_address = yelp_potential_matches[selected_index][2]
