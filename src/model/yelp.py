@@ -3,13 +3,14 @@ This module contains the concrete class Yelp.
 Author: Noah Landis
 """
 
+from bs4 import BeautifulSoup
 from model.website import Website
 
 class Yelp(Website):
     ROOT = "https://www.yelp.com"
 
     @staticmethod
-    def build_url(name, city):
+    def build_url(name: str, city: str) -> str:
         """
         Builds the URL to search for a restaurant on Yelp
         :param str name - the name of the restaurant
@@ -19,10 +20,10 @@ class Yelp(Website):
         return f"{Yelp.ROOT}/search?find_desc={name}&find_loc={city}"
 
     @staticmethod
-    def get_rating_and_review_count(page):
+    def get_rating_and_review_count(page: BeautifulSoup) -> tuple:
         """
         Scrapes the rating and review count from the Yelp page
-        :param page - the page to scrape
+        :param BeautifulSoup page - the page to scrape
         :return tuple (<rating>, <review_count>) - the rating and review count for the restaurant
         """
         div = page.find('div', class_='arrange-unit__09f24__rqHTg arrange-unit-fill__09f24__CUubG y-css-lbeyaq')

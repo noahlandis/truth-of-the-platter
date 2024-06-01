@@ -4,12 +4,13 @@ Author: Noah Landis
 """
 
 from abc import ABC, abstractmethod
+from bs4 import BeautifulSoup
 
 class Website(ABC):
     """
     Abstract class representing a generic website to scrape
     """
-
+    
     @staticmethod
     @abstractmethod
     def build_url(self, name: str, city: str) -> str:
@@ -23,10 +24,10 @@ class Website(ABC):
 
     @staticmethod
     @abstractmethod
-    def get_rating_and_review_count(self, page) -> tuple:
+    def get_rating_and_review_count(self, page: BeautifulSoup) -> tuple:
         """
         Scrapes the rating and review count from the given page
-        :param page - the page to scrape
+        :param BeautifulSoup page - the page to scrape
         :return tuple (<rating>, <review_count>) - the rating and review count for the restaurant
         """
         pass
