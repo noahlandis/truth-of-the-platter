@@ -46,14 +46,13 @@ def get_intended_restaurant(yelp_potential_matches: list) -> tuple:
             print("The number you enter must correspond to one of the listed restaurants.")
     return intended_restaurant
 
-
-
-
-
-def output_site_ratings(site_ratings):
+def output_site_ratings(site_ratings: list, full_name: str, address: str):
     """
     Displays the ratings of the websites
     :param list site_ratings - a list of tuples, where each tuple is in the form (<website>, <rating>, <number of reviews>)
+    :param str full_name - the full name of the restaurant
+    :param str address - the address of the restaurant
     """
+    print(f"Showing Results for {full_name} - {address}...")
     for site_rating in site_ratings:
         print(f"{site_rating[0]} - {site_rating[1]} stars, {site_rating[2]} reviews")

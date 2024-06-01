@@ -12,13 +12,13 @@ def main():
     name, city = read_input()
     while True:
         try:
-            site_ratings = scrape(name, city)
+            site_ratings, full_name, address = scrape(name, city)
             break
         except NoResultsFoundError as e:
             print(e)
             name, city = read_input()
 
-    output_site_ratings(site_ratings)
+    output_site_ratings(site_ratings, full_name, address)
 
 if __name__ == "__main__":
     main()

@@ -22,7 +22,7 @@ def scrape(name: str, city: str) -> list:
     Scrapes the ratings and review counts for the given restaurant name and city from Yelp and Google
     :param str name - the name of the restaurant
     :param str city - the city the restaurant is in
-    :return list results - a list of tuples, where each tuple is in the form (<website name>, <rating>, <review count>)
+    :return tuple results - a list of tuples, where each tuple is in the form (<website name>, <rating>, <review count>), the full name of the restaurant, and the address of the restaurant
     """
     results = []
     for i in range(len(WEBSITES)):
@@ -34,7 +34,7 @@ def scrape(name: str, city: str) -> list:
 
             # get the pages, full names, and addresses of potential yelp restaurants
             yelp_potential_matches = get_yelp_potential_matches(name, page)
-            if len(yelp_potential_matches) == 0:
+            if not yelp_potential_matches:
                 raise NoResultsFoundError(f"No results could be found for \"{name}\" located in \"{city}\". Please try again...")
             
             # get the intended restaurant
@@ -57,8 +57,8 @@ def scrape(name: str, city: str) -> list:
         rating = rating_and_review_count[0]
         review_count = extract_review_count(rating_and_review_count[1])
         results.append((website_name, rating, review_count))
-
-    return results
+    
+    return results, name, city
 
 def get_html(url: str) -> BeautifulSoup:
     """
@@ -66,7 +66,6 @@ def get_html(url: str) -> BeautifulSoup:
     :param str url - The URL to get the HTML for
     :return BeautifulSoup page - the HTML for the given URL
     """
-    
     response = requests.get(url, headers={'User-Agent': "Mozilla/5.0"})
     response.raise_for_status()
     page = BeautifulSoup(response.text, 'html.parser')
@@ -105,5 +104,3 @@ def get_yelp_potential_matches(name: str, yelp_search_results: BeautifulSoup) ->
             yelp_potential_matches.append((yelp_page, yelp_name, yelp_address))
 
     return yelp_potential_matches
-
-
