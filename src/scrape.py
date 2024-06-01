@@ -13,9 +13,10 @@ from model.google import Google
 from input import get_intended_restaurant
 from no_results_found_error import NoResultsFoundError
 from string_utils import is_potential_match, extract_review_count
+from model.tripadvisor import TripAdvisor
 
 # list of websites to scrape
-WEBSITES = [Yelp, Google]
+WEBSITES = [Yelp, Google, TripAdvisor]
 
 def scrape(name: str, city: str) -> list:
     """
@@ -24,10 +25,15 @@ def scrape(name: str, city: str) -> list:
     :param str city - the city the restaurant is in
     :return tuple results - a list of tuples, where each tuple is in the form (<website name>, <rating>, <review count>), the full name of the restaurant, and the address of the restaurant
     """
+    last_url = ""
     results = []
     for i in range(len(WEBSITES)):
         url = WEBSITES[i].build_url(name, city)
-        page = get_html(url)
+
+        # since TripAdvisor's API costs money, are using the data from Google's listing. Therefore, we only need to send one request to the Google URL.
+        if url != last_url:
+            page = get_html(url)
+            last_url = url
 
         # we first scrape Yelp to collect the name, address, and associated page for each restaurant which closely matches the user's input
         if i == 0:
