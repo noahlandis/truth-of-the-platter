@@ -1,15 +1,19 @@
-from unittest.mock import patch, Mock
-
 import pytest
+from unittest.mock import patch, Mock
 from requests import RequestException
-from src.scrape import scrape, NoResultsFoundError, get_html
-
+from src.scrape import scrape, get_html, get_yelp_data, NoResultsFoundError
 
 @patch('src.scrape.get_yelp_potential_matches')
 def test_scrape_no_results(mock_get_yelp_potential_matches):
     mock_get_yelp_potential_matches.return_value = []
     with pytest.raises(NoResultsFoundError):
         scrape("foo", "bar")
+
+@patch('src.scrape.get_yelp_potential_matches')
+def test_scrape_yelp_no_results(mock_get_yelp_potential_matches):
+    mock_get_yelp_potential_matches.return_value = []
+    with pytest.raises(NoResultsFoundError):
+        get_yelp_data("foo", "bar", None)
 
 @patch('requests.get')
 def test_get_html_makes_request(mock_get: Mock):
@@ -30,8 +34,6 @@ def test_get_html_valid_html(mock_get: Mock):
 def test_get_html_invalid_url():
     with pytest.raises(RequestException):
         get_html("https://url.invalid")
-
-
 
 
     

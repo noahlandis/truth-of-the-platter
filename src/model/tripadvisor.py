@@ -1,5 +1,5 @@
 """
-This module contains the concrete class Yelp.
+This module contains the concrete class TripAdvisor.
 Author: Noah Landis
 """
 
@@ -7,6 +7,7 @@ import re
 from bs4 import BeautifulSoup
 from model.google import Google
 from model.website import Website
+from string_utils import extract_review_count
 
 class TripAdvisor(Website):
     ROOT = "https://www.google.com"
@@ -14,7 +15,7 @@ class TripAdvisor(Website):
     @staticmethod
     def build_url(name: str, city: str) -> str:
         """
-        Builds the URL to search for a restaurant on Google
+        Builds the URL to search for a restaurant on Google, to scrape TripAdvisor info from Google's rich snippets 
         :param str name - the name of the restaurant
         :param str city - the city the restaurant is in
         :return str url - the URL to search for the restaurant
@@ -24,7 +25,7 @@ class TripAdvisor(Website):
     @staticmethod
     def get_rating_and_review_count(page: BeautifulSoup) -> tuple:
         """
-        Scrapes the rating and review count from the Google page
+        Scrapes the rating and review count from the TripAdvisor rich snippet
         :param BeautifulSoup page - the page to scrape
         :return tuple (<rating>, <review_count>) - the rating and review count for the restaurant
         """
@@ -38,17 +39,6 @@ class TripAdvisor(Website):
         rating_and_review_count = list(span.stripped_strings)
         rating = rating_and_review_count[0]
         review_count = rating_and_review_count[1]
-        return rating, review_count
-
-        
-        
-
-        
-        print(list(rating_block.stripped_strings))
-        # rating_tag = div.find('span', class_='oqSTJd')
-        # rating = rating_tag.get_text(strip=True)
-        # review_count = rating_tag.next_sibling.next_sibling.next_sibling.next_sibling.get_text(strip=True)
-        # return rating, review_count
-
+        return rating, extract_review_count(review_count)
 
   

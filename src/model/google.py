@@ -5,6 +5,7 @@ Author: Noah Landis
 
 from bs4 import BeautifulSoup
 from model.website import Website
+from string_utils import extract_review_count
 
 class Google(Website):
     ROOT = "https://www.google.com"
@@ -32,6 +33,6 @@ class Google(Website):
         rating_tag = div.find('span', class_='oqSTJd')
         rating = rating_tag.get_text(strip=True)
         review_count = rating_tag.next_sibling.next_sibling.next_sibling.next_sibling.get_text(strip=True)
-        return rating, review_count
+        return rating, extract_review_count(review_count)
     
  

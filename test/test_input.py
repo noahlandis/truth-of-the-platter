@@ -1,3 +1,5 @@
+import pytest
+from exceptions import IntendedRestaurantNotFoundError
 from src import input
 from unittest.mock import Mock, patch
 
@@ -33,12 +35,11 @@ def test_get_intended_restaurant_index_error_out_of_range(mock_print: Mock, mock
     input.get_intended_restaurant(yelp_potential_matches)
     mock_print.assert_any_call("The number you enter must correspond to one of the listed restaurants.")
 
-@patch('builtins.input', side_effect=["-1", "0"])
-@patch('builtins.print')
-def test_get_intended_restaurant_index_error_negative_one(mock_print: Mock, mock_input: Mock):
+@patch('builtins.input', return_value="-1")
+def test_get_intended_restaurant_index_error_negative_one(mock_input: Mock):
     yelp_potential_matches = [("page 1", "name 1", "location 1"), ("page 2", "name 2", "location 2")]
-    input.get_intended_restaurant(yelp_potential_matches)
-    mock_print.assert_any_call("The number you enter must correspond to one of the listed restaurants.")
+    with pytest.raises(IntendedRestaurantNotFoundError):
+        input.get_intended_restaurant(yelp_potential_matches)
 
 @patch('builtins.input', side_effect=["a", "0"])
 @patch('builtins.print')

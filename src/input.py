@@ -3,7 +3,7 @@ This module handles the user input logic.
 It reads the user input to be used in website search and allows the user to select their intended restaurant from a list of potential matches.
 Author: Noah Landis
 """
-
+from exceptions import IntendedRestaurantNotFoundError
 def read_input() -> tuple:
     """
     Reads the user input to be used in website search
@@ -22,6 +22,7 @@ def get_intended_restaurant(yelp_potential_matches: list) -> tuple:
     Allows the user to select their intended restaurant from a list of potential matches (if multiple matches exist)
     :param list search_results - a list of tuples, where each tuple is in the form (<website page>, <name>, <address>)
     :return tuple intended_restaurant - a tuple representing the restaurant selected by the user, in the form (<website page>, <name>, <address>)
+    :raises IntendedRestaurantNotFoundError - if user enters -1, indicating that the restaurant they're looking was not one of the yelp matches
     """
 
     # if there's only one potential match, return it
@@ -35,11 +36,11 @@ def get_intended_restaurant(yelp_potential_matches: list) -> tuple:
     # continuously prompt user to indicate their intended restaurant until they provide valid input 
     while True:
         try:    
-            selected_index = int(input("Enter a number to select what restaurant you had in mind: "))
+            print("Enter the number corresponding to the restaurant you had in mind\nOR\nnot seeing the restaurant you were looking for? Enter -1 to search again!")
+            selected_index = int(input("Enter your selection: "))
 
-            # although valid, we prevent -1 indexing for clarity 
             if selected_index == -1:
-                raise IndexError
+                raise IntendedRestaurantNotFoundError
             intended_restaurant = yelp_potential_matches[selected_index]
             break
         except (IndexError, ValueError):

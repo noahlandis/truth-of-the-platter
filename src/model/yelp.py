@@ -5,6 +5,7 @@ Author: Noah Landis
 
 from bs4 import BeautifulSoup
 from model.website import Website
+from string_utils import extract_review_count
 
 class Yelp(Website):
     ROOT = "https://www.yelp.com"
@@ -30,6 +31,6 @@ class Yelp(Website):
         span_tags = div.find_all('span')
         rating = span_tags[0].get_text(strip=True)
         review_count = span_tags[1].get_text(strip=True)
-        return rating, review_count
+        return rating, extract_review_count(review_count)
     
   

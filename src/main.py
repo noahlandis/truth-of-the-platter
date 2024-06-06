@@ -6,7 +6,7 @@ Author: Noah Landis
 
 from scrape import scrape
 from input import read_input, output_site_ratings
-from no_results_found_error import NoResultsFoundError
+from exceptions import NoResultsFoundError, IntendedRestaurantNotFoundError
 
 def main():
     name, city = read_input()
@@ -14,7 +14,7 @@ def main():
         try:
             site_ratings, full_name, address = scrape(name, city)
             break
-        except NoResultsFoundError as e:
+        except (NoResultsFoundError, IntendedRestaurantNotFoundError) as e:
             print(e)
             name, city = read_input()
 
