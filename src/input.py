@@ -4,6 +4,10 @@ It reads the user input to be used in website search and allows the user to sele
 Author: Noah Landis
 """
 from exceptions import IntendedRestaurantNotFoundError
+
+BOLD_START =  "\033[1m"
+BOLD_END = "\033[0m"
+
 def read_input() -> tuple:
     """
     Reads the user input to be used in website search
@@ -57,3 +61,12 @@ def output_site_ratings(site_ratings: list, full_name: str, address: str):
     print(f"Showing Results for {full_name} - {address}...")
     for site_rating in site_ratings:
         print(f"{site_rating[0]} - {site_rating[1]} stars, {site_rating[2]} reviews")
+
+def display_results(full_name: str, star_average: str, total_review_count: str):
+    """
+    Displays the weighted average and the total number of reviews
+    :param str full_name -  the full name of the restaurant
+    :param str star_average - the weighted average of the star ratings, rounded to 2 decimal places
+    :param str total_review_count - the sum of the review counts across all scraped websites
+    """
+    print(f"{BOLD_START}A more accurate rating of {full_name} is {star_average} stars, {total_review_count} reviews{BOLD_END}")

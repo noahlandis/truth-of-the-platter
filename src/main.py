@@ -5,7 +5,8 @@ Author: Noah Landis
 """
 
 from scrape import scrape
-from input import read_input, output_site_ratings
+from input import read_input, output_site_ratings, display_results
+from calculate_weighted_average import get_weighted_average
 from exceptions import NoResultsFoundError, IntendedRestaurantNotFoundError
 
 def main():
@@ -17,8 +18,9 @@ def main():
         except (NoResultsFoundError, IntendedRestaurantNotFoundError) as e:
             print(e)
             name, city = read_input()
-
     output_site_ratings(site_ratings, full_name, address)
-
+    star_average, total_review_count = get_weighted_average(site_ratings)
+    display_results(full_name, star_average, total_review_count)
+    
 if __name__ == "__main__":
     main()
