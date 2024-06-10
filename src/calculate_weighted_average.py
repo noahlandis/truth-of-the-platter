@@ -1,14 +1,13 @@
 """
-This module contains the logic to calculate the weighted average of the ratings and the
-total number of reviews
+This module contains the logic to calculate the weighted average of the ratings and the total number of reviews
 Author: Noah Landis
 """
 
-def get_weighted_average(site_ratings: list):
+def get_weighted_average_and_total_review_count(site_ratings: list):
     """
     Calculates the weighted average of the ratings and the total number of reviews
-    :param list site_ratings - a list of tuples, where each tuple is in the form (<website>, <rating>, <number of reviews>)
-    :return tuple  - <weighted average of the star ratings, rounded to 2 decimal places>, <total number of reviews across all scraped sites>
+    :param list site_ratings - a list of tuples, where each tuple is in the form (<website name>, <rating>, <number of reviews>)
+    :return tuple  - (<weighted average of the star ratings *rounded to 2 decimal places*>, <total number of reviews across all scraped sites>)
     """
     total_stars = 0
     total_review_count = 0
