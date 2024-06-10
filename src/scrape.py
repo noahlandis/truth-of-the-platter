@@ -14,6 +14,7 @@ from model.tripadvisor import TripAdvisor
 from input import get_intended_restaurant
 from exceptions import NoResultsFoundError
 from string_utils import is_potential_match
+from colorama import Fore
 
 # list of websites to scrape
 WEBSITES = [Yelp, Google, TripAdvisor]
@@ -76,7 +77,7 @@ def get_yelp_data(name: str, city: str, page: BeautifulSoup) -> tuple:
     # get the pages, full names, and addresses of yelp restaurants which potentially match the restaurant the user had in mind
     yelp_potential_matches = get_yelp_potential_matches(name, page)
     if not yelp_potential_matches:
-        raise NoResultsFoundError(f"No results could be found for \"{name}\" located in \"{city}\". Please try again...")
+        raise NoResultsFoundError(f"{Fore.RED}No results could be found for \"{name}\" located in \"{city}\". Please try again...")
     intended_restaurant = get_intended_restaurant(yelp_potential_matches)
     yelp_page, yelp_name, yelp_address = intended_restaurant
     return yelp_page, yelp_name, yelp_address

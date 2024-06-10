@@ -4,9 +4,10 @@ It reads the user input to be used in website search and allows the user to sele
 Author: Noah Landis
 """
 from exceptions import IntendedRestaurantNotFoundError
-
-BOLD_START =  "\033[1m"
-BOLD_END = "\033[0m"
+from colorama import Fore, Style
+from styled_console import print_info, print_warning, get_input
+UNDERLINE_START = "\033[4m"
+UNDERLINE_END = "\033[0m"
 
 def read_input() -> tuple:
     """
@@ -14,12 +15,12 @@ def read_input() -> tuple:
     :return tuple - a tuple containing the user's inputted restaurant in the format (<name>, <city>)
     """
     while True:
-        name = input("Enter a restaurant name: ")
+        name = input(f"{Fore.CYAN}Enter a restaurant name:{Fore.GREEN} ")
         if name:
             break
-        print("The restaurant name cannot be blank.")
-    city = input("Enter the name of a city: ")
-    print("Loading...")
+        print(f"{Fore.YELLOW}The restaurant name cannot be blank.")
+    city = input(f"{Fore.CYAN}Enter the name of a city:{Fore.GREEN} ")
+    print(f"{Fore.LIGHTBLACK_EX}Loading...")
     return name, city
 
 def get_intended_restaurant(yelp_potential_matches: list) -> tuple:
@@ -29,7 +30,6 @@ def get_intended_restaurant(yelp_potential_matches: list) -> tuple:
     :return tuple intended_restaurant - a tuple representing the restaurant selected by the user, in the form (<website page>, <name>, <address>)
     :raises IntendedRestaurantNotFoundError - if user enters -1, indicating that the restaurant they're looking was not one of the yelp matches
     """
-
     # if there's only one potential match, return it
     if len(yelp_potential_matches) == 1:
         return yelp_potential_matches[0]
@@ -38,9 +38,9 @@ def get_intended_restaurant(yelp_potential_matches: list) -> tuple:
     while True:
         try:
             for i in range(len(yelp_potential_matches)):
-                print(str(i) + ": " + str(yelp_potential_matches[i][1] + " - " + yelp_potential_matches[i][2]))      
-            print("Enter the number corresponding to the restaurant you had in mind\nOR\nnot seeing the restaurant you were looking for? Enter -1 to search again!")
-            selected_index = int(input("Enter your selection: "))
+                print(f"{Fore.LIGHTMAGENTA_EX}{Style.BRIGHT}{str(i)}{Style.RESET_ALL}{Fore.LIGHTMAGENTA_EX}: {str(yelp_potential_matches[i][1])} - {yelp_potential_matches[i][2]}")      
+            print(f"{Fore.LIGHTBLACK_EX}Enter the number corresponding to the restaurant you had in mind\n{UNDERLINE_START}OR{UNDERLINE_END}\n{Fore.LIGHTBLACK_EX}not seeing the restaurant you were looking for? Enter -1 to search again!")
+            selected_index = int(input(f"{Fore.CYAN}Enter your selection:{Fore.GREEN} "))
             if selected_index == -1:
                 raise IntendedRestaurantNotFoundError
             
@@ -50,7 +50,7 @@ def get_intended_restaurant(yelp_potential_matches: list) -> tuple:
             intended_restaurant = yelp_potential_matches[selected_index]
             break
         except (IndexError, ValueError):
-            print("The number you enter must correspond to one of the listed restaurants.")
+            print(f"{Fore.YELLOW}The number you enter must correspond to one of the listed restaurants.")
     return intended_restaurant
 
 def output_site_ratings(site_ratings: list, full_name: str, address: str):
@@ -60,9 +60,9 @@ def output_site_ratings(site_ratings: list, full_name: str, address: str):
     :param str full_name - the full name of the restaurant
     :param str address - the address of the restaurant
     """
-    print(f"Showing Results for {full_name} - {address}...")
+    print(f"{Fore.LIGHTBLACK_EX}Showing Results for {full_name} - {address}...")
     for site_rating in site_ratings:
-        print(f"{site_rating[0]} - {site_rating[1]} stars, {site_rating[2]} reviews")
+        print(f"{Fore.LIGHTMAGENTA_EX}{site_rating[0]} - {site_rating[1]} stars, {site_rating[2]} reviews")
 
 def display_results(full_name: str, star_average: str, total_review_count: str):
     """
@@ -71,4 +71,4 @@ def display_results(full_name: str, star_average: str, total_review_count: str):
     :param str star_average - the weighted average of the star ratings, rounded to 2 decimal places
     :param str total_review_count - the sum of the review counts across all scraped websites
     """
-    print(f"{BOLD_START}A more accurate rating of {full_name} is {star_average} stars, {total_review_count} reviews{BOLD_END}")
+    print(f"{Fore.MAGENTA}{Style.BRIGHT}A more accurate rating of {full_name} is {star_average} stars, {total_review_count} reviews{Style.RESET_ALL}")
