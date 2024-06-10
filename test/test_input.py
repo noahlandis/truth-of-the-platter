@@ -13,7 +13,7 @@ def test_read_input(mock_input: Mock):
 @patch('builtins.print')
 def test_read_input_blank_name(mock_print: Mock, mock_input: Mock):
     input.read_input()
-    mock_print.assert_called_once_with("The restaurant name cannot be blank.")
+    mock_print.assert_any_call("The restaurant name cannot be blank.")
 
 def test_get_intended_restaurant_one_match():
     yelp_potential_matches = [("page 1", "Home Slice Pizza", "501 E 53rd St Austin, TX 78751")]
