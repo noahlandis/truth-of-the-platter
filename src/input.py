@@ -19,6 +19,7 @@ def read_input() -> tuple:
             break
         print("The restaurant name cannot be blank.")
     city = input("Enter the name of a city: ")
+    print("Loading...")
     return name, city
 
 def get_intended_restaurant(yelp_potential_matches: list) -> tuple:

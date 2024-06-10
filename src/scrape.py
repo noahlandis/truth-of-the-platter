@@ -73,7 +73,6 @@ def get_yelp_data(name: str, city: str, page: BeautifulSoup) -> tuple:
     :return tuple - the page, name, and address of the intended restaurant as displayed on Yelp 
     :raises NoResultsFoundError - if no yelp results match the user's input 
     """
-
     # get the pages, full names, and addresses of yelp restaurants which potentially match the restaurant the user had in mind
     yelp_potential_matches = get_yelp_potential_matches(name, page)
     if not yelp_potential_matches:
@@ -110,8 +109,7 @@ def get_yelp_potential_matches(name: str, yelp_search_results: BeautifulSoup) ->
             yelp_page = get_html(url)
 
             # get the address of the restaurant
-            element = yelp_page.find(string="Get Directions")
-            yelp_address = element.parent.parent.next_sibling.string
+            yelp_address = yelp_page.find('p', class_='y-css-dg8xxd').get_text(strip=True)
             yelp_potential_matches.append((yelp_page, yelp_name, yelp_address))
 
     return yelp_potential_matches
