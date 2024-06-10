@@ -33,19 +33,20 @@ def get_intended_restaurant(yelp_potential_matches: list) -> tuple:
     # if there's only one potential match, return it
     if len(yelp_potential_matches) == 1:
         return yelp_potential_matches[0]
-    
-    # otherwise, determine the intended restaurant
-    for i in range(len(yelp_potential_matches)):
-        print(str(i) + ": " + str(yelp_potential_matches[i][1] + " - " + yelp_potential_matches[i][2]))  
 
     # continuously prompt user to indicate their intended restaurant until they provide valid input 
     while True:
-        try:    
+        try:
+            for i in range(len(yelp_potential_matches)):
+                print(str(i) + ": " + str(yelp_potential_matches[i][1] + " - " + yelp_potential_matches[i][2]))      
             print("Enter the number corresponding to the restaurant you had in mind\nOR\nnot seeing the restaurant you were looking for? Enter -1 to search again!")
             selected_index = int(input("Enter your selection: "))
-
             if selected_index == -1:
                 raise IntendedRestaurantNotFoundError
+            
+            # python allows negative indexing, but we still raise an error as the number should correspond to the list
+            elif selected_index < -1:
+                raise IndexError
             intended_restaurant = yelp_potential_matches[selected_index]
             break
         except (IndexError, ValueError):
