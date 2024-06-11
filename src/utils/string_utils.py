@@ -1,5 +1,5 @@
 """
-This module contains utility functions for string manipulation.
+Utility class to handle string manipulation.
 Author: Noah Landis
 """
 

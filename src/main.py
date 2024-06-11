@@ -9,8 +9,10 @@ from scrape import scrape
 from input import read_input, output_site_ratings, display_results
 from calculate_weighted_average import get_weighted_average_and_total_review_count
 from exceptions import NoResultsFoundError, IntendedRestaurantNotFoundError
+from colorama import init
 
 def main():
+    init(autoreset=True)
     name, city = read_input()
     while True:
         try:
