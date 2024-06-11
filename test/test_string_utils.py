@@ -1,5 +1,5 @@
 import pytest
-from src import string_utils
+from src.utils import string_utils
 
 @pytest.mark.parametrize("name, yelp_name, expected", [
     ("Home Slice Pizza", "1. Home Slice Pizza", True), # fuzzy match and non-sponsored result
