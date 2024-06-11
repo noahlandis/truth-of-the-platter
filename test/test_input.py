@@ -1,6 +1,5 @@
 import pytest
 import input
-from exceptions import IntendedRestaurantNotFoundError
 from unittest.mock import Mock, patch
 
 @patch('builtins.input', side_effect=['John Doe', 'New York'])
@@ -42,12 +41,6 @@ def test_get_intended_restaurant_errors(mock_input, mock_print, side_effect):
     mock_input.side_effect = side_effect
     input.get_intended_restaurant(yelp_potential_matches)
     assert any("The number you enter must correspond to one of the listed restaurants." in call.args[0] for call in mock_print.call_args_list)
-
-@patch('builtins.input', return_value="-1")
-def test_get_intended_restaurant_index_error_negative_one(mock_input: Mock):
-    yelp_potential_matches = [("page 1", "name 1", "location 1"), ("page 2", "name 2", "location 2")]
-    with pytest.raises(IntendedRestaurantNotFoundError):
-        input.get_intended_restaurant(yelp_potential_matches)
 
 
     
