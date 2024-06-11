@@ -30,42 +30,51 @@ def display_commands():
 
 def get_input_with_command_handling(prompt: str) -> str:
     """
-    Determines if the user input is a command, wrapper function to make sure a user
-    can enter a command at any time
+    Wrapper function to make sure a user can enter a command at any time
     :param str prompt - the prompt to display to the user
+    :return str user_input - the user's input if a command wasn't entered
     """
     while True:
         user_input = get_styled_input(prompt)
-        is_command = handle_commands(user_input)
-        
-        # we stop prompting user for their input after we've determined they didn't enter a command
-        if not is_command:
+        if is_command(user_input):
+            handle_command(user_input)
+        else:
             return user_input
-    
-def handle_commands(user_input: str) -> bool:
+
+def is_command(user_input: str) -> bool:
     """
-    Handles the user input commands
+    Determines if the user input is a command
     :param str user_input - the user's input
     :return bool - True if the user input is a command, False otherwise
     """
-    match user_input:
+    return user_input in COMMANDS.keys()
+
+def handle_command(command: str):
+    """
+    Handles the user input command
+    :param str user_input - the user's input
+    """
+    match command:
         case const.HELP:
             display_commands()
-            return True
         case const.RESTART:
-            # we want a new line to make it clear the program is restarting
-            print()
-            os.execl(sys.executable, sys.executable, *sys.argv)
+            restart_program()
         case const.QUIT:
             sys.exit()
-    return False
+
+def restart_program():
+    """
+    Restarts the program.
+    """
+    # we want a new line to make it clear the program is restarting
+    print()
+    os.execl(sys.executable, sys.executable, *sys.argv)
 
 def prompt_next_command():
     """
-    Prompts the user to enter a command
+    Prompts the user to enter a command until a valid command is entered.
     """
-    user_input = ""
-    # prompt the user until a valid command is entered
-    while user_input not in COMMANDS.keys():
-        user_input = get_styled_input(f"Enter '{const.RESTART}' to search again, or '{const.QUIT}' to quit the program")
-    handle_commands(user_input)
+    # we use a loop so that the prompt displays again if the HELP command is entered
+    while True:
+        get_input_with_command_handling(f"Enter '{const.RESTART}' to restart, or '{const.QUIT}' to quit the program")
+        
