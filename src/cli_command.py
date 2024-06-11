@@ -42,7 +42,7 @@ def get_input_with_command_handling(prompt: str) -> str:
             return user_input
 
 def is_command(user_input: str) -> bool:
-    """
+    """∂
     Determines if the user input is a command
     :param str user_input - the user's input
     :return bool - True if the user input is a command, False otherwise
