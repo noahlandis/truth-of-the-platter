@@ -3,9 +3,11 @@ This module handles the user input logic.
 It reads the user input to be used in website search and allows the user to select their intended restaurant from a list of potential matches.
 Author: Noah Landis
 """
-from exceptions import IntendedRestaurantNotFoundError
+import os
+import sys
 from colorama import Style
-from utils.styled_cli_utils import MessageType, get_styled_input, get_styled_output
+from cli_command import get_input_with_command_handling, display_commands
+from utils.styled_cli_utils import MessageType, get_styled_output
 
 UNDERLINE_START = "\033[4m"
 UNDERLINE_END = "\033[0m"
@@ -16,11 +18,11 @@ def read_input() -> tuple:
     :return tuple - a tuple containing the user's inputted restaurant in the format (<name>, <city>)
     """
     while True:
-        name = get_styled_input("Enter a restaurant name")
+        name = get_input_with_command_handling("Enter a restaurant name")
         if name:
             break
         print(get_styled_output("The restaurant name cannot be blank.", MessageType.WARNING))
-    city = get_styled_input("Enter the name of a city")
+    city = get_input_with_command_handling("Enter the name of a city")
     print(get_styled_output("Loading...", MessageType.INFO))
     return name, city
 
@@ -35,20 +37,19 @@ def get_intended_restaurant(yelp_potential_matches: list) -> tuple:
     if len(yelp_potential_matches) == 1:
         return yelp_potential_matches[0]
 
+    for i in range(len(yelp_potential_matches)):
+        print(get_styled_output(f"{Style.BRIGHT}{str(i)}{Style.NORMAL}: {str(yelp_potential_matches[i][1])} - {yelp_potential_matches[i][2]}", MessageType.LIST_RESULT))
+    
+    print(get_styled_output(f"Enter the number corresponding to the restaurant you had in mind", MessageType.INFO))
+    print(get_styled_output(f"{UNDERLINE_START}OR{UNDERLINE_END}", MessageType.INFO))
+    print(get_styled_output(f"not seeing the restaurant you were looking for? Enter \\r to search again!", MessageType.INFO))
     # continuously prompt user to indicate their intended restaurant until they provide valid input 
     while True:
         try:
-            for i in range(len(yelp_potential_matches)):
-                print(get_styled_output(f"{Style.BRIGHT}{str(i)}{Style.NORMAL}: {str(yelp_potential_matches[i][1])} - {yelp_potential_matches[i][2]}", MessageType.LIST_RESULT))
-            print(get_styled_output(f"Enter the number corresponding to the restaurant you had in mind", MessageType.INFO))
-            print(get_styled_output(f"{UNDERLINE_START}OR{UNDERLINE_END}", MessageType.INFO))
-            print(get_styled_output(f"not seeing the restaurant you were looking for? Enter -1 to search again!", MessageType.INFO))
-            selected_index = int(get_styled_input("Enter your selection"))
-            if selected_index == -1:
-                raise IntendedRestaurantNotFoundError
-            
+            selected_index = int(get_input_with_command_handling("Enter your selection"))
+
             # python allows negative indexing, but we still raise an error as the number should correspond to the list
-            elif selected_index < -1:
+            if selected_index < 0:
                 raise IndexError
             intended_restaurant = yelp_potential_matches[selected_index]
             break
@@ -75,3 +76,13 @@ def display_results(full_name: str, star_average: str, total_review_count: str):
     :param str total_review_count - the sum of the review counts across all scraped websites
     """
     print(get_styled_output(f"{Style.BRIGHT}A more accurate rating of {full_name} is {star_average} stars, {total_review_count} reviews{Style.RESET_ALL}", MessageType.FINAL_RESULT))
+
+
+def display_welcome_message():
+    """
+    Displays the welcome message to the user
+    """
+    print(get_styled_output("Welcome to the Restaurant Rating Aggregator!", MessageType.WELCOME))
+    display_commands()
+    
+

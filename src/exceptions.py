@@ -9,9 +9,3 @@ class NoResultsFoundError(Exception):
     """
     pass
 
-class IntendedRestaurantNotFoundError(Exception):
-    """
-    Exception raised when the user indicates that their intended restaurant was not
-    one of the collected Yelp matches
-    """
-    pass

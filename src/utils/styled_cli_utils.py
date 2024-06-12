@@ -15,7 +15,7 @@ class MessageType(Enum):
     PROMPT = Fore.CYAN
     INPUT = Fore.GREEN
     LIST_RESULT = Fore.LIGHTMAGENTA_EX
-    FINAL_RESULT = Fore.MAGENTA
+    WELCOME = FINAL_RESULT = Fore.MAGENTA
 
 def get_styled_output(message: str, message_type: MessageType) -> str:
     """
@@ -32,4 +32,4 @@ def get_styled_input(message: str) -> str:
     :param str message - the message to be styled
     :return str - the styled message
     """
-    return input(f"{MessageType.PROMPT.value}{message}:{MessageType.INPUT.value} ")
+    return input(f"{MessageType.PROMPT.value}{message}:{MessageType.INPUT.value} ").strip()

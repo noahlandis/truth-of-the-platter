@@ -90,7 +90,7 @@ def get_yelp_potential_matches(name: str, yelp_search_results: BeautifulSoup) ->
     :return list yelp_potential_matches - a list of tuples, where each tuple is in the form (<page>, <yelp_name>, <yelp_address>)
     """
     yelp_name_tags = yelp_search_results.select('[class*="businessName"]', limit=10)
-
+  
     # store the potential yelp restaurants in the form of [<yelp_page>, <yelp_name>, <yelp_address>]
     yelp_potential_matches = []
     
