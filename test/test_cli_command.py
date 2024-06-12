@@ -1,7 +1,7 @@
-from unittest.mock import Mock, patch, ANY
+from unittest.mock import Mock, patch
 import pytest
 from cli_command import is_command, handle_command, get_input_with_command_handling
-# to do: parameritize test_handle_command_ and test_handle_restart (if possible)
+
 @pytest.mark.parametrize("user_input, expected", [
     ("\\h", True), # help command
     ("\\r", True), # restart command
@@ -33,13 +33,6 @@ def test_get_input_with_command_handling_no_command(mock_input: Mock):
     actual = get_input_with_command_handling(expected)
     assert actual == expected
 
-@patch('cli_command.handle_command')
-@patch('builtins.input', return_value='foo bar')
-def test_get_input_with_command_handling_no_command_handle_command_not_called(mock_input: Mock, mock_handle_command: Mock):
-    expected = "foo bar"
-    get_input_with_command_handling(expected)
-    mock_handle_command.assert_not_called()
-
 @patch('builtins.input', side_effect=['\\h', 'foo bar'])
 def test_get_input_with_command_handling_command(mock_input: Mock):
     expected = "foo bar"
@@ -47,8 +40,16 @@ def test_get_input_with_command_handling_command(mock_input: Mock):
     assert actual == expected
 
 @patch('cli_command.handle_command')
+@patch('builtins.input', return_value='foo bar')
+def test_get_input_with_command_handling_no_command_handle_command_not_called(mock_input: Mock, mock_handle_command: Mock):
+    expected = "foo bar"
+    get_input_with_command_handling(expected)
+    mock_handle_command.assert_not_called()
+
+@patch('cli_command.handle_command')
 @patch('builtins.input', side_effect=['\\h', 'foo bar'])
 def test_get_input_with_command_handling_command_is_called(mock_input: Mock, mock_handle_command: Mock):
     expected = "foo bar"
     get_input_with_command_handling(expected)
     mock_handle_command.assert_called_once_with('\\h')
+

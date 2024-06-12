@@ -14,7 +14,6 @@ def test_read_input_blank_name(mock_print: Mock, mock_input: Mock):
     input.read_input()
     assert any("The restaurant name cannot be blank." in call.args[0] for call in mock_print.call_args_list)
 
-
 def test_get_intended_restaurant_one_match():
     yelp_potential_matches = [("page 1", "Home Slice Pizza", "501 E 53rd St Austin, TX 78751")]
     expected = ("page 1", "Home Slice Pizza", "501 E 53rd St Austin, TX 78751")

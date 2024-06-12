@@ -32,4 +32,4 @@ def get_styled_input(message: str) -> str:
     :param str message - the message to be styled
     :return str - the styled message
     """
-    return input(f"{MessageType.PROMPT.value}{message}:{MessageType.INPUT.value} ")
+    return input(f"{MessageType.PROMPT.value}{message}:{MessageType.INPUT.value} ").strip()
