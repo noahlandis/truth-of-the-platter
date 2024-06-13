@@ -6,28 +6,17 @@ Author: Noah Landis
 import re
 from fuzzywuzzy import fuzz
 
+def remove_leading_number(yelp_name: str) -> str:
+    """
+    Removes the leading number from a Yelp name
+    :param str yelp_name - the Yelp name (if it has a leading number)
+    :return str - the Yelp name with the leading number removed
+    """
+    if bool(re.match(r'^\d+\.', yelp_name)):
+        yelp_name = yelp_name[2::].lstrip()
+    return yelp_name
+
 def is_potential_match(name: str, yelp_name: str) -> bool:
-    """
-    Determines if the Yelp name is a potential match for the user's inputted name, based on the following criteria:
-    - The Yelp name is not a sponsored result
-    - The Yelp name is a fuzzy match for the user's inputted name
-    :param str name - the user's inputted name
-    :param str yelp_name - the name of the restaurant on Yelp
-    :return bool - True if the Yelp name is a potential match for the user's inputted name, False otherwise
-    """
-    return (not is_sponsored(yelp_name)) and is_fuzzy_match(name, yelp_name)
-
-def is_sponsored(yelp_name: str) -> bool:
-    """
-    Determines if the Yelp name is a sponsored result
-    :param str yelp_name - the name of the restaurant on Yelp
-    :return bool - True if the Yelp name is a sponsored result, False otherwise
-    """
-
-    # On Yelp, only non-sponsored results have a number followed by a period at the beginning of the name
-    return not bool(re.match(r'^\d+\.', yelp_name))
-
-def is_fuzzy_match(name: str, yelp_name: str) -> bool:
     """
     Determines if the Yelp name is a fuzzy match for the user's inputted name
     :param str name - the user's inputted name

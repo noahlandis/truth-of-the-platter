@@ -13,7 +13,7 @@ from model.google import Google
 from model.tripadvisor import TripAdvisor
 from input import get_intended_restaurant
 from exceptions import NoResultsFoundError
-from utils.string_utils import is_potential_match
+from utils.string_utils import is_potential_match, remove_leading_number
 from utils.styled_cli_utils import MessageType, get_styled_output
 
 # list of websites to scrape
@@ -90,22 +90,27 @@ def get_yelp_potential_matches(name: str, yelp_search_results: BeautifulSoup) ->
     :return list yelp_potential_matches - a list of tuples, where each tuple is in the form (<page>, <yelp_name>, <yelp_address>)
     """
     yelp_name_tags = yelp_search_results.select('[class*="businessName"]', limit=10)
-  
+    
     # store the potential yelp restaurants in the form of [<yelp_page>, <yelp_name>, <yelp_address>]
     yelp_potential_matches = []
     
     # iterate over the search results to find potential matches
     for tag in yelp_name_tags:
         yelp_name = tag.get_text(strip=True)
-        
+
+        # Yelp list results sometimes start with a leading number, we remove this if it's present in order to ensure more accurate matching
+        yelp_name = remove_leading_number(yelp_name)
+
         # we only care about yelp restaurants with names that are potential matches
         if is_potential_match(name, yelp_name):
-
-            # remove integer and period as it isn't relevant
-            yelp_name = yelp_name[2::]
-
+            
             # we store the pages of the individual restaurants so we can scrape the rating and review count of the intended restaurant later
             restaurant_url = tag.find('a', href=True)['href']
+            
+            # we don't consider that tag if it's an ad
+            if "/adredir" in restaurant_url:
+                continue
+            
             url = f"{Yelp.ROOT}" + restaurant_url
             yelp_page = get_html(url)
 

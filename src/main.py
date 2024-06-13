@@ -4,7 +4,6 @@ It reads the user input, scrapes the ratings and review counts for the given res
 Author: Noah Landis
 """
 
-import time
 from cli_command import prompt_next_command
 from scrape import scrape
 from input import read_input, output_site_ratings, display_results, display_welcome_message
@@ -24,8 +23,6 @@ def main():
         except NoResultsFoundError as e:
             print(e)
             name, city = read_input()
-            # sleep to avoid block caused by multiple requests in a short duration
-            time.sleep(10)
 
     output_site_ratings(site_ratings, full_name, address)
     star_average, total_review_count = get_weighted_average_and_total_review_count(site_ratings)
