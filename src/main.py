@@ -4,7 +4,6 @@ It reads the user input, scrapes the ratings and review counts for the given res
 Author: Noah Landis
 """
 
-import sys
 import time
 from cli_command import prompt_next_command
 from scrape import scrape

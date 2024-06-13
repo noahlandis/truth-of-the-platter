@@ -11,13 +11,15 @@ def get_weighted_average_and_total_review_count(site_ratings: list):
     """
     total_stars = 0
     total_review_count = 0
-    for site_rating in site_ratings:
-        rating = float(site_rating[1])
+    for _, star_rating, review_count in site_ratings:
+        # if we were unable to find the rating for the site, we don't consider the site when calculating the weighted average
+        if star_rating is not None:
 
-        # remove the commas so review_count can be converted into an integer
-        review_count = int(site_rating[2].replace(',', ''))  
-        total_stars += rating * review_count
-        total_review_count += review_count
+            # remove the commas so review_count can be converted into an integer
+            review_count = int(review_count.replace(',', ''))  
+            total_stars += float(star_rating) * review_count
+            total_review_count += review_count
+    
     weighted_average = total_stars / total_review_count
     
     # add commas to the total review count to be consistent with the review counts for individual sites
