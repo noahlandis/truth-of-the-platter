@@ -21,7 +21,7 @@ class Yelp(Website):
         return f"{Yelp.ROOT}/search?find_desc={name}&find_loc={city}"
 
     @staticmethod
-    def get_rating_and_review_count(page: BeautifulSoup) -> tuple:
+    def _get_rating_and_review_count(page: BeautifulSoup) -> tuple:
         """
         Scrapes the rating and review count from the Yelp page
         :param BeautifulSoup page - the page to scrape

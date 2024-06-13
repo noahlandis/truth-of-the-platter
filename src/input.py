@@ -29,7 +29,7 @@ def read_input() -> tuple:
 def get_intended_restaurant(yelp_potential_matches: list) -> tuple:
     """
     Allows the user to select their intended restaurant from a list of potential matches (if multiple matches exist)
-    :param list search_results - a list of tuples, where each tuple is in the form (<website page>, <name>, <address>)
+    :param list search_results - a list of tuples, where each tuple is in the form (<website page>, <restaurant name>, <address>)
     :return tuple intended_restaurant - a tuple representing the restaurant selected by the user, in the form (<website page>, <name>, <address>)
     :raises IntendedRestaurantNotFoundError - if user enters -1, indicating that the restaurant they're looking was not one of the yelp matches
     """
@@ -60,13 +60,17 @@ def get_intended_restaurant(yelp_potential_matches: list) -> tuple:
 def output_site_ratings(site_ratings: list, full_name: str, address: str):
     """
     Displays the ratings of the websites
-    :param list site_ratings - a list of tuples, where each tuple is in the form (<website>, <rating>, <number of reviews>)
+    :param list site_ratings - a list of tuples, where each tuple is in the form (<website name>, <rating>, <number of reviews>)
     :param str full_name - the full name of the restaurant
     :param str address - the address of the restaurant
     """
     print(get_styled_output(f"Showing Results for {full_name} - {address}...", MessageType.INFO))
-    for site_rating in site_ratings:
-        print(get_styled_output(f"{site_rating[0]} - {site_rating[1]} stars, {site_rating[2]} reviews", MessageType.LIST_RESULT))
+    for website_name, star_rating, review_count in site_ratings:
+        if star_rating is None:
+            display_message = f"{website_name} - Ratings could not be found for this site, it will not be considred for the aggregate rating"
+        else:
+            display_message = f"{website_name} - {star_rating} stars, {review_count} reviews"
+        print(get_styled_output(display_message, MessageType.LIST_RESULT))
 
 def display_results(full_name: str, star_average: str, total_review_count: str):
     """
@@ -76,7 +80,6 @@ def display_results(full_name: str, star_average: str, total_review_count: str):
     :param str total_review_count - the sum of the review counts across all scraped websites
     """
     print(get_styled_output(f"{Style.BRIGHT}A more accurate rating of {full_name} is {star_average} stars, {total_review_count} reviews{Style.RESET_ALL}", MessageType.FINAL_RESULT))
-
 
 def display_welcome_message():
     """

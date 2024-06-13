@@ -23,7 +23,7 @@ class Google(Website):
         return f"{Google.ROOT}/search?q={name} {city}"
 
     @staticmethod
-    def get_rating_and_review_count(page: BeautifulSoup) -> tuple:
+    def _get_rating_and_review_count(page: BeautifulSoup) -> tuple:
         """
         Scrapes the rating and review count from the Google page
         :param BeautifulSoup page - the page to scrape

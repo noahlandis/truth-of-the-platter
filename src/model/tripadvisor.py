@@ -23,13 +23,12 @@ class TripAdvisor(Website):
         return Google.build_url(name, city)
 
     @staticmethod
-    def get_rating_and_review_count(page: BeautifulSoup) -> tuple:
+    def _get_rating_and_review_count(page: BeautifulSoup) -> tuple:
         """
         Scrapes the rating and review count from the TripAdvisor rich snippet
         :param BeautifulSoup page - the page to scrape
         :return tuple (<rating>, <review_count>) - the rating and review count for the restaurant
         """
-
         # find the div that contains the tripadvisor link
         div = page.find('div', class_='BNeawe UPmit AP7Wnd lRVwie', string=re.compile('www.tripadvisor.com'))
         trip_advisor_description = div.parent.parent.parent.parent.next_sibling
