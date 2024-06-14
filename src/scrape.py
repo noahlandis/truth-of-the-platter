@@ -19,11 +19,12 @@ from utils.styled_cli_utils import MessageType, get_styled_output
 # list of websites to scrape
 WEBSITES = [Yelp, Google, TripAdvisor]
 
-def scrape(name: str, city: str) -> list:
+def scrape(name: str, city: str, state: str) -> list:
     """
     Scrapes the ratings and review counts for the given restaurant name and city from Yelp, Google, and TripAdvisor
     :param str name - the name of the restaurant
     :param str city - the city the restaurant is in
+    :param str state- the state the restaurant is in
     :return tuple results - a list of tuples, where each tuple is in the form (<website name>, <rating>, <review count>), the full name of the restaurant, and the address of the restaurant
     """
     last_url = ""
@@ -107,15 +108,21 @@ def get_yelp_potential_matches(name: str, yelp_search_results: BeautifulSoup) ->
             # we store the pages of the individual restaurants so we can scrape the rating and review count of the intended restaurant later
             restaurant_url = tag.find('a', href=True)['href']
             
-            # we don't consider that tag if it's an ad
+            # we can't parse the ad redirect page, so we skip it
             if "/adredir" in restaurant_url:
                 continue
             
             url = f"{Yelp.ROOT}" + restaurant_url
             yelp_page = get_html(url)
 
-            # get the address of the restaurant
-            yelp_address = yelp_page.find('p', class_='y-css-dg8xxd').get_text(strip=True)
+            try:
+                yelp_address = yelp_page.find('p', class_='y-css-dg8xxd').get_text(strip=True)
+            
+            # in the rare case where we can't find the address, we will just ignore that restaurant 
+            except AttributeError:
+                print(get_styled_output(f"Could not find address for {yelp_name}: {url}. Skipping...", MessageType.INFO))
+                continue
+            
             yelp_potential_matches.append((yelp_page, yelp_name, yelp_address))
 
     return yelp_potential_matches

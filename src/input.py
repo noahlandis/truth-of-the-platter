@@ -15,7 +15,7 @@ UNDERLINE_END = "\033[0m"
 def read_input() -> tuple:
     """
     Reads the user input to be used in website search
-    :return tuple - a tuple containing the user's inputted restaurant in the format (<name>, <city>)
+    :return tuple - a tuple containing the user's inputted restaurant in the format (<name>, <city>, <state>)
     """
     while True:
         name = get_input_with_command_handling("Enter a restaurant name")
@@ -23,8 +23,9 @@ def read_input() -> tuple:
             break
         print(get_styled_output("The restaurant name cannot be blank.", MessageType.WARNING))
     city = get_input_with_command_handling("Enter the name of a city")
+    state = get_input_with_command_handling("Enter the name of a state")
     print(get_styled_output("Loading...", MessageType.INFO))
-    return name, city
+    return name, city, state
 
 def get_intended_restaurant(yelp_potential_matches: list) -> tuple:
     """

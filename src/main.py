@@ -15,10 +15,10 @@ def main():
     Controls the flow of the program
     """
     display_welcome_message()
-    name, city = read_input()
+    name, city, state = read_input()
     while True:
         try:
-            site_ratings, full_name, address = scrape(name, city)
+            site_ratings, full_name, address = scrape(name, city, state)
             break
         except NoResultsFoundError as e:
             print(e)
