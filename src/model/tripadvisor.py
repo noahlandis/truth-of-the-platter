@@ -13,14 +13,14 @@ class TripAdvisor(Website):
     ROOT = "https://www.google.com"
 
     @staticmethod
-    def build_url(name: str, city: str) -> str:
+    def build_url(name: str, location: str) -> str:
         """
         Builds the URL to search for a restaurant on Google, to scrape TripAdvisor info from Google's rich snippets 
         :param str name - the name of the restaurant
-        :param str city - the city the restaurant is in
+        :param str location - the location of the restaurant
         :return str url - the URL to search for the restaurant
         """
-        return Google.build_url(name, city)
+        return Google.build_url(name, location)
 
     @staticmethod
     def _get_rating_and_review_count(page: BeautifulSoup) -> tuple:

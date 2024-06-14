@@ -1,24 +1,23 @@
 import pytest
-from src.utils import string_utils
+from src.utils.string_utils import remove_leading_number, is_potential_match, remove_non_alphanumeric_chars, extract_review_count, formatted_location
 
-@pytest.mark.parametrize("name, yelp_name, expected", [
-    ("Home Slice Pizza", "1. Home Slice Pizza", True), # fuzzy match and non-sponsored result
-    ("Home Slice Pizza", "Home Slice Pizza", False), # fuzzy match with sponsored result
-    ("Luigi's Pizza from Home", "1. Home Slice Pizza", False), # no fuzzy match with non-sponsored result
-    ("Luigi's Pizza from Home", "Home Slice Pizza", False) # no fuzzy match with sponsored result
+
+@pytest.mark.parametrize("city, state, expected", [
+    ("Austin", "TX", "Austin, TX"), # city and state given
+    ("Austin", "", "Austin"), # only city given
+    ("", "TX", "TX"), # only state given
+    ("", "", "") # neither city nor state given
 ])
-def test_is_potential_match(name, yelp_name, expected):
-    actual = string_utils.is_potential_match(name, yelp_name)
+def test_formatted_location(city, state, expected):
+    actual = formatted_location(city, state)
     assert actual == expected
 
 @pytest.mark.parametrize("yelp_name, expected", [
-    ("Home Slice Pizza", True),  # sponsored results
-    ("Home Slice 1. Pizza", True),
-    ("1. Home Slice Pizza", False), # non-sponsored results
-    ("10. Home Slice Pizza", False)     
+    ("1. Home Slice Pizza", "Home Slice Pizza"),
+    ("Home Slice Pizza", "Home Slice Pizza")
 ])
-def test_is_sponsored(yelp_name, expected):
-    actual = string_utils.is_sponsored(yelp_name)
+def test_remove_leading_number(yelp_name, expected):
+    actual = remove_leading_number(yelp_name)
     assert actual == expected
 
 @pytest.mark.parametrize("name, expected", [
@@ -29,15 +28,15 @@ def test_is_sponsored(yelp_name, expected):
     ("Home Slice's Pizza", True), # different punctuation 
     ("Luigi's Pizza from Home", False) # false match
 ])
-def test_fuzzy_match(name, expected):
+def test_potential_match(name, expected):
     yelp_name = "Home Slice Pizza"
-    actual = string_utils.is_fuzzy_match(name, yelp_name)
+    actual = is_potential_match(name, yelp_name)
     assert actual == expected
 
 def test_remove_non_alphanumeric_chars():
     a_string = "\tHomeslice's Pizza, Restaraunt"
     expected = "HomeslicesPizzaRestaraunt"
-    actual = string_utils.remove_non_alphanumeric_chars(a_string)
+    actual = remove_non_alphanumeric_chars(a_string)
     assert actual == expected
 
 @pytest.mark.parametrize("a_string, expected", [
@@ -49,5 +48,5 @@ def test_remove_non_alphanumeric_chars():
     ("10,000 reviews", "10,000")
 ])
 def test_extract_review_count(a_string, expected):
-    actual = string_utils.extract_review_count(a_string)
+    actual = extract_review_count(a_string)
     assert actual == expected

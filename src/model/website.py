@@ -13,11 +13,11 @@ class Website(ABC):
     
     @staticmethod
     @abstractmethod
-    def build_url(name: str, city: str) -> str:
+    def build_url(name: str, location: str) -> str:
         """
         Builds the URL to search for a restaurant on the website
         :param str name - the name of the restaurant
-        :param str city - the city the restaurant is in
+        :param str location - the location the restaurant
         :return str url - the URL to search for the restaurant
         """
         pass

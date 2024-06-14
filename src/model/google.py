@@ -11,16 +11,16 @@ class Google(Website):
     ROOT = "https://www.google.com"
 
     @staticmethod
-    def build_url(name: str, city: str) -> str:
+    def build_url(name: str, location: str) -> str:
         """
         Builds the URL to search for a restaurant on Google
         :param str name - the name of the restaurant
-        :param str city - the city the restaurant is in
+        :param str location - the location the restaurant
         :return str url - the URL to search for the restaurant
         """
         # Replace the ampersand with "and" to avoid URL encoding issues
         name = name.replace("&", "and")
-        return f"{Google.ROOT}/search?q={name} {city}"
+        return f"{Google.ROOT}/search?q={name} {location}"
 
     @staticmethod
     def _get_rating_and_review_count(page: BeautifulSoup) -> tuple:

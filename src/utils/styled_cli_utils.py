@@ -26,10 +26,15 @@ def get_styled_output(message: str, message_type: MessageType) -> str:
     """
     return f"{message_type.value}{message}"
 
-def get_styled_input(message: str) -> str:
+def get_styled_input(message: str, is_optional: bool=False) -> str:
     """
     Returns a styled input prompt to be printed to the console
     :param str message - the message to be styled
+    :bool is_optional - indicates whether or not the field is optional
     :return str - the styled message
     """
-    return input(f"{MessageType.PROMPT.value}{message}:{MessageType.INPUT.value} ").strip()
+    prompt_str = f"{MessageType.PROMPT.value}{message}"
+    if is_optional:
+        prompt_str += f"{MessageType.INFO.value} (optional)"
+    prompt_str += f"{MessageType.PROMPT.value}:"
+    return input(f"{prompt_str}{MessageType.INPUT.value} ").strip()
