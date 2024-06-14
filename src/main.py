@@ -9,20 +9,27 @@ from scrape import scrape
 from input import read_input, output_site_ratings, display_results, display_welcome_message
 from calculate_weighted_average import get_weighted_average_and_total_review_count
 from exceptions import NoResultsFoundError
+from utils.string_utils import formatted_location
+
+def _get_name_and_location():
+    name, city, state = read_input()
+    location = formatted_location(city, state)
+    return name, location
+    
 
 def main():
     """
     Controls the flow of the program
     """
     display_welcome_message()
-    name, city, state = read_input()
+    name, location = _get_name_and_location()
     while True:
         try:
-            site_ratings, full_name, address = scrape(name, city, state)
+            site_ratings, full_name, address = scrape(name, location)
             break
         except NoResultsFoundError as e:
             print(e)
-            name, city = read_input()
+            name, location = _get_name_and_location()
 
     output_site_ratings(site_ratings, full_name, address)
     star_average, total_review_count = get_weighted_average_and_total_review_count(site_ratings)

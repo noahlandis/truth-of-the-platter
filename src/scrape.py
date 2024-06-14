@@ -1,6 +1,6 @@
 """
 This module handles the main scraping logic.
-Given a restaurant name and a city, it identifies potential matching restaurants on Yelp, where a match is defined as the restaurant the user intended to search for.
+Given a restaurant name and a location, it identifies potential matching restaurants on Yelp, where a match is defined as the restaurant the user intended to search for.
 The user is then prompted to select their intended restaurant from the list of potential matches.
 The ratings and review counts for the selected restaurant are then scraped from Yelp, Google, and TripAdvisor and the results are printed.
 Author: Noah Landis
@@ -19,18 +19,17 @@ from utils.styled_cli_utils import MessageType, get_styled_output
 # list of websites to scrape
 WEBSITES = [Yelp, Google, TripAdvisor]
 
-def scrape(name: str, city: str, state: str) -> list:
+def scrape(name: str, location: str) -> list:
     """
-    Scrapes the ratings and review counts for the given restaurant name and city from Yelp, Google, and TripAdvisor
+    Scrapes the ratings and review counts for the given restaurant name and location from Yelp, Google, and TripAdvisor
     :param str name - the name of the restaurant
-    :param str city - the city the restaurant is in
-    :param str state- the state the restaurant is in
+    :param str location- the location of the restaurant 
     :return tuple results - a list of tuples, where each tuple is in the form (<website name>, <rating>, <review count>), the full name of the restaurant, and the address of the restaurant
     """
     last_url = ""
     results = []
     for i in range(len(WEBSITES)):
-        url = WEBSITES[i].build_url(name, city)
+        url = WEBSITES[i].build_url(name, location)
 
         # since TripAdvisor's API costs money, we scrape the data from the TripAdvisor rich snippet from the Google results. Therefore, we only need to send one request to the Google URL.
         if url != last_url:
@@ -39,21 +38,21 @@ def scrape(name: str, city: str, state: str) -> list:
 
         # we first scrape Yelp to collect the name, address, and associated page for each restaurant which closely matches the user's input
         if i == 0:
-            yelp_page, yelp_name, yelp_address = get_yelp_data(name, city, page)
+            yelp_page, yelp_name, yelp_address = get_yelp_data(name, location, page)
 
             # we update the page to the individual restaurant's yelp page so we can scrape the rating and review count
             page = yelp_page
 
             # we now have the full name and address of the intended restaurant, so we can use it for more accurate scraping in the future
             name = yelp_name
-            city = yelp_address
+            location = yelp_address
 
         # get the rating and review count for the given website
         website_name = WEBSITES[i].__name__
         rating, review_count = WEBSITES[i].get_rating_and_review_count(page)
         results.append((website_name, rating, review_count))
     
-    return results, name, city
+    return results, name, location
 
 def get_html(url: str) -> BeautifulSoup:
     """
@@ -66,11 +65,11 @@ def get_html(url: str) -> BeautifulSoup:
     page = BeautifulSoup(response.text, 'html.parser')
     return page
 
-def get_yelp_data(name: str, city: str, page: BeautifulSoup) -> tuple:
+def get_yelp_data(name: str, location: str, page: BeautifulSoup) -> tuple:
     """
     Handles the Yelp scraping to get the intended restaurant details and returns the page, name, and address corresponding to the intended restaurant
     :param str name - the name of the restaurant
-    :param str city - the city the restaurant is in
+    :param str location - the location of the restaurant
     :param BeautifulSoup page - the Yelp search results page
     :return tuple - the page, name, and address of the intended restaurant as displayed on Yelp 
     :raises NoResultsFoundError - if no yelp results match the user's input 
@@ -78,7 +77,7 @@ def get_yelp_data(name: str, city: str, page: BeautifulSoup) -> tuple:
     # get the pages, full names, and addresses of yelp restaurants which potentially match the restaurant the user had in mind
     yelp_potential_matches = get_yelp_potential_matches(name, page)
     if not yelp_potential_matches:
-        raise NoResultsFoundError(get_styled_output(f"No results could be found for \"{name}\" located in \"{city}\". Please try again...", MessageType.ERROR))
+        raise NoResultsFoundError(get_styled_output(f"No results could be found for \"{name}\" located in \"{location}\". Please try again...", MessageType.ERROR))
     intended_restaurant = get_intended_restaurant(yelp_potential_matches)
     yelp_page, yelp_name, yelp_address = intended_restaurant
     return yelp_page, yelp_name, yelp_address

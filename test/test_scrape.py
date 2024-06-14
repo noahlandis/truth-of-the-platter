@@ -7,7 +7,7 @@ from src.scrape import scrape, get_html, get_yelp_data, NoResultsFoundError
 def test_scrape_no_results(mock_get_yelp_potential_matches):
     mock_get_yelp_potential_matches.return_value = []
     with pytest.raises(NoResultsFoundError):
-        scrape("foo", "foo", "bar")
+        scrape("foo", "bar")
 
 @patch('src.scrape.get_yelp_potential_matches')
 def test_scrape_yelp_no_results(mock_get_yelp_potential_matches):
