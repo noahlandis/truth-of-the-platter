@@ -28,14 +28,15 @@ def display_commands():
     for command, description in COMMANDS.items():
         print(get_styled_output(f"  {Style.BRIGHT}{command}{Style.NORMAL} - {description}", MessageType.INFO))
 
-def get_input_with_command_handling(prompt: str) -> str:
+def get_input_with_command_handling(prompt: str, is_optional: bool=False) -> str:
     """
     Wrapper function to make sure a user can enter a command at any time
     :param str prompt - the prompt to display to the user
+    :bool is_optional - indicates whether or not the field is optional
     :return str user_input - the user's input if a command wasn't entered
     """
     while True:
-        user_input = get_styled_input(prompt)
+        user_input = get_styled_input(prompt, is_optional)
         if is_command(user_input):
             handle_command(user_input)
         else:

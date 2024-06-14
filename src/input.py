@@ -22,8 +22,8 @@ def read_input() -> tuple:
         if name:
             break
         print(get_styled_output("The restaurant name cannot be blank.", MessageType.WARNING))
-    city = get_input_with_command_handling("Enter the name of a city")
-    state = get_input_with_command_handling("Enter the name of a state")
+    city = get_input_with_command_handling("Enter the name of a city", True)
+    state = get_input_with_command_handling("Enter the name of a state", True)
     print(get_styled_output("Loading...", MessageType.INFO))
     return name, city, state
 
