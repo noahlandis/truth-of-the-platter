@@ -6,6 +6,7 @@ The ratings and review counts for the selected restaurant are then scraped from 
 Author: Noah Landis
 """
 
+import concurrent.futures
 import requests
 from bs4 import BeautifulSoup
 from model.yelp import Yelp
@@ -84,7 +85,7 @@ def get_yelp_data(name: str, location: str, page: BeautifulSoup) -> tuple:
 
 def get_yelp_potential_matches(name: str, yelp_search_results: BeautifulSoup) -> list:
     """
-    Searches Yelp to get the HTML, full names, and addresses of restaurants that match the user's input
+    Searches Yelp to get the HTML, full names, and addresses of restaurants that match the user's input.
     :param str name - the name of the restaurant
     :param BeautifulSoup yelp_search_results - the HTML of the search results page
     :return list yelp_potential_matches - a list of tuples, where each tuple is in the form (<page>, <yelp_name>, <yelp_address>)
@@ -93,23 +94,22 @@ def get_yelp_potential_matches(name: str, yelp_search_results: BeautifulSoup) ->
     
     # store the potential yelp restaurants in the form of [<yelp_page>, <yelp_name>, <yelp_address>]
     yelp_potential_matches = []
-    
-    # iterate over the search results to find potential matches
-    for tag in yelp_name_tags:
+
+    def process_tag(tag):
         yelp_name = tag.get_text(strip=True)
 
         # Yelp list results sometimes start with a leading number, we remove this if it's present in order to ensure more accurate matching
         yelp_name = remove_leading_number(yelp_name)
-
-        # we only care about yelp restaurants with names that are potential matches
+        
+        # we only care about Yelp restaurants that closely match the user's input
         if is_potential_match(name, yelp_name):
-            
+
             # we store the pages of the individual restaurants so we can scrape the rating and review count of the intended restaurant later
             restaurant_url = tag.find('a', href=True)['href']
             
-            # we can't parse the ad redirect page, so we skip it
+            # we can't parse an ad redirect page, so we skip it
             if "/adredir" in restaurant_url:
-                continue
+                return None
             
             url = f"{Yelp.ROOT}" + restaurant_url
             yelp_page = get_html(url)
@@ -117,12 +117,17 @@ def get_yelp_potential_matches(name: str, yelp_search_results: BeautifulSoup) ->
             try:
                 yelp_address = yelp_page.find('p', class_='y-css-dg8xxd').get_text(strip=True)
             
-            # in the rare case where we can't find the address, we will just ignore that restaurant 
+            # in the rare case that we can't find the address, we skip the restaurant
             except AttributeError:
                 print(get_styled_output(f"Could not find address for {yelp_name}: {url}. Skipping...", MessageType.INFO))
-                continue
-            
-            yelp_potential_matches.append((yelp_page, yelp_name, yelp_address))
+                return None
+
+            return (yelp_page, yelp_name, yelp_address)
+        return None
+
+    # we process the tags concurrently
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        yelp_potential_matches = list(filter(None, executor.map(process_tag, yelp_name_tags)))
 
     return yelp_potential_matches
 
