@@ -1,5 +1,7 @@
 from bs4 import BeautifulSoup
+
 from src.model.tripadvisor import TripAdvisor
+
 
 def test_build_url():
     expected = "https://www.google.com/search?q=Home Slice Pizza Austin"

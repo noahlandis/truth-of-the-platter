@@ -4,10 +4,13 @@ Author: Noah Landis
 """
 
 import re
+
 from bs4 import BeautifulSoup
+
 from model.google import Google
 from model.website import Website
 from utils.string_utils import extract_review_count
+
 
 class TripAdvisor(Website):
     ROOT = "https://www.google.com"

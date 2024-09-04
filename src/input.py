@@ -3,10 +3,9 @@ This module handles the user input logic.
 It reads the user input to be used in website search and allows the user to select their intended restaurant from a list of potential matches.
 Author: Noah Landis
 """
-import os
-import sys
 from colorama import Style
-from cli_command import get_input_with_command_handling, display_commands
+
+from cli_command import display_commands, get_input_with_command_handling
 from utils.styled_cli_utils import MessageType, get_styled_output
 
 UNDERLINE_START = "\033[4m"

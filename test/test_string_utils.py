@@ -1,5 +1,8 @@
 import pytest
-from src.utils.string_utils import is_potential_match, remove_non_alphanumeric_chars, extract_review_count
+
+from src.utils.string_utils import (extract_review_count, is_potential_match,
+                                    remove_non_alphanumeric_chars)
+
 
 @pytest.mark.parametrize("name, expected", [
     ("home slice pizza", True), # different capitalization
