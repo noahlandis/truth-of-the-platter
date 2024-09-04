@@ -22,10 +22,9 @@ def read_input() -> tuple:
         if name:
             break
         print(get_styled_output("The restaurant name cannot be blank.", MessageType.WARNING))
-    city = get_input_with_command_handling("Enter the name of a city", True)
-    state = get_input_with_command_handling("Enter the name of a state", True)
+    location = get_input_with_command_handling("Enter the location", True)
     print(get_styled_output("Loading...", MessageType.INFO))
-    return name, city, state
+    return name, location
 
 def get_intended_restaurant(yelp_potential_matches: list) -> tuple:
     """
@@ -38,8 +37,8 @@ def get_intended_restaurant(yelp_potential_matches: list) -> tuple:
     if len(yelp_potential_matches) == 1:
         return yelp_potential_matches[0]
 
-    for i in range(len(yelp_potential_matches)):
-        print(get_styled_output(f"{Style.BRIGHT}{str(i)}{Style.NORMAL}: {str(yelp_potential_matches[i][1])} - {yelp_potential_matches[i][2]}", MessageType.LIST_RESULT))
+    for i, potential_match in enumerate(yelp_potential_matches):
+        print(get_styled_output(f"{Style.BRIGHT}{str(i)}{Style.NORMAL}: {potential_match['name']} - {potential_match['location']}", MessageType.LIST_RESULT))
     
     print(get_styled_output(f"Enter the number corresponding to the restaurant you had in mind", MessageType.INFO))
     print(get_styled_output(f"{UNDERLINE_START}OR{UNDERLINE_END}", MessageType.INFO))

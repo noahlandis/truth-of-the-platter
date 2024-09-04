@@ -5,6 +5,8 @@ Author: Noah Landis
 
 from abc import ABC, abstractmethod
 from bs4 import BeautifulSoup
+import logging
+logger = logging.getLogger()
 
 class Website(ABC):
     """
@@ -32,7 +34,8 @@ class Website(ABC):
         try:
             return cls._get_rating_and_review_count(page)
         # handle case when the rating and review count couldn't be parsed
-        except AttributeError:
+        except AttributeError as e:
+            logger.warning(f"Couldn't parse rating and review count: {e}")
             return None, None
         
     @staticmethod

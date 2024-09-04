@@ -1,19 +1,20 @@
 import pytest
 from unittest.mock import patch, Mock
 from requests import RequestException
-from src.scrape import scrape, get_html, get_yelp_data, NoResultsFoundError
+from src.scrape import get_html
+from src.yelp_api import get_yelp_data, NoResultsFoundError
 
-@patch('src.scrape.get_yelp_potential_matches')
-def test_scrape_no_results(mock_get_yelp_potential_matches):
-    mock_get_yelp_potential_matches.return_value = []
+@patch('src.yelp_api.collect_yelp_restaurants_regular_api')
+def test_collect_yelp_restaurants_regular_api(collect_yelp_restaurants_regular_api):
+    collect_yelp_restaurants_regular_api.return_value = []
     with pytest.raises(NoResultsFoundError):
-        scrape("foo", "bar")
+        get_yelp_data("foo", "bar")
 
-@patch('src.scrape.get_yelp_potential_matches')
-def test_scrape_yelp_no_results(mock_get_yelp_potential_matches):
-    mock_get_yelp_potential_matches.return_value = []
+@patch('src.yelp_api.collect_yelp_restaurants_graph_ql')
+def test_collect_yelp_restaurants_graph_ql(collect_yelp_restaurants_graph_ql):
+    collect_yelp_restaurants_graph_ql.return_value = []
     with pytest.raises(NoResultsFoundError):
-        get_yelp_data("foo", "bar", None)
+        get_yelp_data("foo", "bar")
 
 @patch('requests.get')
 def test_get_html_makes_request(mock_get: Mock):
