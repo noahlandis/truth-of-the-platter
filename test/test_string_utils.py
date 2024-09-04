@@ -1,24 +1,5 @@
 import pytest
-from src.utils.string_utils import remove_leading_number, is_potential_match, remove_non_alphanumeric_chars, extract_review_count, formatted_location
-
-
-@pytest.mark.parametrize("city, state, expected", [
-    ("Austin", "TX", "Austin, TX"), # city and state given
-    ("Austin", "", "Austin"), # only city given
-    ("", "TX", "TX"), # only state given
-    ("", "", "") # neither city nor state given
-])
-def test_formatted_location(city, state, expected):
-    actual = formatted_location(city, state)
-    assert actual == expected
-
-@pytest.mark.parametrize("yelp_name, expected", [
-    ("1. Home Slice Pizza", "Home Slice Pizza"),
-    ("Home Slice Pizza", "Home Slice Pizza")
-])
-def test_remove_leading_number(yelp_name, expected):
-    actual = remove_leading_number(yelp_name)
-    assert actual == expected
+from src.utils.string_utils import is_potential_match, remove_non_alphanumeric_chars, extract_review_count
 
 @pytest.mark.parametrize("name, expected", [
     ("home slice pizza", True), # different capitalization

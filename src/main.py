@@ -8,7 +8,6 @@ from scrape import scrape
 from input import read_input, output_site_ratings, display_results, display_welcome_message
 from calculate_weighted_average import get_weighted_average_and_total_review_count
 from exceptions import NoResultsFoundError
-from utils.string_utils import formatted_location
 import geocoder
 import bugsnag
 from bugsnag.handlers import BugsnagHandler

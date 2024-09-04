@@ -6,35 +6,6 @@ Author: Noah Landis
 import re
 from fuzzywuzzy import fuzz
 
-def formatted_location(city: str, state: str):
-    """
-    Returns the location of the user based on which values were supplied by the user
-    :param str city - the city given by the user
-    :param str state - the state given by the user
-    :return str location - a string in one of the following formats:
-    - "<city, state>" if both the city and state were given
-    - "<city>" if only the city was given
-    - "<state>" if only the state was given
-    """
-    # assuming neither city nor state was provided
-    location = ""
-    if city and state:
-        location = f"{city}, {state}"
-    elif city:
-        location = city
-    elif state:
-        location = state
-    return location
-
-def remove_leading_number(yelp_name: str) -> str:
-    """
-    Removes the leading number from a Yelp name
-    :param str yelp_name - the Yelp name (if it has a leading number)
-    :return str - the Yelp name with the leading number removed
-    """
-    if bool(re.match(r'^\d+\.', yelp_name)):
-        yelp_name = yelp_name[2::].lstrip()
-    return yelp_name
 
 def is_potential_match(name: str, yelp_name: str) -> bool:
     """

@@ -15,7 +15,7 @@ from model.google import Google
 from model.tripadvisor import TripAdvisor
 from input import get_intended_restaurant
 from exceptions import NoResultsFoundError
-from utils.string_utils import is_potential_match, remove_leading_number, extract_review_count
+from utils.string_utils import is_potential_match, extract_review_count
 from utils.styled_cli_utils import MessageType, get_styled_output
 from yelp_api import get_yelp_data
 import logging
