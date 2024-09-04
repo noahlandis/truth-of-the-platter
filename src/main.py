@@ -3,17 +3,21 @@ This module controls the flow of the program.
 It reads the user input, scrapes the ratings and review counts for the given restaurant, and prints the results.
 Author: Noah Landis
 """
-from cli_command import prompt_next_command
-from scrape import scrape
-from input import read_input, output_site_ratings, display_results, display_welcome_message
-from calculate_weighted_average import get_weighted_average_and_total_review_count
-from exceptions import NoResultsFoundError
-import geocoder
-import bugsnag
-from bugsnag.handlers import BugsnagHandler
-import os
-from dotenv import load_dotenv
 import logging
+import os
+
+import bugsnag
+import geocoder
+from bugsnag.handlers import BugsnagHandler
+from dotenv import load_dotenv
+
+from calculate_weighted_average import \
+    get_weighted_average_and_total_review_count
+from cli_command import prompt_next_command
+from exceptions import NoResultsFoundError
+from input import (display_results, display_welcome_message,
+                   output_site_ratings, read_input)
+from scrape import scrape
 
 logger = logging.getLogger()
 

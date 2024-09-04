@@ -1,6 +1,10 @@
 from unittest.mock import Mock, patch
+
 import pytest
-from cli_command import is_command, handle_command, get_input_with_command_handling
+
+from cli_command import (get_input_with_command_handling, handle_command,
+                         is_command)
+
 
 @pytest.mark.parametrize("user_input, expected", [
     ("\\h", True), # help command

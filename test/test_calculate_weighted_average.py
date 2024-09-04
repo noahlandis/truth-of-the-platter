@@ -1,5 +1,8 @@
 import pytest
-from src.calculate_weighted_average import get_weighted_average_and_total_review_count
+
+from src.calculate_weighted_average import \
+    get_weighted_average_and_total_review_count
+
 
 @pytest.mark.parametrize("site_ratings, expected", [
     ([("Yelp", "1.0", "1"), ("Google", "5.0", "1")], (3.0, "2")), # weighted average and count is calculated correctly

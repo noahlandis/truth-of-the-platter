@@ -1,8 +1,11 @@
+from unittest.mock import Mock, patch
+
 import pytest
-from unittest.mock import patch, Mock
 from requests import RequestException
+
 from src.scrape import get_html
-from src.yelp_api import get_yelp_data, NoResultsFoundError
+from src.yelp_api import NoResultsFoundError, get_yelp_data
+
 
 @patch('src.yelp_api.collect_yelp_restaurants_regular_api')
 def test_collect_yelp_restaurants_regular_api(collect_yelp_restaurants_regular_api):

@@ -3,9 +3,11 @@ This module contains the abstract class Website.
 Author: Noah Landis
 """
 
-from abc import ABC, abstractmethod
-from bs4 import BeautifulSoup
 import logging
+from abc import ABC, abstractmethod
+
+from bs4 import BeautifulSoup
+
 logger = logging.getLogger()
 
 class Website(ABC):
@@ -22,7 +24,6 @@ class Website(ABC):
         :param str location - the location the restaurant
         :return str url - the URL to search for the restaurant
         """
-        pass
 
     @classmethod
     def get_rating_and_review_count(cls, page: BeautifulSoup) -> tuple:

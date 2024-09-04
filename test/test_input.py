@@ -1,6 +1,8 @@
-import pytest
-import input
 from unittest.mock import Mock, patch
+
+import pytest
+
+import input
 
 
 @patch('builtins.input')

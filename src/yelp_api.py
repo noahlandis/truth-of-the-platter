@@ -1,10 +1,13 @@
+import logging
 import os
+
 import requests
+
+from exceptions import NoResultsFoundError
 from input import get_intended_restaurant
 from utils.string_utils import is_potential_match
-from exceptions import NoResultsFoundError
 from utils.styled_cli_utils import MessageType, get_styled_output
-import logging
+
 logger = logging.getLogger()
 
 def get_yelp_data(name, location):

@@ -2,8 +2,10 @@
 Utility class to handle styling CLI input and output.
 Author: Noah Landis
 """
-from colorama import Fore
 from enum import Enum
+
+from colorama import Fore
+
 
 class MessageType(Enum):
     """
