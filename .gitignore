@@ -3,3 +3,6 @@ __pycache__/
 src/r.py
 .env
 app.log
+dist/
+build/
+*.egg-info/
