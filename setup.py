@@ -1,15 +1,18 @@
 from setuptools import setup, find_packages
 
+# Function to read requirements.txt
+def read_requirements():
+    with open('requirements.txt') as f:
+        return f.read().splitlines()
+
 setup(
     name='true-reviews',
-    version='0.1.0',
+    version='1.0.0',
     packages=find_packages(),
-    install_requires=[
-        'geocoder',
-    ],
+    install_requires=read_requirements(),  # use requirements.txt
     entry_points={
         'console_scripts': [
-            'yourcli=your_cli_tool.cli:hello',
+            'truereviews=src.main:main',
         ],
     },
     author='Noah Landis',
