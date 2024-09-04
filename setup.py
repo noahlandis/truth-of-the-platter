@@ -7,7 +7,7 @@ def read_requirements():
 
 setup(
     name='true-reviews',
-    version='1.0.0',
+    version='0.1.0',
     packages=find_packages(),
     install_requires=read_requirements(),  # use requirements.txt
     entry_points={

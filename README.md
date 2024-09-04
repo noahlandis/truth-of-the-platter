@@ -4,10 +4,10 @@ True Reviews is a Python tool that aggregates restaurant reviews from Yelp, Trip
 
 ## Features
 
-- Scrapes ratings and review counts from Yelp, Google, and TripAdvisor
+- Gets ratings and review counts from Yelp, Google, and TripAdvisor
 - Calculates a weighted average rating based on the data from all sources
 - Provides a command-line interface for easy interaction
-- Supports automatic location detection (optional)
+- Supports automatic location detection (when location is not provided)
 - Handles errors gracefully and provides informative messages
 
 ## Installation
