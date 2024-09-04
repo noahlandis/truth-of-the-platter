@@ -15,7 +15,6 @@ from bugsnag.handlers import BugsnagHandler
 import os
 from dotenv import load_dotenv
 import logging
-import sys
 
 logger = logging.getLogger()
 

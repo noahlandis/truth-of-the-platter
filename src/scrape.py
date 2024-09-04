@@ -59,14 +59,11 @@ def get_html(url: str) -> BeautifulSoup:
     :return BeautifulSoup page - the HTML for the given URL
     """
 
-    try:
-        response = requests.get(url, headers={'User-Agent': "Mozilla/5.0"})
-        response.raise_for_status()
-        page = BeautifulSoup(response.text, 'html.parser')
-        return page
-    except Exception as e:
-        logger.error(f"An error occurred while fetching HTML from {url}: {e}")
-        return None
+    response = requests.get(url, headers={'User-Agent': "Mozilla/5.0"})
+    response.raise_for_status()
+    page = BeautifulSoup(response.text, 'html.parser')
+    return page
+   
 
 
 def is_captcha(page):
