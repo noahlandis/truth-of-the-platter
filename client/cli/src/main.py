@@ -7,7 +7,7 @@ import requests
 
 from .cli_command import get_input_with_command_handling, prompt_next_command
 from .input import display_results, display_welcome_message, get_intended_restaurant, output_site_ratings, read_input
-from server.src.calculate_weighted_average import get_weighted_average_and_total_review_count
+from server.src.services.calculate_weighted_average_service import get_weighted_average_and_total_review_count
 from server.src.exceptions import NoResultsFoundError, UserLocationNotFoundError
 from server.src.services.scrape_service import scrape
 from server.src.services.user_location_service import get_user_location

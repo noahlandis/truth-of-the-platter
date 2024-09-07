@@ -1,6 +1,5 @@
 from bs4 import BeautifulSoup
-
-from src.model.google import Google
+from model.google import Google
 
 
 def test_build_url():

@@ -13,3 +13,8 @@ class UserLocationNotFoundError(Exception):
     """
     Exception raised when the user's location is not found
     """
+
+class UnknownLocationError(Exception):
+    """
+    Exception raised when the location is not found
+    """

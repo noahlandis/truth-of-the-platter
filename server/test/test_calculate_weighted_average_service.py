@@ -1,7 +1,7 @@
 import pytest
 
-from src.calculate_weighted_average import \
-    get_weighted_average_and_total_review_count
+from server.src.services.calculate_weighted_average_service import get_weighted_average_and_total_review_count
+
 
 
 @pytest.mark.parametrize("site_ratings, expected", [

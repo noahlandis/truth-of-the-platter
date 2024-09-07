@@ -11,8 +11,9 @@ import logging
 import requests
 from bs4 import BeautifulSoup
 
-from model.google import Google
-from model.tripadvisor import TripAdvisor
+from server.src.model.google import Google
+from server.src.model.tripadvisor import TripAdvisor
+
 
 logger = logging.getLogger()
 

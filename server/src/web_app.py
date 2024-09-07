@@ -3,7 +3,7 @@ from flask import Flask, request, session, jsonify
 from exceptions import NoResultsFoundError
 from services.yelp_service import get_yelp_matches
 from server.src.services.scrape_service import scrape
-from calculate_weighted_average import get_weighted_average_and_total_review_count
+from server.src.services.calculate_weighted_average_service import get_weighted_average_and_total_review_count
 from flask_cors import CORS
 
 app = Flask(__name__)
