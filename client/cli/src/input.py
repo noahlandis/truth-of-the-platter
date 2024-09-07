@@ -5,8 +5,8 @@ Author: Noah Landis
 """
 from colorama import Style
 
-from cli_command import display_commands, get_input_with_command_handling
-from utils.styled_cli_utils import MessageType, get_styled_output
+from .cli_command import display_commands, get_input_with_command_handling
+from .utils.styled_cli_utils import MessageType, get_styled_output
 
 UNDERLINE_START = "\033[4m"
 UNDERLINE_END = "\033[0m"
@@ -22,7 +22,6 @@ def read_input() -> tuple:
             break
         print(get_styled_output("The restaurant name cannot be blank.", MessageType.WARNING))
     location = get_input_with_command_handling("Enter the location", True)
-    print(get_styled_output("Loading...", MessageType.INFO))
     return name, location
 
 def get_intended_restaurant(yelp_potential_matches: list) -> tuple:
@@ -87,4 +86,3 @@ def display_welcome_message():
     print(get_styled_output("Welcome to the Restaurant Rating Aggregator!", MessageType.WELCOME))
     display_commands()
     
-

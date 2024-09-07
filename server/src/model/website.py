@@ -36,7 +36,7 @@ class Website(ABC):
             return cls._get_rating_and_review_count(page)
         # handle case when the rating and review count couldn't be parsed
         except AttributeError as e:
-            logger.warning(f"Couldn't parse rating and review count: {e}")
+            # logger.warning(f"Couldn't parse rating and review count: {e}")
             return None, None
         
     @staticmethod

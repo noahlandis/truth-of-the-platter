@@ -4,22 +4,20 @@ import os
 import requests
 
 from exceptions import NoResultsFoundError
-from input import get_intended_restaurant
 from utils.string_utils import is_potential_match
-from utils.styled_cli_utils import MessageType, get_styled_output
 
 logger = logging.getLogger()
 
-def get_yelp_data(name, location):
+def get_yelp_matches(name, location):
     try:
-        yelp_restaurants = collect_yelp_restaurants_graph_ql(name, location)['data']['search']['business']
+        yelp_restaurants = _collect_yelp_restaurants_graph_ql(name, location)['data']['search']['business']
     except:
         logger.info('Trying regular API')
-        yelp_restaurants = collect_yelp_restaurants_regular_api(name, location)
+        yelp_restaurants = _collect_yelp_restaurants_regular_api(name, location)
 
     if not yelp_restaurants:
-        raise NoResultsFoundError(get_styled_output(f"No results could be found for \"{name}\" located in \"{location}\". Please try again...", MessageType.ERROR))
-    
+        raise NoResultsFoundError(f'No results could be found for {name} located in {location}. Please try again...')
+
     # filter matches
     filtered_restaurants = [
         {
@@ -31,19 +29,21 @@ def get_yelp_data(name, location):
         for yelp_restaurant in yelp_restaurants
         if is_potential_match(name, yelp_restaurant['name'])
     ]
-    intended_restaurant = get_intended_restaurant(filtered_restaurants)
-    return intended_restaurant
-  
-
-def collect_yelp_restaurants_graph_ql(name, location):
-    # Get the API key from the .env file
     
-    api_key=os.getenv('YELP_API_KEY')
+    if not filtered_restaurants:
+        raise NoResultsFoundError(f'No results could be found for {name} located in {location}. Please try again...')
+
+    
+    return filtered_restaurants
+
+
+def _collect_yelp_restaurants_graph_ql(name, location):
+    # Get the API key from the .env file
+    api_key = os.getenv('YELP_API_KEY')
 
     # Define the headers with your API key
     url = 'https://api.yelp.com/v3/graphql'
 
-    # Define the headers with your API key
     headers = {
         'Authorization': f'Bearer {api_key}',
         'Content-Type': 'application/json'
@@ -67,7 +67,6 @@ def collect_yelp_restaurants_graph_ql(name, location):
         }
     }
     '''
-    
 
     # Define the variables
     variables = {
@@ -78,18 +77,17 @@ def collect_yelp_restaurants_graph_ql(name, location):
     # Make the request to the Yelp GraphQL API
     response = requests.post(url, headers=headers, json={'query': query, 'variables': variables})
 
-
     # Parse and print the response
     if response.status_code == 200:
         business_data = response.json()
         return business_data
     else:
-        logger.info(f'Error getting yelp restaurants for GraphQL API: {response.text}')
+        logger.info(f'Error getting Yelp restaurants for GraphQL API: {response.text}')
 
 
-def collect_yelp_restaurants_regular_api(name, location):
+def _collect_yelp_restaurants_regular_api(name, location):
     # Get the API key from the .env file
-    api_key=os.getenv('YELP_API_KEY')
+    api_key = os.getenv('YELP_API_KEY')
 
     # Define the endpoint and parameters for the regular Yelp API
     url = 'https://api.yelp.com/v3/businesses/search'
@@ -110,4 +108,4 @@ def collect_yelp_restaurants_regular_api(name, location):
         business_data = response.json()
         return business_data['businesses']
     else:
-        logger.error(f'Error getting yelp restaurants for Regular API: {response.text}')
+        logger.error(f'Error getting Yelp restaurants for Regular API: {response.text}')

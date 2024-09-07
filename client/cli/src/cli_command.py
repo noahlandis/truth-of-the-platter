@@ -8,8 +8,10 @@ import types
 
 from colorama import Style
 
-from utils.styled_cli_utils import (MessageType, get_styled_input,
-                                    get_styled_output)
+from .utils.styled_cli_utils import MessageType, get_styled_input, get_styled_output
+
+
+
 
 # not the cleanest, but we use const to avoid "Irrefutable pattern is allowed only for the last case statementPylance error in the switch statement
 const = types.SimpleNamespace()
