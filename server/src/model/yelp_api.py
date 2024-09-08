@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
+import os
 
 class YelpApi(ABC):
-    api_key = 'vh49slh9rlYEAYZ44isMebG-lOr3Sz7XKfIqrhME6BovN1Fs4lBWbD3PD5BgvNV1IyvAW8w2NTpqcXb2TTtgnzfl_4M2tqEJb_4JFBmRdoMVp0VuTVkA5KjpWDjXZnYx'
+    api_key = os.getenv('YELP_API_KEY')
+
     headers = {
         'Authorization': f'Bearer {api_key}',
         'Content-Type': 'application/json'
