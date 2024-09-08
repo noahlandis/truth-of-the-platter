@@ -11,6 +11,8 @@ from server.src.services.calculate_weighted_average_service import get_weighted_
 from server.src.exceptions import NoResultsFoundError, UserLocationNotFoundError
 from server.src.services.scrape_service import scrape
 from server.src.services.user_location_service import get_user_location
+from server.src.services.yelp_service import get_yelp_matches
+
 from .utils.styled_cli_utils import MessageType, get_styled_output
 
 
@@ -42,34 +44,35 @@ def run_cli():
     
     display_welcome_message()
     name, location = _get_name_and_location()
-    while True:
-        try:
-            params = {'name': name, 'location': location}
-            print(get_styled_output(f"Searching for {name} near {location}", MessageType.INFO))
-            print(get_styled_output("Loading...", MessageType.INFO))
-            response = requests.get(f"{FLASK_APP_URL}/search", params=params)
-            if response.status_code == 404:
-                raise NoResultsFoundError(response.json()['error'])
-            yelp_matches = response.json()
+    get_yelp_matches(name, location)
+    # while True:
+    #     try:
+    #         params = {'name': name, 'location': location}
+    #         print(get_styled_output(f"Searching for {name} near {location}", MessageType.INFO))
+    #         print(get_styled_output("Loading...", MessageType.INFO))
+    #         response = requests.get(f"{FLASK_APP_URL}/search", params=params)
+    #         if response.status_code == 404:
+    #             raise NoResultsFoundError(response.json()['error'])
+    #         yelp_matches = response.json()
         
-            intended_restaurant = get_intended_restaurant(yelp_matches)
+    #         intended_restaurant = get_intended_restaurant(yelp_matches)
 
-            site_ratings = []
-            # since we got the Yelp data from the API, we can add it to the results right away
-            site_ratings.append(("Yelp", str(intended_restaurant['rating']), str(intended_restaurant['review_count'])))
+    #         site_ratings = []
+    #         # since we got the Yelp data from the API, we can add it to the results right away
+    #         site_ratings.append(("Yelp", str(intended_restaurant['rating']), str(intended_restaurant['review_count'])))
 
-            # we use the more detailed name and location from the Yelp data to help us scrape the other sites
-            full_name = intended_restaurant['name']
-            full_location = intended_restaurant['location']
+    #         # we use the more detailed name and location from the Yelp data to help us scrape the other sites
+    #         full_name = intended_restaurant['name']
+    #         full_location = intended_restaurant['location']
 
-            # append the Google and TripAdvisor ratings and review counts to the results
-            site_ratings.extend(scrape(full_name, full_location))
-            break
-        except NoResultsFoundError as e:
-            print(get_styled_output(e, MessageType.ERROR))
-            name, location = _get_name_and_location()
+    #         # append the Google and TripAdvisor ratings and review counts to the results
+    #         site_ratings.extend(scrape(full_name, full_location))
+    #         break
+    #     except NoResultsFoundError as e:
+    #         print(get_styled_output(e, MessageType.ERROR))
+    #         name, location = _get_name_and_location()
 
-    output_site_ratings(site_ratings, full_name, full_location)
-    star_average, total_review_count = get_weighted_average_and_total_review_count(site_ratings)
-    display_results(full_name, star_average, total_review_count)
+    # output_site_ratings(site_ratings, full_name, full_location)
+    # star_average, total_review_count = get_weighted_average_and_total_review_count(site_ratings)
+    # display_results(full_name, star_average, total_review_count)
     prompt_next_command()
