@@ -1,18 +1,10 @@
-
-import requests
 from model.yelp_api import YelpApi
-
+import requests
 
 class YelpApiGraphQL(YelpApi):
-
-
-    def get_response(self) -> str:
-        """
-        Gets the response from the regular Yelp API
-        :return str response - the response from the API
-        """
+    @staticmethod
+    def get_response(name: str, location: str) -> dict:
         url = 'https://api.yelp.com/v3/graphql'
-
         query = '''
         query SearchBusinesses($term: String!, $location: String!) {
             search(term: $term, location: $location, limit: 5) {
@@ -30,13 +22,18 @@ class YelpApiGraphQL(YelpApi):
             }
         }
         '''
-
-        
-        # Make the request to the Yelp API
-        response = requests.post(url, headers=self.headers, json={'query': query, 'variables': self.params})
-
-        
-        return response.json()
+        variables = {
+            'term': name,
+            'location': location
+        }
+        response = requests.post(url, headers=YelpApi.headers, json={'query': query, 'variables': variables}).json()
+        error = YelpApiGraphQL._get_error_message(response)
+        if error:
+            return error
+        return response['data']['search']['business']
     
-    def get_error(response) -> str:
-        return response['errors'][0]['extensions']['code']
+    def _get_error_message(response: dict) -> str:
+        if 'errors' in response and response['errors']:
+            return response['errors'][0]['extensions']['code']
+        return None
+    

@@ -1,23 +1,24 @@
-
+from model.yelp_api import YelpApi
 import requests
-from model.yelp_api import YelpApi    
 
 class YelpApiRegular(YelpApi):
-    def get_response(self) -> str:
-        """
-        Gets the response from the regular Yelp API
-        :return str response - the response from the API
-        """
+    @staticmethod
+    def get_response(name: str, location: str) -> dict:
         url = 'https://api.yelp.com/v3/businesses/search'
-        
-        # Make the request to the Yelp API
-        response = requests.get(url, headers=self.headers, params=self.params)
-        
-        return response.json()
+        params = {
+            'term': name,
+            'location': location,
+            'limit': 5
+        }
+        response = requests.get(url, headers=YelpApi.headers, params=params).json()
+        error = YelpApiRegular._get_error_message(response)
+        if error:
+            return error
+        return response['businesses']
     
-    def get_error(response) -> str:
-        """
-        Gets the error message from the regular Yelp API
-        :return str error - the error message
-        """
-        return response['error']['code']
+    def _get_error_message(response: dict) -> str:
+        if 'error' in response and 'code' in response['error']:
+            return response['error']['code']
+        return None
+    
+   

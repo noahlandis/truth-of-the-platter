@@ -1,6 +1,6 @@
 from flask import Flask, request, session, jsonify
 
-from exceptions import NoResultsFoundError
+from exceptions import NoResultsFoundError, UnknownLocationError
 from services.yelp_service import get_yelp_matches
 from server.src.services.scrape_service import scrape
 from server.src.services.calculate_weighted_average_service import get_weighted_average_and_total_review_count
@@ -40,12 +40,20 @@ def home():
 def search():
     name = request.args.get('name')
     location = request.args.get('location')
-    
     try:
         matches = get_yelp_matches(name, location)
         return jsonify(matches), 200
+    except UnknownLocationError as e:
+        return jsonify({
+            "error": str(e),
+            "error_code": "UNKNOWN_LOCATION"
+        }), 404
     except NoResultsFoundError as e:
-        return jsonify({"error": str(e)}), 404 
+        return jsonify({
+            "error": str(e),
+            "error_code": "NO_RESULTS"
+        }), 404
+    
 
 
     # Dynamically add the matches as radio butto
