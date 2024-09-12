@@ -60,48 +60,22 @@ def search():
 
 @app.route('/select', methods=['POST'])
 def select_match():
-    # Retrieve match_id from form
-    match_id = int(request.form.get('match_id'))
+    print("CALLED AGAIN")
+    print(request.json)
+    intended_restaurant = request.json
+    site_ratings = []
+    site_ratings.append(("Yelp", str(intended_restaurant['rating']), str(intended_restaurant['review_count'])))
+    full_name = intended_restaurant['name']
+    full_location = intended_restaurant['location']
+    site_ratings.extend(scrape(full_name, full_location))
+    star_average, total_review_count = get_weighted_average_and_total_review_count(site_ratings)
+    return jsonify({
+        'site_ratings': site_ratings,
+        'star_average': star_average,
+        'total_review_count': total_review_count
+    })
 
-    # Retrieve the matches from the session
-    matches = session.get('matches', [])
 
-    # Find the selected match by its index (match_id)
-    selected_match = matches[match_id]
 
-    # Display the selected match details
-    selected_match_info = f'''
-    <h1>Selected Restaurant Details</h1>
-    <p><strong>Name:</strong> {selected_match['name']}</p>
-    <p><strong>Address:</strong> {selected_match['location']}</p>
-    '''
-
-    # Scrape results for the selected match
-    name = selected_match['name']
-    location = selected_match['location']
-    results, name, address = scrape(selected_match)
-    star_average, total_review_count = get_weighted_average_and_total_review_count(results)
-
-    # Display site ratings
-    site_ratings_html = ""
-    for website_name, star_rating, review_count in results:
-        if star_rating is None:
-            display_message = f"<p>{website_name} - Ratings could not be found for this site, it will not be considered for the aggregate rating.</p>"
-        else:
-            display_message = f"<p>{website_name} - {star_rating} stars, {review_count} reviews.</p>"
-        site_ratings_html += display_message
-
-    # Display final weighted average and total review count
-    final_result = f'''
-    <h2>A more accurate rating of {name} is {star_average} stars based on {total_review_count} reviews.</h2>
-    '''
-
-    # Combine all the HTML to display
-    html_output = f'''
-    {selected_match_info}
-    <h2>Ratings from Various Websites:</h2>
-    {site_ratings_html}
-    {final_result}
-    '''
-
-    return html_output
+    
+     
