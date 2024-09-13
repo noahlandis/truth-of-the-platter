@@ -3,12 +3,19 @@ import { Paper, InputBase, IconButton, Box, List, ListItem, ListItemButton, List
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import axios from 'axios';
+import { useSearchParams } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
+
 
 function SearchBar() {
+    const navigate = useNavigate();
+
     const [name, setName] = useState('');
     const [location, setLocation] = useState('');
     const [suggestions, setSuggestions] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
+    const [searchParams, setSearchParams] = useSearchParams();
+
 
     const handleClearName = () => setName('');
     const handleClearLocation = () => setLocation('');
@@ -71,9 +78,22 @@ function SearchBar() {
         }
     };
 
+    const handleSearch = (e) => {
+        e.preventDefault();
+        // Set the search parameters in the URL
+        console.log(name);
+        console.log(location);
+        navigate(`/search?name=${name}&location=${location}`);
+
+
+    };
+
+ 
+
     return (
         <Paper
             component="form"
+            onSubmit={handleSearch}  // Handle search on form submit
             sx={{
                 display: 'flex',
                 alignItems: 'center',
