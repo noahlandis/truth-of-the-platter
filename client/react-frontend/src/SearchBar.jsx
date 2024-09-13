@@ -1,112 +1,267 @@
-import React, { useState } from 'react';
-import { Paper, InputBase, IconButton, Box } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Paper, InputBase, IconButton, Box, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
+import axios from 'axios';
 
 function SearchBar() {
-  const [name, setName] = useState('');
-  const [location, setLocation] = useState('');
+    const [name, setName] = useState('');
+    const [location, setLocation] = useState('');
+    const [suggestions, setSuggestions] = useState([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
 
-  const handleClearName = () => setName('');
-  const handleClearLocation = () => setLocation('');
+    const handleClearName = () => setName('');
+    const handleClearLocation = () => setLocation('');
 
-  return (
-    <Paper
-      component="form"
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        width: '100%',
-        maxWidth: 1100,
-        borderRadius: '8px',
-        backgroundColor: '#fff',
-        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-        border: '1px solid #ccc',
-      }}
-    >
-      <Box sx={{ position: 'relative', flex: 1 }}>
-        <InputBase
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Name"
-          sx={{
-            ml: 2,
-            width: '100%',
-            flex: 1,
-          }}
-          inputProps={{ 'aria-label': 'name' }}
-        />
-        {name && (
-          <IconButton
-            onClick={handleClearName}
+    const handleSuggestionClick = (suggestion) => {
+        setLocation(suggestion);
+        setShowSuggestions(false); // Hide suggestions after selection
+    };
+
+    const handleFocus = () => {
+        setShowSuggestions(true);
+    };
+
+    const handleBlur = () => {
+        // Use setTimeout to allow click events on suggestions to fire before hiding
+        setTimeout(() => setShowSuggestions(false), 200);
+    };
+
+    useEffect(() => {
+        if (location.length > 0) {
+            // Fetch suggestions from the Flask server
+            const fetchSuggestions = async () => {
+                try {
+                    const response = await axios.get('http://127.0.0.1:5000/autocomplete', {
+                        params: {
+                            text: location,
+                        },
+                    });
+                    // remove , USA from the suggestions
+                    response.data.predictions = response.data.predictions.map((suggestion) => {
+                        suggestion.description = suggestion.description.replace(/, USA$/, '');
+                        return suggestion;
+                    });
+                    setSuggestions(response.data.predictions);
+                    console.log('Suggestions:', response.data.predictions);
+                } catch (error) {
+                    console.error('Error fetching location suggestions:', error);
+                }
+            };
+
+            fetchSuggestions();
+        } else {
+            setSuggestions([]);
+        }
+    }, [location]);
+
+    const handleLocationChange = (e) => {
+        setLocation(e.target.value);
+        setShowSuggestions(true);
+    };
+
+    const handleUserLocationClick = async () => {
+        try {
+            const response = await axios.get('http://127.0.0.1:5000/user-location');
+            console.log('User Location:', response);
+            setLocation(response.data);
+            setShowSuggestions(false);
+        } catch (error) {
+            console.error('Error fetching user location:', error);
+        }
+    };
+
+    return (
+        <Paper
+            component="form"
             sx={{
-              position: 'absolute',
-              right: 0,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              padding: 0,
+                display: 'flex',
+                alignItems: 'center',
+                width: '100%',
+                maxWidth: 1100,
+                borderRadius: '0 8px 8px 0',
+                boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                border: '1px solid #ccc',
             }}
-            aria-label="clear name"
-          >
-            <ClearIcon fontSize="small" />
-          </IconButton>
-        )}
-      </Box>
-      
-      <Box
-        sx={{
-          height: '40px',
-          width: '1px',
-          backgroundColor: '#ccc',
-          mx: 2,
-        }}
-      />
+        >
+            {/* Name input field */}
+            <Box sx={{ position: 'relative', flex: 1, borderRight: '1px solid #ccc' }}>
+                <InputBase
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Name"
+                    sx={{
+                        ml: 2,
+                        width: '100%',
+                        flex: 1,
+                    }}
+                    inputProps={{ 'aria-label': 'name' }}
+                />
+                {name && (
+                    <IconButton
+                        onClick={handleClearName}
+                        sx={{
+                            position: 'absolute',
+                            right: 10,
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            padding: 0,
+                        }}
+                        aria-label="clear name"
+                    >
+                        <ClearIcon fontSize="small" />
+                    </IconButton>
+                )}
+            </Box>
 
-      <Box sx={{ position: 'relative', flex: 1 }}>
-        <InputBase
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          placeholder="Location"
-          
-          sx={{
-            flex: 1,
-            width: '100%',
+            {/* Location input field */}
+            <Box sx={{ position: 'relative', flex: 1 }}>
+                <InputBase
+                    value={location}
+                    onChange={handleLocationChange}
+                    onFocus={handleFocus}
+                    onBlur={handleBlur}
+                    placeholder="Location"
+                    sx={{
+                        ml: 2,
+                        flex: 1,
+                        width: '100%',
+                    }}
+                    inputProps={{ 'aria-label': 'location' }}
+                />
+                {location && (
+                    <IconButton
+                        onClick={handleClearLocation}
+                        sx={{
+                            position: 'absolute',
+                            right: 10,
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            padding: 0,
+                        }}
+                        aria-label="clear location"
+                    >
+                        <ClearIcon fontSize="small" />
+                    </IconButton>
+                )}
+                {showSuggestions && (
+                    <List
+                        sx={{
+                            position: 'absolute',
+                            top: '97%',
+                            left: 0,
+                            right: 0,
+                            width: '100%',
+                            backgroundColor: '#fff',
+                            boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                            zIndex: 1,
+                            maxHeight: 200,
+                            overflowY: 'auto',
+                            borderBottomLeftRadius: '8px',
+                            borderBottomRightRadius: '8px',
+                        }}
+                    >
+                        <ListItem disablePadding>
+                            <ListItemButton onMouseDown={() => handleUserLocationClick()}>
+                                <Box
+                                    component="span"
+                                    sx={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        mr: 1,
+                                    }}
+                                >
+                                    {/* SVG for location icon */}
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        version="1.1"
+                                        width="24"
+                                        height="24"
+                                        viewBox="0 0 256 256"
+                                    >
+                                        <g
+                                            style={{
+                                                stroke: 'none',
+                                                strokeWidth: 0,
+                                                fill: 'none',
+                                                fillRule: 'nonzero',
+                                                opacity: 1,
+                                            }}
+                                            transform="translate(1.4 1.4) scale(2.81 2.81)"
+                                        >
+                                            <path
+                                                d="M 45 90 c -1.415 0 -2.725 -0.748 -3.444 -1.966 l -4.385 -7.417 C 28.167 65.396 19.664 51.02 16.759 45.189 c -2.112 -4.331 -3.175 -8.955 -3.175 -13.773 C 13.584 14.093 27.677 0 45 0 c 17.323 0 31.416 14.093 31.416 31.416 c 0 4.815 -1.063 9.438 -3.157 13.741 c -0.025 0.052 -0.053 0.104 -0.08 0.155 c -2.961 5.909 -11.41 20.193 -20.353 35.309 l -4.382 7.413 C 47.725 89.252 46.415 90 45 90 z"
+                                                style={{
+                                                    fill: 'rgb(4,136,219)',
+                                                }}
+                                                transform="matrix(1 0 0 1 0 0)"
+                                            />
+                                            <path
+                                                d="M 45 45.678 c -8.474 0 -15.369 -6.894 -15.369 -15.368 S 36.526 14.941 45 14.941 c 8.474 0 15.368 6.895 15.368 15.369 S 53.474 45.678 45 45.678 z"
+                                                style={{
+                                                    fill: 'rgb(255,255,255)',
+                                                }}
+                                                transform="matrix(1 0 0 1 0 0)"
+                                            />
+                                        </g>
+                                    </svg>
+                                </Box>
+                                <ListItemText
+                                    primary="Current Location"
+                                    sx={{
+                                        color: '#0688DB',
+                                    }}
+                                />
+                            </ListItemButton>
+                        </ListItem>
 
-            
-          }}
-          inputProps={{ 'aria-label': 'location' }}
-        />
-        {location && (
-          <IconButton
-            onClick={handleClearLocation}
-            sx={{
-              position: 'absolute',
-              right: 20,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              padding: 0,
-            }}
-            aria-label="clear location"
-          >
-            <ClearIcon fontSize="small" />
-          </IconButton>
-        )}
-      </Box>
-
-      <IconButton
-        type="submit"
-        sx={{
-          p: '10px',
-          backgroundColor: '#1976d2',
-          borderRadius: '0 8px 8px 0',
-          color: '#fff',
-        }}
-        aria-label="search"
-      >
-        <SearchIcon />
-      </IconButton>
-    </Paper>
-  );
+                        {suggestions.map((suggestion, index) => (
+                            <ListItem key={index} disablePadding>
+                                <ListItemButton onMouseDown={() => handleSuggestionClick(suggestion.description)}>
+                                    <ListItemText primary={suggestion.description} />
+                                </ListItemButton>
+                            </ListItem>
+                        ))}
+                    </List>
+                )}
+            </Box>
+            <IconButton
+                type="submit"
+                sx={{
+                    backgroundColor: '#1976d2',
+                    color: '#fff',
+                    borderRadius: '0 8px 8px 0',
+                }}
+                aria-label="search"
+            >
+                <SearchIcon />
+            </IconButton>
+        </Paper>
+    );
 }
 
 export default SearchBar;
+
+// <List
+// sx={{
+//   position: 'absolute',
+//   top: '100%',
+//   left: 0,
+//   right: 0, // Ensures it spans the full width of the location input
+//   width: '100%', // Ensures full width
+//   backgroundColor: '#fff',
+//   boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+//   zIndex: 1,
+//   maxHeight: 200,
+//   overflowY: 'auto',
+//   borderRadius: '0 0 8px 8px',
+// }}
+// >
+// {['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix'].map((suggestion, index) => (
+//   <ListItem key={index} disablePadding>
+//     <ListItemButton onClick={() => handleSuggestionClick(suggestion)}>
+//       <ListItemText primary={suggestion} />
+//     </ListItemButton>
+//   </ListItem>
+// ))}
+// </List>
