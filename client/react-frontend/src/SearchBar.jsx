@@ -110,7 +110,6 @@ function SearchBar() {
                 display: 'flex',
                 alignItems: 'center',
                 width: '100%',
-                maxWidth: 1100,
                 borderRadius: '0 8px 8px 0',
                 boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
                 border: '1px solid #ccc',

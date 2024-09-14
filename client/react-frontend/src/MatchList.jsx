@@ -51,7 +51,7 @@ function MatchList() {
     <div className="flex flex-col items-center justify-center">
       {matches.length > 0 ? (
         matches.map((data, index) => (
-          <div key={index} className="w-full max-w-5xl mb-4">
+          <div key={index} className="w-full mb-4">
             <Card sx={{ width: '100%' }}>
               <div className="flex items-center">
                 {/* Left side: Image */}
