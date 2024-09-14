@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Paper, InputBase, IconButton, Box, List, ListItem, ListItemButton, ListItemText } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -6,60 +6,78 @@ import axios from 'axios';
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
 
-
 function SearchBar() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
 
+    // State for name and location
     const [name, setName] = useState('');
     const [location, setLocation] = useState('');
     const [suggestions, setSuggestions] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
-    const [searchParams, setSearchParams] = useSearchParams();
+    
+    // Ref for storing timeout ID for debouncing
+    const debounceTimeoutRef = useRef(null);
 
+    // On component mount, populate input fields from query params
+    useEffect(() => {
+        const initialName = searchParams.get('name') || '';
+        const initialLocation = searchParams.get('location') || '';
 
+        setName(initialName);
+        setLocation(initialLocation);
+    }, [searchParams]);
+
+    // Clear name input
     const handleClearName = () => setName('');
     const handleClearLocation = () => setLocation('');
 
+    // Handle suggestion click
     const handleSuggestionClick = (suggestion) => {
         setLocation(suggestion);
-        setShowSuggestions(false); // Hide suggestions after selection
+        setShowSuggestions(false);
     };
 
+    // Show suggestions on focus
     const handleFocus = () => {
         setShowSuggestions(true);
     };
 
     const handleBlur = () => {
-        // Use setTimeout to allow click events on suggestions to fire before hiding
-        setTimeout(() => setShowSuggestions(false), 200);
+        setTimeout(() => setShowSuggestions(false), 100);
     };
 
     useEffect(() => {
+        // Debounced API call
         if (location.length > 0) {
-            // Fetch suggestions from the Flask server
-            const fetchSuggestions = async () => {
+            if (debounceTimeoutRef.current) {
+                clearTimeout(debounceTimeoutRef.current);
+            }
+
+            debounceTimeoutRef.current = setTimeout(async () => {
                 try {
                     const response = await axios.get('http://127.0.0.1:5000/autocomplete', {
-                        params: {
-                            text: location,
-                        },
+                        params: { text: location },
                     });
-                    // remove , USA from the suggestions
+                    console.log('API called');
                     response.data.predictions = response.data.predictions.map((suggestion) => {
                         suggestion.description = suggestion.description.replace(/, USA$/, '');
                         return suggestion;
                     });
                     setSuggestions(response.data.predictions);
-                    console.log('Suggestions:', response.data.predictions);
                 } catch (error) {
                     console.error('Error fetching location suggestions:', error);
                 }
-            };
-
-            fetchSuggestions();
+            }, 200); // 300ms debounce delay
         } else {
             setSuggestions([]);
         }
+        // Cleanup timeout on unmount or when location changes
+        return () => {
+            if (debounceTimeoutRef.current) {
+                clearTimeout(debounceTimeoutRef.current);
+            }
+        };
     }, [location]);
 
     const handleLocationChange = (e) => {
@@ -70,7 +88,6 @@ function SearchBar() {
     const handleUserLocationClick = async () => {
         try {
             const response = await axios.get('http://127.0.0.1:5000/user-location');
-            console.log('User Location:', response);
             setLocation(response.data);
             setShowSuggestions(false);
         } catch (error) {
@@ -78,22 +95,17 @@ function SearchBar() {
         }
     };
 
+    // Handle search and navigate with query params
     const handleSearch = (e) => {
         e.preventDefault();
-        // Set the search parameters in the URL
-        console.log(name);
-        console.log(location);
         navigate(`/search?name=${name}&location=${location}`);
-
-
     };
 
- 
 
     return (
         <Paper
             component="form"
-            onSubmit={handleSearch}  // Handle search on form submit
+            onSubmit={handleSearch}
             sx={{
                 display: 'flex',
                 alignItems: 'center',
@@ -104,7 +116,6 @@ function SearchBar() {
                 border: '1px solid #ccc',
             }}
         >
-            {/* Name input field */}
             <Box sx={{ position: 'relative', flex: 1, borderRight: '1px solid #ccc' }}>
                 <InputBase
                     value={name}
@@ -134,7 +145,6 @@ function SearchBar() {
                 )}
             </Box>
 
-            {/* Location input field */}
             <Box sx={{ position: 'relative', flex: 1 }}>
                 <InputBase
                     value={location}
@@ -191,7 +201,6 @@ function SearchBar() {
                                         mr: 1,
                                     }}
                                 >
-                                    {/* SVG for location icon */}
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         version="1.1"
@@ -261,6 +270,7 @@ function SearchBar() {
 }
 
 export default SearchBar;
+
 
 // <List
 // sx={{

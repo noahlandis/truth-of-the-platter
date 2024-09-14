@@ -9,9 +9,13 @@ function Layout({ children }) {
       </div>
 
       {/* Page Content */}
-      <main className="flex-grow p-4">
-        {children} {/* This is where the routed page content will go */}
-      </main>
+     
+      {/* Page Content */}
+      <main className="flex justify-center flex-grow p-4"> {/* Added flex and justify-center */}
+        <div className="w-full max-w-7xl"> {/* This div ensures a max width to center the content */}
+          {children} {/* This is where the routed page content will go */}
+        </div>
+        </main>
 
     </div>
   );
