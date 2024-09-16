@@ -1,17 +1,10 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Layout from './Layout';  // Import your Layout component
 import MatchList from './MatchList';  // Import your MatchList component
+import RatingResults from './RatingResults';  // Import your RatingResults component
 
 function Home() {
   return <h1>Home</h1>;
-}
-
-function Search() {
-  return <h1>Search</h1>;
-}
-
-function Result() {
-  return <h1>Result</h1>;
 }
 
 function App() {
@@ -21,7 +14,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/search" element={<MatchList />} />
-          <Route path="/result" element={<Result />} />
+          <Route path="/ratings" element={<RatingResults />} />
         </Routes>
       </Layout>
     </Router>

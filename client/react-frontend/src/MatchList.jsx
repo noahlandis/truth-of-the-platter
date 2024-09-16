@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, Typography, CircularProgress } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 function MatchList() {
+  const navigate = useNavigate();
+
   const [matches, setMatches] = useState([]);
   const [error, setErrorType] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -57,6 +60,13 @@ function MatchList() {
     }
   }, [name, location]);
 
+
+
+  const handleCardClick = (data) => {
+    navigate('/ratings', { state: { data } });
+
+  };
+
   if (loading) {
     return <div className='flex items-center justify-center mt-20 '>
       <CircularProgress style={{ color: 'black' }} />
@@ -97,7 +107,10 @@ function MatchList() {
       {matches.length > 0 ? (
         matches.map((data, index) => (
           <div key={index} className="w-full mb-4">
-            <Card sx={{ width: '100%' }}>
+              <Card
+                sx={{ width: '100%', cursor: 'pointer' }}
+                onClick={() => handleCardClick(data)}
+              >
               <div className="flex items-center">
                 {data.imageUrl && (
                   <div>

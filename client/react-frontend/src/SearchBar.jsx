@@ -27,7 +27,7 @@ function SearchBar() {
 
         setName(initialName);
         setLocation(initialLocation);
-    }, [searchParams]);
+    }, []);
 
     // Clear name input
     const handleClearName = () => setName('');
