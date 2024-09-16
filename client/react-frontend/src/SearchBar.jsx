@@ -138,24 +138,24 @@ function SearchBar() {
                         inputProps={{ 'aria-label': 'name' }}
                     />
 
-{error && (
-        <Typography
-            color="error"
-            sx={{
-                position: 'absolute',
-                bottom: '-15px', // Adjust this value to control the spacing
-                left: 6,
-                fontSize: '0.75rem',
-                paddingLeft: '10px',
-                borderTop: '2px solid red', // Add top red border
-                width: 'calc(100% - 12px)', // Increase the width to cover more of the x-axis
+                    {error && (
+                        <Typography
+                            color="error"
+                            sx={{
+                                position: 'absolute',
+                                bottom: '-15px', // Adjust this value to control the spacing
+                                left: 6,
+                                fontSize: '0.75rem',
+                                paddingLeft: '10px',
+                                borderTop: '2px solid red', // Add top red border
+                                width: 'calc(100% - 12px)', // Increase the width to cover more of the x-axis
 
 
-            }}
-        >
-            {error}
-        </Typography>
-    )}
+                            }}
+                        >
+                            {error}
+                        </Typography>
+                    )}
                     {name && (
                         <IconButton
                             onClick={handleClearName}

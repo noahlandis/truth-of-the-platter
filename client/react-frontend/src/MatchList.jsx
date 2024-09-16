@@ -28,6 +28,7 @@ function MatchList() {
             params: { name, location },
             
           });
+          console.log(response.data);
           console.log('Data loaded from server');
 
           setMatches(response.data); 
@@ -38,6 +39,9 @@ function MatchList() {
       } catch (err) {
         if (err.response && err.response.data && err.response.data.error_code) {
           setErrorType(err.response.data.error_code);
+        }
+        else {
+          setErrorType('UNKNOWN_ERROR');
         }
       } finally {
         setLoading(false);
@@ -78,7 +82,7 @@ function MatchList() {
 
   return (
     <div className="flex flex-col ">
-      <h1 className="items-start mb-4 text-3xl font-bold">Select the restaurant you want to want to see the ratings for</h1>
+      <h1 className="items-start mb-4 text-3xl font-bold">Select the restaurant you want to see the ratings for</h1>
       
       {matches.length > 0 ? (
         matches.map((data, index) => (
