@@ -91,13 +91,14 @@ function SearchBar() {
             const response = await axios.get('http://127.0.0.1:5000/user-location');
             setLocation(response.data);
             setShowSuggestions(false);
+            return response.data;
         } catch (error) {
             console.error('Error fetching user location:', error);
         }
     };
 
     // Handle search and navigate with query params
-    const handleSearch = (e) => {
+    const handleSearch = async (e) => {
         e.preventDefault();
 
         // Check if name is empty and set error if true
@@ -105,9 +106,14 @@ function SearchBar() {
             setError('Name field cannot be left blank');
             return; // Prevent form submission
         }
+        let searchLocation = location;
+        if (!location.trim()) {
+            searchLocation = await handleUserLocationClick();
+        }
+
 
         setError(''); // Clear error if validation passes
-        navigate(`/search?name=${name}&location=${location}`);
+        navigate(`/search?name=${name}&location=${searchLocation}`);
     };
 
     return (
@@ -307,6 +313,29 @@ function SearchBar() {
 export default SearchBar;
 
 
+// <List
+// sx={{
+//   position: 'absolute',
+//   top: '100%',
+//   left: 0,
+//   right: 0, // Ensures it spans the full width of the location input
+//   width: '100%', // Ensures full width
+//   backgroundColor: '#fff',
+//   boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+//   zIndex: 1,
+//   maxHeight: 200,
+//   overflowY: 'auto',
+//   borderRadius: '0 0 8px 8px',
+// }}
+// >
+// {['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix'].map((suggestion, index) => (
+//   <ListItem key={index} disablePadding>
+//     <ListItemButton onClick={() => handleSuggestionClick(suggestion)}>
+//       <ListItemText primary={suggestion} />
+//     </ListItemButton>
+//   </ListItem>
+// ))}
+// </List>
 // <List
 // sx={{
 //   position: 'absolute',

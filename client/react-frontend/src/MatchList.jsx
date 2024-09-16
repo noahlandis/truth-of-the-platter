@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
-import { Card, CardContent, Typography } from '@mui/material';
+import { Card, CardContent, Typography, CircularProgress } from '@mui/material';
 
 function MatchList() {
   const [matches, setMatches] = useState([]);
@@ -48,14 +48,21 @@ function MatchList() {
       }
     };
 
-    if (name || location) {
+    if (name && location) {
       fetchMatches();
+    }
+    else {
+      setLoading(false);
+      setErrorType('MISSING_PARAMS');
     }
   }, [name, location]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className='flex items-center justify-center mt-20 '>
+      <CircularProgress style={{ color: 'black' }} />
+    </div>;
   }
+  
 
   if (error === 'UNKNOWN_LOCATION') {
     return (
@@ -75,6 +82,9 @@ function MatchList() {
 
   if (error === 'NO_RESULTS') {
     return <h1 className="items-start mb-4 text-3xl font-bold">No results for {name} in {location}. Please try again...</h1>
+  }
+  if (error === 'MISSING_PARAMS') {
+    return <h1 className="items-start mb-4 text-3xl font-bold">Couldn't fetch results. Both the name and location are required.</h1>
   }
   if (error) {
     return <div>An error occurred: {error}</div>;
