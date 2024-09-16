@@ -18,6 +18,7 @@ class YelpApiGraphQL(YelpApi):
                     }
                     review_count
                     rating
+                    photos
                 }
             }
         }

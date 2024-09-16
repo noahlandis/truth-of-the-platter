@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios'; // Add this import to use axios
+import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent, Typography } from '@mui/material';
 
@@ -15,22 +15,33 @@ function MatchList() {
 
   useEffect(() => {
     const fetchMatches = async () => {
+      setLoading(true);
       try {
-        setLoading(true); // Set loading to true when the request starts
-        const response = await axios.get('http://127.0.0.1:5000/search', {
-          params: { name, location },
-        });
-        console.log(response.data);
-        setMatches(response.data); // Store the results in state
-        setError(null); // Clear any previous errors
+        // Check if data exists in localStorage
+        const cachedMatches = localStorage.getItem(`matches_${name}_${location}`);
+        if (cachedMatches) {
+          setMatches(JSON.parse(cachedMatches));
+          console.log('Data loaded from localStorage');
+          setLoading(false);
+        } else {
+          const response = await axios.get('http://127.0.0.1:5000/search', {
+            params: { name, location },
+            
+          });
+          console.log('Data loaded from server');
+
+          setMatches(response.data); 
+          localStorage.setItem(`matches_${name}_${location}`, JSON.stringify(response.data)); // Save the data in localStorage
+        }
+        setError(null); 
       } catch (err) {
         if (err.response) {
-          setError(err.response.data.error); // Handle the error message
+          setError(err.response.data.error); 
         } else {
           setError('An unexpected error occurred');
         }
       } finally {
-        setLoading(false); // Set loading to false once the request finishes
+        setLoading(false);
       }
     };
 
@@ -40,11 +51,11 @@ function MatchList() {
   }, [name, location]);
 
   if (loading) {
-    return <div>Loading...</div>; // Show loading state
+    return <div>Loading...</div>;
   }
 
   if (error) {
-    return <div>Error: {error}</div>; // Show error message
+    return <div>Error: {error}</div>;
   }
 
   return (
@@ -54,7 +65,6 @@ function MatchList() {
           <div key={index} className="w-full mb-4">
             <Card sx={{ width: '100%' }}>
               <div className="flex items-center">
-                {/* Left side: Image */}
                 {data.imageUrl && (
                   <div>
                     <img
@@ -64,7 +74,6 @@ function MatchList() {
                     />
                   </div>
                 )}
-                {/* Right side: Card content */}
                 <div>
                   <CardContent>
                     <Typography variant="h5" component="div">
