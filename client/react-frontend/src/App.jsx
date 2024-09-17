@@ -11,21 +11,23 @@ import StarRateIcon from '@mui/icons-material/StarRate';
 function Home() {
   const steps = [
     {
-      label: 'Search for Restaurants',
-      description: 'Start by entering a restaurant name and location to find places near you.',
+      label: 'Find Restaurants Near You',
+      description: 'Enter a restaurant name or use automatic location detection to discover places around you.',
       icon: <SearchIcon sx={{ fontSize: 50, color: '#1976d2' }} />,
     },
     {
-      label: 'Select a Restaurant',
-      description: 'Choose a restaurant from the list of search results to view detailed ratings.',
+      label: 'Choose a Restaurant',
+      description: 'Browse through search results and select a restaurant to see detailed ratings from Yelp, Google, and TripAdvisor.',
       icon: <RestaurantIcon sx={{ fontSize: 50, color: '#1976d2' }} />,
     },
     {
-      label: 'Check Ratings',
-      description: 'View aggregated ratings and reviews from different sites to help you decide.',
+      label: 'View Aggregated Ratings',
+      description: 'Check the weighted average rating and review counts from all platforms to make an informed decision.',
       icon: <StarRateIcon sx={{ fontSize: 50, color: '#1976d2' }} />,
     },
   ];
+  
+  
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>

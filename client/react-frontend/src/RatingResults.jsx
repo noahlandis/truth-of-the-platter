@@ -9,6 +9,7 @@ import google from './assets/google.svg'; // Adjust the path based on your folde
 import StarIcon from '@mui/icons-material/Star'; // Import the star icon
 
 function RatingResults() {
+    const apiUrl = import.meta.env.VITE_API_BASE_URL;
     const navigate = useNavigate();
     const location = useLocation();
     const { data } = location.state || {}; // Get the entire data object from location.state
@@ -57,7 +58,7 @@ function RatingResults() {
         const fetchRatings = async () => {
             setLoading(true);
             try {
-                const response = await fetch('http://127.0.0.1:5000/select', {
+                const response = await fetch(`${apiUrl}/select`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -117,7 +118,7 @@ function RatingResults() {
                                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                         <div className="flex items-center w-full">
                                             {/* Fixed width container for the logo */}
-                                            <div className="flex-shrink-0 w-[150px] h-[100px">
+                                            <div className="flex-shrink-0 w-[150px] h-[100]px">
                                                 <img
                                                     src={getLogoForWebsite(website)}
                                                     alt={`${website} Logo`}
@@ -140,29 +141,46 @@ function RatingResults() {
                                         </div>
                                     </Box>
                                 ) : (
-                                    <Typography>{website} - Ratings could not be found for this site</Typography>
+                                    <Typography component="div" style={{ display: 'inline-flex', alignItems: 'center' }}>
+                                    <img
+                                        src={getLogoForWebsite(website)}
+                                        alt={`${website} Logo`}
+                                        className="object-contain"
+                                        style={{ marginRight: '8px', width: '150px', height: '100px' }}  // Adjust size here
+                                    /> 
+                                    Ratings could not be found for this site
+                                </Typography>
+                                
+
                                 )}
                             </li>
                         ))}
                     </ul>
 
                     <div className="mt-20 text-2xl font-semibold">
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Typography sx={{ marginRight: '5px' }} variant="h3" className="mt-10 text-3xl font-semibold">
-                                Overall
-                            </Typography>
-                            <Rating
-                                value={starAverage}
-                                precision={0.5}
-                                readOnly
-                                icon={<StarIcon style={{ color: '#FFF700' }} />} // Bright yellow stars for overall rating
-                                emptyIcon={<StarIcon style={{ color: 'rgba(255, 255, 255, 0.5)' }} />} // Semi-transparent white stars
-                            />
-                            <Typography sx={{ marginLeft: '5px' }}>
-                                {starAverage} ({totalReviewCount} reviews)
-                            </Typography>
-                        </Box>
-                    </div>
+    {/* Black line above "Overall" */}
+    <div style={{ borderTop: '2px solid black', width: '100%', marginBottom: '20px' }}></div>
+    
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Typography sx={{ marginRight: '5px', fontSize: '1.5rem' }} className="mt-10 font-semibold">
+            Overall
+        </Typography>
+        <div className="flex items-center flex-grow ml-20">
+                                                <Rating
+                                                    value={starAverage}
+                                                    precision={0.5}
+                                                    readOnly
+                                                    icon={<StarIcon style={{ color: '#FFF700' }} />} // Bright yellow stars
+                                                    emptyIcon={<StarIcon style={{ color: 'rgba(255, 255, 255, 0.5)' }} />} // Semi-transparent white stars
+                                                />
+                                                <Typography sx={{ marginLeft: '5px' }}>
+                                                    {starAverage} ({totalReviewCount} reviews)
+                                                </Typography>
+                                            </div>
+    </Box>
+</div>
+
+
 
                 </div>
             ) : (

@@ -5,6 +5,7 @@ import { Card, CardContent, Typography, CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 function MatchList() {
+  const apiUrl = import.meta.env.VITE_API_BASE_URL;
   const navigate = useNavigate();
 
   const [matches, setMatches] = useState([]);
@@ -27,7 +28,7 @@ function MatchList() {
           console.log('Data loaded from sessionStorage');
           setLoading(false);
         } else {
-          const response = await axios.get('http://127.0.0.1:5000/search', {
+          const response = await axios.get(`${apiUrl}/search`, {
             params: { name, location },
           });
           console.log(response.data);

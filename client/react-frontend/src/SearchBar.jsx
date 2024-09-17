@@ -7,6 +7,9 @@ import { useSearchParams } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
 
 function SearchBar() {
+    const apiUrl = import.meta.env.VITE_API_BASE_URL;
+
+
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
 
@@ -57,7 +60,7 @@ function SearchBar() {
 
             debounceTimeoutRef.current = setTimeout(async () => {
                 try {
-                    const response = await axios.get('http://127.0.0.1:5000/autocomplete', {
+                    const response = await axios.get(`${apiUrl}/autocomplete`, {
                         params: { text: location },
                     });
                     console.log('API called');
