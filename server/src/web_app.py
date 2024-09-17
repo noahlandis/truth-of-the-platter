@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv, find_dotenv
-from flask import Flask, request, session, jsonify
+from flask import Flask, render_template, request, session, jsonify
 
 from exceptions import NoResultsFoundError, UnknownLocationError
 from services.yelp_service import get_yelp_matches
@@ -11,35 +11,20 @@ from flask_cors import CORS
 import requests
 
 
-app = Flask(__name__)
+
+app = Flask(
+    __name__,
+    static_folder='../../client/react-frontend/dist/assets',  # React static assets like JS and CSS
+    template_folder='../../client/react-frontend/dist'  # Path to index.html
+)
 CORS(app)  # This will allow all origins
 
 
 
 @app.route('/')
 def home():
-    return '''
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Search Form</title>
-        </head>
-        <body>
-            <h1>Search</h1>
-            <form action="/search" method="GET">
-                <label for="name">Name:</label>
-                <input type="text" id="name" name="name" required><br><br>
+    return render_template("index.html")
 
-                <label for="location">Location:</label>
-                <input type="text" id="location" name="location" required><br><br>
-
-                <button type="submit">Search</button>
-            </form>
-        </body>
-        </html>
-    '''
 
 @app.route('/search', methods=['GET'])
 def search():
