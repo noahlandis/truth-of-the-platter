@@ -3,11 +3,12 @@ import { useLocation } from 'react-router-dom';
 import { CircularProgress, Rating, Box, Typography } from '@mui/material';
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
-
+import yelp from './assets/yelp.svg'; // Adjust the path based on your folder structure
+import tripAdvisor from './assets/trip_advisor.png'; // Adjust the path based on your folder structure
+import google from './assets/google.svg'; // Adjust the path based on your folder structure
 
 function RatingResults() {
     const navigate = useNavigate();
-
     const location = useLocation();
     const { data } = location.state || {}; // Get the entire data object from location.state
 
@@ -20,6 +21,19 @@ function RatingResults() {
     const nameParam = searchParams.get('name') || '';
     const locationParam = searchParams.get('location') || '';
 
+    // Function to map website name to corresponding logo
+    const getLogoForWebsite = (website) => {
+        switch (website.toLowerCase()) {
+            case 'yelp':
+                return yelp;
+            case 'tripadvisor':
+                return tripAdvisor;
+            case 'google':
+                return google;
+            default:
+                return null; // Return null or a default placeholder logo if website is unrecognized
+        }
+    };
 
     useEffect(() => {
         // Redirect to /search if no data is available (opened directly from a link)
@@ -27,10 +41,9 @@ function RatingResults() {
             navigate(`/search?name=${nameParam}&location=${locationParam}`);
         }
         if (!data) {
-            navigate('/')
+            navigate('/');
         }
     }, [data, nameParam, locationParam, navigate]);
-
 
     useEffect(() => {
         // Clear localStorage when new data (restaurant) is selected
@@ -96,28 +109,36 @@ function RatingResults() {
 
             {siteRatings.length > 0 ? (
                 <div>
-                    <ul className="space-y-4 text-2xl font-semibold">
+                    <ul className="space-y-2 text-2xl font-semibold">
                         {siteRatings.map(([website, rating, reviews], index) => (
                             <li key={index}>
                                 {rating ? (
-                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                        <Typography sx={{ marginRight: '5px' }}>{website} - </Typography>
-                                        <Rating
-                                            value={rating}
-                                            precision={0.5}
-                                            readOnly
-
-                                        />
-                                        <Typography sx={{ marginLeft: '5px' }}>
-                                            {rating} ({reviews} reviews)
-                                        </Typography>
-                                    </Box>
+                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                         <Typography sx={{ marginRight: '5px' }}>
+                             <div className="inline-block h-[100px] w-[200px]">
+                                 <img
+                                     src={getLogoForWebsite(website)}
+                                     alt={`${website} Logo`}
+                                     className="object-contain w-full h-full align-middle"
+                                 />
+                             </div>
+                             
+                         </Typography>
+                         <Rating
+                             value={rating}
+                             precision={0.5}
+                             readOnly
+                         />
+                         <Typography sx={{ marginLeft: '5px' }}>
+                             {rating} ({reviews} reviews)
+                         </Typography>
+                     </Box>
+                     
                                 ) : (
                                     <Typography>{website} - Ratings could not be found for this site</Typography>
                                 )}
                             </li>
                         ))}
-
                     </ul>
                     <h3 className="mt-10 text-3xl font-semibold underline">Overall</h3>
                     <div className="text-2xl font-semibold">
@@ -128,7 +149,6 @@ function RatingResults() {
                             </Typography>
                         </Box>
                     </div>
-
                 </div>
             ) : (
                 <p>No ratings found.</p>

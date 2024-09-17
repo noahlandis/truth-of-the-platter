@@ -299,6 +299,7 @@ function SearchBar() {
                         color: '#fff',
                         height: '100%',
                         borderRadius: '0 8px 8px 0',
+                        width: 65,
                     }}
                     aria-label="search"
                 >
