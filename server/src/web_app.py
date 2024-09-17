@@ -21,12 +21,13 @@ CORS(app)  # This will allow all origins
 
 
 
-@app.route('/')
-def home():
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def catch_all(path):
     return render_template("index.html")
 
 
-@app.route('/search', methods=['GET'])
+@app.route('/api/search', methods=['GET'])
 def search():
     name = request.args.get('name')
     location = request.args.get('location')
@@ -48,7 +49,7 @@ def search():
 
     # Dynamically add the matches as radio butto
 
-@app.route('/select', methods=['POST'])
+@app.route('/api/select', methods=['POST'])
 def select_match():
     print("CALLED AGAIN")
     print(request.json)
@@ -66,7 +67,7 @@ def select_match():
     })
 
 
-@app.route('/autocomplete', methods=['GET'])
+@app.route('/api/autocomplete', methods=['GET'])
 def google_places_autocomplete():
     url = "https://maps.googleapis.com/maps/api/place/autocomplete/json"
 
@@ -91,7 +92,7 @@ def google_places_autocomplete():
         return jsonify({"error": str(e)}), 500
 
 
-@app.route('/user-location', methods=['GET']) 
+@app.route('/api/user-location', methods=['GET']) 
 def get_location():
     return jsonify(get_user_location())
 
