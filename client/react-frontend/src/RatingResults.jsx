@@ -1,8 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { CircularProgress, Rating, Box, Typography } from '@mui/material';
+import { useSearchParams } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
+
 
 function RatingResults() {
+    const navigate = useNavigate();
+
     const location = useLocation();
     const { data } = location.state || {}; // Get the entire data object from location.state
 
@@ -11,6 +16,21 @@ function RatingResults() {
     const [totalReviewCount, setTotalReviewCount] = useState(null);
     const [loading, setLoading] = useState(false);  // Update loading state
     const [error, setError] = useState(null);
+    const [searchParams] = useSearchParams();
+    const nameParam = searchParams.get('name') || '';
+    const locationParam = searchParams.get('location') || '';
+
+
+    useEffect(() => {
+        // Redirect to /search if no data is available (opened directly from a link)
+        if (!data && nameParam && locationParam) {
+            navigate(`/search?name=${nameParam}&location=${locationParam}`);
+        }
+        if (!data) {
+            navigate('/')
+        }
+    }, [data, nameParam, locationParam, navigate]);
+
 
     useEffect(() => {
         // Clear localStorage when new data (restaurant) is selected
@@ -100,14 +120,14 @@ function RatingResults() {
 
                     </ul>
                     <h3 className="mt-10 text-3xl font-semibold underline">Overall</h3>
-<div className="text-2xl font-semibold">
-    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <Rating value={starAverage} precision={0.5} readOnly />
-        <Typography sx={{ marginLeft: '5px' }}>
-            {starAverage} ({totalReviewCount} reviews)
-        </Typography>
-    </Box>
-</div>
+                    <div className="text-2xl font-semibold">
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Rating value={starAverage} precision={0.5} readOnly />
+                            <Typography sx={{ marginLeft: '5px' }}>
+                                {starAverage} ({totalReviewCount} reviews)
+                            </Typography>
+                        </Box>
+                    </div>
 
                 </div>
             ) : (

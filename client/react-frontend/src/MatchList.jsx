@@ -20,23 +20,22 @@ function MatchList() {
     const fetchMatches = async () => {
       setLoading(true);
       try {
-        // Check if data exists in localStorage
-        const cachedMatches = localStorage.getItem(`matches_${name}_${location}`);
+        // Check if data exists in sessionStorage
+        const cachedMatches = sessionStorage.getItem(`matches_${name}_${location}`);
         if (cachedMatches) {
           setMatches(JSON.parse(cachedMatches));
-          console.log('Data loaded from localStorage');
+          console.log('Data loaded from sessionStorage');
           setLoading(false);
         } else {
           const response = await axios.get('http://127.0.0.1:5000/search', {
             params: { name, location },
-            
           });
           console.log(response.data);
           console.log('Data loaded from server');
 
           setMatches(response.data); 
           
-          localStorage.setItem(`matches_${name}_${location}`, JSON.stringify(response.data)); // Save the data in localStorage
+          sessionStorage.setItem(`matches_${name}_${location}`, JSON.stringify(response.data)); // Save the data in sessionStorage
         }
         setErrorType(null); 
       } catch (err) {
@@ -60,11 +59,8 @@ function MatchList() {
     }
   }, [name, location]);
 
-
-
   const handleCardClick = (data) => {
-    navigate('/ratings', { state: { data } });
-
+    navigate(`/ratings?name=${name}&location=${location}`, { state: { data } });
   };
 
   if (loading) {
@@ -72,7 +68,6 @@ function MatchList() {
       <CircularProgress style={{ color: 'black' }} />
     </div>;
   }
-  
 
   if (error === 'UNKNOWN_LOCATION') {
     return (
@@ -88,7 +83,6 @@ function MatchList() {
       </div>
     );
   }
-
 
   if (error === 'NO_RESULTS') {
     return <h1 className="items-start mb-4 text-3xl font-bold">No results for {name} in {location}. Please try again...</h1>
@@ -107,10 +101,10 @@ function MatchList() {
       {matches.length > 0 ? (
         matches.map((data, index) => (
           <div key={index} className="w-full mb-4">
-              <Card
-                sx={{ width: '100%', cursor: 'pointer' }}
-                onClick={() => handleCardClick(data)}
-              >
+            <Card
+              sx={{ width: '100%', cursor: 'pointer' }}
+              onClick={() => handleCardClick(data)}
+            >
               <div className="flex items-center">
                 {data.imageUrl && (
                   <div>

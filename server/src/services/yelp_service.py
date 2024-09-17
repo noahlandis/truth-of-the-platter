@@ -44,6 +44,7 @@ def get_filtered_yelp_matches(yelp_restaurants, name):
         if is_potential_match(name, yelp_restaurant['name'])
     ]
     print("The filtered restaurants are: ", filtered_restaurants)
+    
     return filtered_restaurants
     
     
