@@ -58,7 +58,7 @@ function RatingResults() {
         const fetchRatings = async () => {
             setLoading(true);
             try {
-                const response = await fetch(`${apiUrl}/select`, {
+                const response = await fetch(`${apiUrl}/api/select`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -142,15 +142,15 @@ function RatingResults() {
                                     </Box>
                                 ) : (
                                     <Typography component="div" style={{ display: 'inline-flex', alignItems: 'center' }}>
-                                    <img
-                                        src={getLogoForWebsite(website)}
-                                        alt={`${website} Logo`}
-                                        className="object-contain"
-                                        style={{ marginRight: '8px', width: '150px', height: '100px' }}  // Adjust size here
-                                    /> 
-                                    Ratings could not be found for this site
-                                </Typography>
-                                
+                                        <img
+                                            src={getLogoForWebsite(website)}
+                                            alt={`${website} Logo`}
+                                            className="object-contain"
+                                            style={{ marginRight: '8px', width: '150px', height: '100px' }}  // Adjust size here
+                                        />
+                                        Ratings could not be found for this site
+                                    </Typography>
+
 
                                 )}
                             </li>
@@ -158,27 +158,27 @@ function RatingResults() {
                     </ul>
 
                     <div className="mt-20 text-2xl font-semibold">
-    {/* Black line above "Overall" */}
-    <div style={{ borderTop: '2px solid black', width: '100%', marginBottom: '20px' }}></div>
-    
-    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-        <Typography sx={{ marginRight: '5px', fontSize: '1.5rem' }} className="mt-10 font-semibold">
-            Overall
-        </Typography>
-        <div className="flex items-center flex-grow ml-20">
-                                                <Rating
-                                                    value={starAverage}
-                                                    precision={0.5}
-                                                    readOnly
-                                                    icon={<StarIcon style={{ color: '#FFF700' }} />} // Bright yellow stars
-                                                    emptyIcon={<StarIcon style={{ color: 'rgba(255, 255, 255, 0.5)' }} />} // Semi-transparent white stars
-                                                />
-                                                <Typography sx={{ marginLeft: '5px' }}>
-                                                    {starAverage} ({totalReviewCount} reviews)
-                                                </Typography>
-                                            </div>
-    </Box>
-</div>
+                        {/* Black line above "Overall" */}
+                        <div style={{ borderTop: '2px solid black', width: '100%', marginBottom: '20px' }}></div>
+
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Typography sx={{ marginRight: '5px', fontSize: '1.5rem' }} className="mt-10 font-semibold">
+                                Overall
+                            </Typography>
+                            <div className="flex items-center flex-grow ml-20">
+                                <Rating
+                                    value={starAverage}
+                                    precision={0.5}
+                                    readOnly
+                                    icon={<StarIcon style={{ color: '#FFF700' }} />} // Bright yellow stars
+                                    emptyIcon={<StarIcon style={{ color: 'rgba(255, 255, 255, 0.5)' }} />} // Semi-transparent white stars
+                                />
+                                <Typography sx={{ marginLeft: '5px' }}>
+                                    {starAverage} ({totalReviewCount} reviews)
+                                </Typography>
+                            </div>
+                        </Box>
+                    </div>
 
 
 

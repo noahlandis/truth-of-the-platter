@@ -60,7 +60,7 @@ function SearchBar() {
 
             debounceTimeoutRef.current = setTimeout(async () => {
                 try {
-                    const response = await axios.get(`${apiUrl}/autocomplete`, {
+                    const response = await axios.get(`${apiUrl}/api/autocomplete`, {
                         params: { text: location },
                     });
                     console.log('API called');
@@ -91,7 +91,7 @@ function SearchBar() {
 
     const handleUserLocationClick = async () => {
         try {
-            const response = await axios.get('http://127.0.0.1:5000/user-location');
+            const response = await axios.get(`${apiUrl}/api/user-location`);
             setLocation(response.data);
             setShowSuggestions(false);
             return response.data;

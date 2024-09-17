@@ -28,7 +28,7 @@ function MatchList() {
           console.log('Data loaded from sessionStorage');
           setLoading(false);
         } else {
-          const response = await axios.get(`${apiUrl}/search`, {
+          const response = await axios.get(`${apiUrl}/api/search`, {
             params: { name, location },
           });
           console.log(response.data);
