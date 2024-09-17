@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import yelp from './assets/yelp.svg'; // Adjust the path based on your folder structure
 import tripAdvisor from './assets/trip_advisor.png'; // Adjust the path based on your folder structure
 import google from './assets/google.svg'; // Adjust the path based on your folder structure
+import StarIcon from '@mui/icons-material/Star'; // Import the star icon
 
 function RatingResults() {
     const navigate = useNavigate();
@@ -109,46 +110,60 @@ function RatingResults() {
 
             {siteRatings.length > 0 ? (
                 <div>
-                    <ul className="space-y-2 text-2xl font-semibold">
+                    <ul className="space-y-12 text-2xl font-semibold ">
                         {siteRatings.map(([website, rating, reviews], index) => (
                             <li key={index}>
                                 {rating ? (
-                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                         <Typography sx={{ marginRight: '5px' }}>
-                             <div className="inline-block h-[100px] w-[200px]">
-                                 <img
-                                     src={getLogoForWebsite(website)}
-                                     alt={`${website} Logo`}
-                                     className="object-contain w-full h-full align-middle"
-                                 />
-                             </div>
-                             
-                         </Typography>
-                         <Rating
-                             value={rating}
-                             precision={0.5}
-                             readOnly
-                         />
-                         <Typography sx={{ marginLeft: '5px' }}>
-                             {rating} ({reviews} reviews)
-                         </Typography>
-                     </Box>
-                     
+                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                        <div className="flex items-center w-full">
+                                            {/* Fixed width container for the logo */}
+                                            <div className="flex-shrink-0 w-[150px] h-[100px">
+                                                <img
+                                                    src={getLogoForWebsite(website)}
+                                                    alt={`${website} Logo`}
+                                                    className="object-contain w-full h-full align-middle"
+                                                />
+                                            </div>
+                                            {/* Flexible container for the rating and review count */}
+                                            <div className="flex items-center flex-grow ml-4">
+                                                <Rating
+                                                    value={rating}
+                                                    precision={0.5}
+                                                    readOnly
+                                                    icon={<StarIcon style={{ color: '#FFF700' }} />} // Bright yellow stars
+                                                    emptyIcon={<StarIcon style={{ color: 'rgba(255, 255, 255, 0.5)' }} />} // Semi-transparent white stars
+                                                />
+                                                <Typography sx={{ marginLeft: '5px' }}>
+                                                    {rating} ({reviews} reviews)
+                                                </Typography>
+                                            </div>
+                                        </div>
+                                    </Box>
                                 ) : (
                                     <Typography>{website} - Ratings could not be found for this site</Typography>
                                 )}
                             </li>
                         ))}
                     </ul>
-                    <h3 className="mt-10 text-3xl font-semibold underline">Overall</h3>
-                    <div className="text-2xl font-semibold">
+
+                    <div className="mt-20 text-2xl font-semibold">
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Rating value={starAverage} precision={0.5} readOnly />
+                            <Typography sx={{ marginRight: '5px' }} variant="h3" className="mt-10 text-3xl font-semibold">
+                                Overall
+                            </Typography>
+                            <Rating
+                                value={starAverage}
+                                precision={0.5}
+                                readOnly
+                                icon={<StarIcon style={{ color: '#FFF700' }} />} // Bright yellow stars for overall rating
+                                emptyIcon={<StarIcon style={{ color: 'rgba(255, 255, 255, 0.5)' }} />} // Semi-transparent white stars
+                            />
                             <Typography sx={{ marginLeft: '5px' }}>
                                 {starAverage} ({totalReviewCount} reviews)
                             </Typography>
                         </Box>
                     </div>
+
                 </div>
             ) : (
                 <p>No ratings found.</p>
