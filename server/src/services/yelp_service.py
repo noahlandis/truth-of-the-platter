@@ -37,11 +37,14 @@ def get_filtered_yelp_matches(yelp_restaurants, name):
             'name': yelp_restaurant['name'],
             'location': f"{yelp_restaurant['location']['address1']} {yelp_restaurant['location']['city']}, {yelp_restaurant['location']['state']}",
             'review_count': yelp_restaurant['review_count'],
-            'rating': yelp_restaurant['rating']
+            'rating': yelp_restaurant['rating'],
+            'imageUrl': yelp_restaurant['image_url'] if 'image_url' in yelp_restaurant else yelp_restaurant['photos'][0] if 'photos' in yelp_restaurant else None
         }
         for yelp_restaurant in yelp_restaurants
         if is_potential_match(name, yelp_restaurant['name'])
     ]
+    print("The filtered restaurants are: ", filtered_restaurants)
+    
     return filtered_restaurants
     
     

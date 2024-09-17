@@ -35,6 +35,7 @@ def setup():
 
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "cli":
+        setup()
         run_cli()
     else:
         app.run(debug=True)
