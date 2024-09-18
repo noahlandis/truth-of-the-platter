@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 
 function SearchBar() {
     const apiUrl = import.meta.env.VITE_API_BASE_URL;
+    const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
 
     const navigate = useNavigate();
@@ -22,6 +23,7 @@ function SearchBar() {
 
     // Ref for storing timeout ID for debouncing
     const debounceTimeoutRef = useRef(null);
+
 
     // On component mount, populate input fields from query params
     useEffect(() => {
@@ -52,7 +54,7 @@ function SearchBar() {
     };
 
     useEffect(() => {
-        // Debounced API call
+        // Debounced API call for location suggestions
         if (location.length > 0) {
             if (debounceTimeoutRef.current) {
                 clearTimeout(debounceTimeoutRef.current);
@@ -63,7 +65,6 @@ function SearchBar() {
                     const response = await axios.get(`${apiUrl}/api/autocomplete`, {
                         params: { text: location },
                     });
-                    console.log('API called');
                     response.data.predictions = response.data.predictions.map((suggestion) => {
                         suggestion.description = suggestion.description.replace(/, USA$/, '');
                         return suggestion;
@@ -89,14 +90,41 @@ function SearchBar() {
         setShowSuggestions(true);
     };
 
+    // Updated function to get user location and reverse geocode it to city and state
     const handleUserLocationClick = async () => {
-        try {
-            const response = await axios.get(`${apiUrl}/api/user-location`);
-            setLocation(response.data);
-            setShowSuggestions(false);
-            return response.data;
-        } catch (error) {
-            console.error('Error fetching user location:', error);
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const { latitude, longitude } = position.coords;
+                console.log('User location:', latitude, longitude);
+                const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}`;
+                
+                try {
+                    const response = await axios.get(apiUrl);
+                    const results = response.data.results;
+                    console.log('Reverse geocoding results:', response);
+                    if (results.length > 0) {
+                        const addressComponents = results[0].address_components;
+
+                        const city = addressComponents.find((component) =>
+                            component.types.includes('locality')
+                        )?.long_name;
+
+                        const state = addressComponents.find((component) =>
+                            component.types.includes('administrative_area_level_1')
+                        )?.long_name;
+
+                        const userLocation = `${city}, ${state}`;
+                        setLocation(userLocation);  // Update location state with city and state
+                        setShowSuggestions(false);
+                    }
+                } catch (error) {
+                    console.error('Error reverse geocoding location:', error);
+                }
+            }, (error) => {
+                console.error('Error getting user location:', error);
+            });
+        } else {
+            alert('Geolocation is not supported by this browser.');
         }
     };
 
@@ -113,7 +141,6 @@ function SearchBar() {
         if (!location.trim()) {
             searchLocation = await handleUserLocationClick();
         }
-
 
         setError(''); // Clear error if validation passes
         navigate(`/search?name=${name}&location=${searchLocation}`);
@@ -158,8 +185,6 @@ function SearchBar() {
                                 paddingLeft: '10px',
                                 borderTop: '2px solid red', // Add top red border
                                 width: 'calc(100% - 12px)', // Increase the width to cover more of the x-axis
-
-
                             }}
                         >
                             {error}
@@ -180,11 +205,7 @@ function SearchBar() {
                             <ClearIcon fontSize="small" />
                         </IconButton>
                     )}
-
-                    {/* Display error message if name is empty */}
-
                 </Box>
-
 
                 <Box sx={{ position: 'relative', flex: 1 }}>
                     <InputBase
@@ -309,7 +330,6 @@ function SearchBar() {
                     <SearchIcon />
                 </IconButton>
             </Paper>
-
         </>
     );
 }

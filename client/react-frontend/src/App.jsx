@@ -11,7 +11,7 @@ import StarRateIcon from '@mui/icons-material/StarRate';
 function Home() {
   const steps = [
     {
-      label: 'Find Restaurants Near HI NOAH L',
+      label: 'Find Restaurants Near You',
       description: 'Enter a restaurant name or use automatic location detection to discover places around you.',
       icon: <SearchIcon sx={{ fontSize: 50, color: '#1976d2' }} />,
     },
@@ -26,14 +26,11 @@ function Home() {
       icon: <StarRateIcon sx={{ fontSize: 50, color: '#1976d2' }} />,
     },
   ];
-  
-  
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
       <Paper elevation={3} sx={{ padding: 5, width: '80%', maxWidth: 600 }}>
-
-        <Stepper orientation="vertical">
+        <Stepper orientation="vertical" connector={null}>
           {steps.map((step, index) => (
             <Step key={index} active>
               <StepLabel
@@ -50,7 +47,6 @@ function Home() {
     </Box>
   );
 }
-
 function App() {
   return (
     <Router>
