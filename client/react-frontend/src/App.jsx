@@ -11,7 +11,7 @@ import StarRateIcon from '@mui/icons-material/StarRate';
 function Home() {
   const steps = [
     {
-      label: 'Find Restaurants Near RANDOM NAME',
+      label: 'Find Restaurants Near HI BOB',
       description: 'Enter a restaurant name or use automatic location detection to discover places around you.',
       icon: <SearchIcon sx={{ fontSize: 50, color: '#1976d2' }} />,
     },
