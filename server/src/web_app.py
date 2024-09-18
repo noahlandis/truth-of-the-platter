@@ -21,6 +21,7 @@ CORS(app)  # This will allow all origins
 
 
 
+
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def catch_all(path):
