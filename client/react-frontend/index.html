@@ -9,6 +9,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Abel&display=swap" rel="stylesheet">
   <title>Truth of the Platter</title>
+
+  <!-- Conditionally add noindex for staging -->
+  <script type="module">
+    console.log('VITE_APP_ENV:', import.meta.env.VITE_APP_ENV);
+    if (import.meta.env.VITE_APP_ENV === 'staging') {
+      
+      document.write('<meta name="robots" content="noindex, nofollow">');
+    }
+  </script>
 </head>
 
 <body>
