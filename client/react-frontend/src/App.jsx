@@ -28,18 +28,45 @@ function Home() {
   ];
 
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
-      <Paper elevation={3} sx={{ padding: 5, width: '80%', maxWidth: 600 }}>
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        padding: { xs: 2, sm: 3, md: 5 }, // Adjust padding for different screen sizes
+      }}
+    >
+      <Paper
+        elevation={3}
+        sx={{
+          padding: { xs: 2, sm: 4, md: 5 }, // Adjust padding for different screen sizes
+          width: '100%',
+          maxWidth: { xs: 360, sm: 500, md: 600 }, // Make the paper responsive
+        }}
+      >
         <Stepper orientation="vertical" connector={null}>
           {steps.map((step, index) => (
             <Step key={index} active>
               <StepLabel
                 icon={step.icon}
-                sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
               >
-                <Typography variant="h6">{step.label}</Typography>
+                <Typography variant="h6" sx={{ fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' } }}>
+                  {step.label}
+                </Typography>
               </StepLabel>
-              <Typography sx={{ mb: 2, ml: 6 }}>{step.description}</Typography>
+              <Typography
+                sx={{
+                  mb: 2,
+                  ml: { xs: 2, sm: 4, md: 6 }, // Adjust margin based on screen size
+                  fontSize: { xs: '0.875rem', sm: '1rem' }, // Font size adjustment
+                }}
+              >
+                {step.description}
+              </Typography>
             </Step>
           ))}
         </Stepper>
@@ -47,6 +74,7 @@ function Home() {
     </Box>
   );
 }
+
 function App() {
   return (
     <Router>
