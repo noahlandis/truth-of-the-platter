@@ -168,7 +168,7 @@ function SearchBar() {
                         placeholder="Name"
                         sx={{
                             ml: 2,
-                            width: '100%',
+                            width: 'calc(100% - 50px)', // Ensure input width leaves space for clear button
                             flex: 1,
                         }}
                         inputProps={{ 'aria-label': 'name' }}
@@ -217,7 +217,7 @@ function SearchBar() {
                         sx={{
                             ml: 2,
                             flex: 1,
-                            width: '100%',
+                            width: 'calc(100% - 50px)', // Ensure input width leaves space for clear button
                         }}
                         inputProps={{ 'aria-label': 'location' }}
                     />
