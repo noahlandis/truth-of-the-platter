@@ -24,6 +24,8 @@ function SearchBar() {
     // Ref for storing timeout ID for debouncing
     const debounceTimeoutRef = useRef(null);
 
+    const autocompleteServiceRef = useRef(null);
+
 
     // On component mount, populate input fields from query params
     useEffect(() => {
@@ -32,7 +34,14 @@ function SearchBar() {
 
         setName(initialName);
         setLocation(initialLocation);
+
+        // Initialize Google Places AutocompleteService
+        if (window.google && window.google.maps && window.google.maps.places) {
+            autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
+        }
     }, []);
+
+
 
     // Clear name input
     const handleClearName = () => setName('');
@@ -54,30 +63,39 @@ function SearchBar() {
     };
 
     useEffect(() => {
-        // Debounced API call for location suggestions
         if (location.length > 0) {
             if (debounceTimeoutRef.current) {
                 clearTimeout(debounceTimeoutRef.current);
             }
 
-            debounceTimeoutRef.current = setTimeout(async () => {
-                try {
-                    const response = await axios.get(`${apiUrl}/api/autocomplete`, {
-                        params: { text: location },
-                    });
-                    response.data.predictions = response.data.predictions.map((suggestion) => {
-                        suggestion.description = suggestion.description.replace(/, USA$/, '');
-                        return suggestion;
-                    });
-                    setSuggestions(response.data.predictions);
-                } catch (error) {
-                    console.error('Error fetching location suggestions:', error);
+            debounceTimeoutRef.current = setTimeout(() => {
+                if (autocompleteServiceRef.current) {
+                    autocompleteServiceRef.current.getPlacePredictions(
+                        {
+                            input: location,
+                            types: ['(cities)'],
+                            componentRestrictions: { country: 'us' }
+                        },
+                        (predictions, status) => {
+                            if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
+                                const formattedPredictions = predictions.map(prediction => ({
+                                    ...prediction,
+                                    description: prediction.description.replace(/, USA$/, '')
+                                }));
+                                setSuggestions(formattedPredictions);
+                            } else {
+                                console.error('Error fetching location suggestions:', status);
+                                setSuggestions([]);
+                            }
+                        }
+                    );
                 }
-            }, 200); // 300ms debounce delay
+            }, 200); // 200ms debounce delay
         } else {
             setSuggestions([]);
+            setShowSuggestions(false);
         }
-        // Cleanup timeout on unmount or when location changes
+
         return () => {
             if (debounceTimeoutRef.current) {
                 clearTimeout(debounceTimeoutRef.current);
@@ -137,13 +155,9 @@ function SearchBar() {
             setError('Name field cannot be left blank');
             return; // Prevent form submission
         }
-        let searchLocation = location;
-        if (!location.trim()) {
-            searchLocation = await handleUserLocationClick();
-        }
 
         setError(''); // Clear error if validation passes
-        navigate(`/search?name=${name}&location=${searchLocation}`);
+        navigate(`/search?name=${name}&location=${location}`);
     };
 
     return (
@@ -336,50 +350,3 @@ function SearchBar() {
 
 export default SearchBar;
 
-
-// <List
-// sx={{
-//   position: 'absolute',
-//   top: '100%',
-//   left: 0,
-//   right: 0, // Ensures it spans the full width of the location input
-//   width: '100%', // Ensures full width
-//   backgroundColor: '#fff',
-//   boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-//   zIndex: 1,
-//   maxHeight: 200,
-//   overflowY: 'auto',
-//   borderRadius: '0 0 8px 8px',
-// }}
-// >
-// {['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix'].map((suggestion, index) => (
-//   <ListItem key={index} disablePadding>
-//     <ListItemButton onClick={() => handleSuggestionClick(suggestion)}>
-//       <ListItemText primary={suggestion} />
-//     </ListItemButton>
-//   </ListItem>
-// ))}
-// </List>
-// <List
-// sx={{
-//   position: 'absolute',
-//   top: '100%',
-//   left: 0,
-//   right: 0, // Ensures it spans the full width of the location input
-//   width: '100%', // Ensures full width
-//   backgroundColor: '#fff',
-//   boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-//   zIndex: 1,
-//   maxHeight: 200,
-//   overflowY: 'auto',
-//   borderRadius: '0 0 8px 8px',
-// }}
-// >
-// {['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix'].map((suggestion, index) => (
-//   <ListItem key={index} disablePadding>
-//     <ListItemButton onClick={() => handleSuggestionClick(suggestion)}>
-//       <ListItemText primary={suggestion} />
-//     </ListItemButton>
-//   </ListItem>
-// ))}
-// </List>
