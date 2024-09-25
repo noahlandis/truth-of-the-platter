@@ -88,13 +88,12 @@ function RatingResults() {
     }, [data]);
 
     if (loading) {
-        return (
-            <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
-                <CircularProgress style={{ color: 'black' }} />
-            </Box>
-        );
-    }
+        return <div className='flex items-center justify-center mt-20 '>
+          <CircularProgress style={{ color: 'black' }} />
+        </div>;
+      }
 
+      
     if (error) {
         return <div>Error: {error}</div>;
     }

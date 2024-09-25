@@ -31,15 +31,21 @@ function SearchBar() {
     useEffect(() => {
         const initialName = searchParams.get('name') || '';
         const initialLocation = searchParams.get('location') || '';
-
-        setName(initialName);
-        setLocation(initialLocation);
-
+        
+        // Check if the current route is '/'
+        if (window.location.pathname === '/') {
+            setLocation('');  // Clear location if on home page
+            setName('');  // Clear name if on home page
+        } else {
+            setName(initialName);
+            setLocation(initialLocation);
+        }
+    
         // Initialize Google Places AutocompleteService
         if (window.google && window.google.maps && window.google.maps.places) {
             autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
         }
-    }, []);
+    }, [searchParams]);
 
 
 
