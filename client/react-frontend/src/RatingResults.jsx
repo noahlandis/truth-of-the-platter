@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { CircularProgress, Rating, Box, Typography, Grid, Card, CardContent, CardMedia } from '@mui/material';
+import { CircularProgress, Rating, Box, Typography, Grid2, Card, CardContent, CardMedia } from '@mui/material';
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
 
@@ -102,9 +102,9 @@ function RatingResults() {
 
     return (
         <Card sx={{ display: 'flex', padding: 2, boxShadow: 3, marginBottom: 4 }}>
-            <Grid container spacing={2}>
+            <Grid2 container spacing={2}>
                 {/* Left Column: Photo, Name, Location */}
-                <Grid item xs={12} md={6}>
+                <Grid2 item xs={12} md={6}>
                     <CardMedia
                         component="img"
                         sx={{ width: '100%', height: 250, borderRadius: '8px' }}
@@ -119,10 +119,10 @@ function RatingResults() {
                             {data?.location}
                         </Typography>
                     </CardContent>
-                </Grid>
+                </Grid2>
 
                 {/* Right Column: Ratings and Reviews */}
-                <Grid item xs={12} md={6}>
+                <Grid2 item xs={12} md={6}>
                     {siteRatings.length > 0 ? (
                         <div>
                     
@@ -153,7 +153,7 @@ function RatingResults() {
                                 ))}
                             </ul>
 
-                            <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 4 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 7.1 }}>
                                 <Typography variant="h6" component="div" sx={{ marginRight: '16px' }}>
                                     Overall Rating:
                                 </Typography>
@@ -172,8 +172,8 @@ function RatingResults() {
                     ) : (
                         <Typography>No ratings found.</Typography>
                     )}
-                </Grid>
-            </Grid>
+                </Grid2>
+            </Grid2>
         </Card>
     );
 }
