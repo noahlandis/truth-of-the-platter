@@ -3,9 +3,11 @@ import { useLocation } from 'react-router-dom';
 import { CircularProgress, Rating, Box, Typography, Grid, Card, CardContent, CardMedia } from '@mui/material';
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
-import yelp from './assets/yelp.svg'; // Adjust the path based on your folder structure
-import tripAdvisor from './assets/trip_advisor.png'; // Adjust the path based on your folder structure
-import google from './assets/google.svg'; // Adjust the path based on your folder structure
+
+import google from './assets/logos_png/google_logo.png'
+import tripAdvisor from './assets/logos_png/trip_advisor_logo.png'
+import yelp from './assets/logos_png/yelp_logo.png'
+
 import StarIcon from '@mui/icons-material/Star'; // Import the star icon
 
 function RatingResults() {
@@ -123,9 +125,7 @@ function RatingResults() {
                 <Grid item xs={12} md={6}>
                     {siteRatings.length > 0 ? (
                         <div>
-                            <Typography variant="h6" component="div" gutterBottom>
-                                Ratings & Reviews
-                            </Typography>
+                    
                             <ul>
                                 {siteRatings.map(([website, rating, reviews], index) => (
                                     <li key={index} style={{ marginBottom: '16px' }}>
@@ -134,14 +134,13 @@ function RatingResults() {
                                                 <img
                                                     src={getLogoForWebsite(website)}
                                                     alt={`${website} Logo`}
-                                                    style={{ width: '80px', marginRight: '16px' }}
+                                                    style={{ width: '150px', marginRight: '16px' }}
                                                 />
                                                 <Rating
                                                     value={rating}
                                                     precision={0.5}
                                                     readOnly
                                                     icon={<StarIcon style={{ color: '#FFD700' }} />}
-                                                    emptyIcon={<StarIcon style={{ color: 'rgba(255, 255, 255, 0.5)' }} />}
                                                 />
                                                 <Typography sx={{ marginLeft: '5px' }}>
                                                     {rating} ({reviews} reviews)
@@ -159,12 +158,12 @@ function RatingResults() {
                                     Overall Rating:
                                 </Typography>
                                 <Rating
-                                    value={starAverage}
-                                    precision={0.5}
-                                    readOnly
-                                    icon={<StarIcon style={{ color: '#FFD700' }} />}
-                                    emptyIcon={<StarIcon style={{ color: 'rgba(255, 255, 255, 0.5)' }} />}
-                                />
+  value={starAverage}
+  precision={0.5}
+  readOnly
+  icon={<StarIcon style={{ color: '#FFD700' }} />}
+/>
+
                                 <Typography sx={{ marginLeft: '8px' }}>
                                     {starAverage} ({totalReviewCount} reviews)
                                 </Typography>
