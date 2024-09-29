@@ -55,10 +55,13 @@ function SearchBar() {
     const handleClearName = () => setName('');
     const handleClearLocation = () => setLocation('');
 
-    // Handle suggestion click
+    // Updated handleSuggestionClick function
     const handleSuggestionClick = (suggestion) => {
         setLocation(suggestion);
-        setShowSuggestions(false);
+        // Don't hide suggestions immediately
+        if (!isMobile) {
+            setShowSuggestions(false);
+        }
     };
 
     // Show suggestions on focus
@@ -66,8 +69,11 @@ function SearchBar() {
         setShowSuggestions(true);
     };
 
+    // Updated handleBlur function
     const handleBlur = () => {
-        setTimeout(() => setShowSuggestions(false), 100);
+        if (!isMobile) {
+            setTimeout(() => setShowSuggestions(false), 100);
+        }
     };
 
     useEffect(() => {
@@ -156,7 +162,7 @@ function SearchBar() {
 
     // Updated handleSearch function
     const handleSearch = async (e) => {
-        e.preventDefault();
+        e.preventDefault();  // This line is crucial
 
         // Check if name is empty and set error if true
         if (!name.trim()) {
@@ -222,7 +228,7 @@ function SearchBar() {
         <>
             <Paper
                 component="form"
-                onSubmit={handleSearch}
+                onSubmit={handleSearch}  // This line is crucial
                 sx={{
                     display: 'flex',
                     flexDirection: isMobile ? 'column' : 'row',
@@ -251,7 +257,10 @@ function SearchBar() {
                             flex: 1,
                             height: isMobile ? 65 : 'auto',
                         }}
-                        inputProps={{ 'aria-label': 'name' }}
+                        inputProps={{ 
+                            'aria-label': 'name',
+                            enterKeyHint: 'search'  // Added this line
+                        }}
                     />
                     {error && (
                         <Typography
@@ -391,7 +400,15 @@ function SearchBar() {
 
                             {suggestions.map((suggestion, index) => (
                                 <ListItem key={index} disablePadding>
-                                    <ListItemButton onMouseDown={() => handleSuggestionClick(suggestion.description)}>
+                                    <ListItemButton 
+                                        onMouseDown={() => handleSuggestionClick(suggestion.description)}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            if (isMobile) {
+                                                handleSuggestionClick(suggestion.description);
+                                            }
+                                        }}
+                                    >
                                         <ListItemText primary={suggestion.description} />
                                     </ListItemButton>
                                 </ListItem>
