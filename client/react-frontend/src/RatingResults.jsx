@@ -158,7 +158,9 @@ function RatingResults() {
                             </ul>
 
                             <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 7 }}>
-                                <Typography variant="h5" component="div" sx={{ marginRight: '16px', minWidth: '150px' }}> {/* Added minWidth */}
+                                <Typography 
+                                variant="h5" // make h6 if mobile
+                                component="div" sx={{ marginRight: '16px', minWidth: '150px' }}> {/* Added minWidth */}
                                     Overall Rating:
                                 </Typography>
                                 <Rating

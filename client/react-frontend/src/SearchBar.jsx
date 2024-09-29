@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Paper, InputBase, IconButton, Box, List, ListItem, ListItemButton, ListItemText, Typography } from '@mui/material';
+import { Paper, InputBase, IconButton, Box, List, ListItem, ListItemButton, ListItemText, Typography, useMediaQuery, useTheme } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import axios from 'axios';
@@ -26,6 +26,8 @@ function SearchBar() {
 
     const autocompleteServiceRef = useRef(null);
 
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     // On component mount, populate input fields from query params
     useEffect(() => {
@@ -223,27 +225,34 @@ function SearchBar() {
                 onSubmit={handleSearch}
                 sx={{
                     display: 'flex',
+                    flexDirection: isMobile ? 'column' : 'row',
                     alignItems: 'center',
-                    height: 65,
+                    height: isMobile ? 'auto' : 65,
                     width: '100%',
-                    borderRadius: '0 8px 8px 0',
+                    borderRadius: isMobile ? '8px' : '0 8px 8px 0',
                     boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
                     border: '1px solid #ccc',
                 }}
             >
-                <Box sx={{ position: 'relative', flex: 1, borderRight: '1px solid #ccc' }}>
+                <Box sx={{ 
+                    position: 'relative', 
+                    flex: 1, 
+                    width: '100%',
+                    borderRight: isMobile ? 'none' : '1px solid #ccc',
+                    borderBottom: isMobile ? '1px solid #ccc' : 'none',
+                }}>
                     <InputBase
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Name"
                         sx={{
                             ml: 2,
-                            width: 'calc(100% - 50px)', // Ensure input width leaves space for clear button
+                            width: 'calc(100% - 50px)',
                             flex: 1,
+                            height: isMobile ? 65 : 'auto',
                         }}
                         inputProps={{ 'aria-label': 'name' }}
                     />
-
                     {error && (
                         <Typography
                             color="error"
@@ -277,7 +286,7 @@ function SearchBar() {
                     )}
                 </Box>
 
-                <Box sx={{ position: 'relative', flex: 1 }}>
+                <Box sx={{ position: 'relative', flex: 1, width: '100%' }}>
                     <InputBase
                         value={location}
                         onChange={handleLocationChange}
@@ -287,7 +296,8 @@ function SearchBar() {
                         sx={{
                             ml: 2,
                             flex: 1,
-                            width: 'calc(100% - 50px)', // Ensure input width leaves space for clear button
+                            width: 'calc(100% - 50px)',
+                            height: isMobile ? 65 : 'auto',
                         }}
                         inputProps={{ 'aria-label': 'location' }}
                     />
@@ -386,19 +396,21 @@ function SearchBar() {
                         </List>
                     )}
                 </Box>
-                <IconButton
-                    type="submit"
-                    sx={{
-                        backgroundColor: '#1976d2',
-                        color: '#fff',
-                        height: '100%',
-                        borderRadius: '0 8px 8px 0',
-                        width: 65,
-                    }}
-                    aria-label="search"
-                >
-                    <SearchIcon />
-                </IconButton>
+                {!isMobile && (
+                    <IconButton
+                        type="submit"
+                        sx={{
+                            backgroundColor: '#1976d2',
+                            color: '#fff',
+                            height: '100%',
+                            borderRadius: '0 8px 8px 0',
+                            width: 65,
+                        }}
+                        aria-label="search"
+                    >
+                        <SearchIcon />
+                    </IconButton>
+                )}
             </Paper>
         </>
     );
