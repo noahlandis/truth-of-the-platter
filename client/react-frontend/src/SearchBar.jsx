@@ -160,9 +160,17 @@ function SearchBar() {
         }
     };
 
-    // Updated handleSearch function
+    // Add this new function
+    const handleKeyPress = (event) => {
+        if (event.key === 'Enter') {
+            handleSearch(event);
+        }
+    };
+
+    // Modified handleSearch function
     const handleSearch = async (e) => {
-        e.preventDefault();  // This line is crucial
+        e.preventDefault();
+        console.log('handleSearch called'); // Add this line for debugging
 
         // Check if name is empty and set error if true
         if (!name.trim()) {
@@ -228,7 +236,7 @@ function SearchBar() {
         <>
             <Paper
                 component="form"
-                onSubmit={handleSearch}  // This line is crucial
+                onSubmit={handleSearch}
                 sx={{
                     display: 'flex',
                     flexDirection: isMobile ? 'column' : 'row',
@@ -250,6 +258,7 @@ function SearchBar() {
                     <InputBase
                         value={name}
                         onChange={(e) => setName(e.target.value)}
+                        onKeyPress={handleKeyPress} // Add this line
                         placeholder="Name"
                         sx={{
                             ml: 2,
@@ -299,6 +308,7 @@ function SearchBar() {
                     <InputBase
                         value={location}
                         onChange={handleLocationChange}
+                        onKeyPress={handleKeyPress} // Add this line
                         onFocus={handleFocus}
                         onBlur={handleBlur}
                         placeholder="Location"
