@@ -137,15 +137,16 @@ function RatingResults() {
                                                 <img
                                                     src={getLogoForWebsite(website)}
                                                     alt={`${website} Logo`}
-                                                    style={{ width: '150px', marginRight: '16px' }}
+                                                    style={{ width: '150px', minWidth: '150px', marginRight: '16px' }} // Added minWidth
                                                 />
                                                 <Rating
                                                     value={rating}
                                                     precision={0.5}
                                                     readOnly
                                                     icon={<StarIcon style={{ color: '#FFD700' }} />}
+                                                    sx={{ marginLeft: '8px' }}
                                                 />
-                                                <Typography sx={{ marginLeft: '5px' }}>
+                                                <Typography sx={{ marginLeft: '8px' }}>
                                                     {rating} ({reviews} reviews)
                                                 </Typography>
                                             </Box>
@@ -157,7 +158,7 @@ function RatingResults() {
                             </ul>
 
                             <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 7 }}>
-                                <Typography variant="h5" component="div" sx={{ marginRight: '16px' }}>
+                                <Typography variant="h5" component="div" sx={{ marginRight: '16px', minWidth: '150px' }}> {/* Added minWidth */}
                                     Overall Rating:
                                 </Typography>
                                 <Rating
