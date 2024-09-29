@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Paper, InputBase, IconButton, Box, List, ListItem, ListItemButton, ListItemText, Typography } from '@mui/material';
+import { Paper, InputBase, IconButton, Box, List, ListItem, ListItemButton, ListItemText, Typography, useMediaQuery, useTheme } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import axios from 'axios';
@@ -24,15 +24,32 @@ function SearchBar() {
     // Ref for storing timeout ID for debouncing
     const debounceTimeoutRef = useRef(null);
 
+    const autocompleteServiceRef = useRef(null);
+
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     // On component mount, populate input fields from query params
     useEffect(() => {
         const initialName = searchParams.get('name') || '';
         const initialLocation = searchParams.get('location') || '';
+        
+        // Check if the current route is '/'
+        if (window.location.pathname === '/') {
+            setLocation('');  // Clear location if on home page
+            setName('');  // Clear name if on home page
+        } else {
+            setName(initialName);
+            setLocation(initialLocation);
+        }
+    
+        // Initialize Google Places AutocompleteService
+        if (window.google && window.google.maps && window.google.maps.places) {
+            autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
+        }
+    }, [searchParams]);
 
-        setName(initialName);
-        setLocation(initialLocation);
-    }, []);
+
 
     // Clear name input
     const handleClearName = () => setName('');
@@ -54,30 +71,39 @@ function SearchBar() {
     };
 
     useEffect(() => {
-        // Debounced API call for location suggestions
         if (location.length > 0) {
             if (debounceTimeoutRef.current) {
                 clearTimeout(debounceTimeoutRef.current);
             }
 
-            debounceTimeoutRef.current = setTimeout(async () => {
-                try {
-                    const response = await axios.get(`${apiUrl}/api/autocomplete`, {
-                        params: { text: location },
-                    });
-                    response.data.predictions = response.data.predictions.map((suggestion) => {
-                        suggestion.description = suggestion.description.replace(/, USA$/, '');
-                        return suggestion;
-                    });
-                    setSuggestions(response.data.predictions);
-                } catch (error) {
-                    console.error('Error fetching location suggestions:', error);
+            debounceTimeoutRef.current = setTimeout(() => {
+                if (autocompleteServiceRef.current) {
+                    autocompleteServiceRef.current.getPlacePredictions(
+                        {
+                            input: location,
+                            types: ['(cities)'],
+                            componentRestrictions: { country: 'us' }
+                        },
+                        (predictions, status) => {
+                            if (status === window.google.maps.places.PlacesServiceStatus.OK && predictions) {
+                                const formattedPredictions = predictions.map(prediction => ({
+                                    ...prediction,
+                                    description: prediction.description.replace(/, USA$/, '')
+                                }));
+                                setSuggestions(formattedPredictions);
+                            } else {
+                                console.error('Error fetching location suggestions:', status);
+                                setSuggestions([]);
+                            }
+                        }
+                    );
                 }
-            }, 200); // 300ms debounce delay
+            }, 200); // 200ms debounce delay
         } else {
             setSuggestions([]);
+            setShowSuggestions(false);
         }
-        // Cleanup timeout on unmount or when location changes
+
         return () => {
             if (debounceTimeoutRef.current) {
                 clearTimeout(debounceTimeoutRef.current);
@@ -128,7 +154,7 @@ function SearchBar() {
         }
     };
 
-    // Handle search and navigate with query params
+    // Updated handleSearch function
     const handleSearch = async (e) => {
         e.preventDefault();
 
@@ -137,13 +163,59 @@ function SearchBar() {
             setError('Name field cannot be left blank');
             return; // Prevent form submission
         }
-        let searchLocation = location;
-        if (!location.trim()) {
-            searchLocation = await handleUserLocationClick();
-        }
 
         setError(''); // Clear error if validation passes
+
+        let searchLocation = location;
+
+        // If location is blank, get current location
+        if (!location.trim()) {
+            try {
+                const currentLocation = await getCurrentLocation();
+                searchLocation = currentLocation;
+            } catch (error) {
+                console.error('Error getting current location:', error);
+                // You might want to set an error state here or handle it differently
+            }
+        }
+
         navigate(`/search?name=${name}&location=${searchLocation}`);
+    };
+
+    // New function to get current location
+    const getCurrentLocation = () => {
+        return new Promise((resolve, reject) => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async (position) => {
+                    const { latitude, longitude } = position.coords;
+                    const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}`;
+                    
+                    try {
+                        const response = await axios.get(apiUrl);
+                        const results = response.data.results;
+                        if (results.length > 0) {
+                            const addressComponents = results[0].address_components;
+                            const city = addressComponents.find((component) =>
+                                component.types.includes('locality')
+                            )?.long_name;
+                            const state = addressComponents.find((component) =>
+                                component.types.includes('administrative_area_level_1')
+                            )?.long_name;
+                            const userLocation = `${city}, ${state}`;
+                            resolve(userLocation);
+                        } else {
+                            reject(new Error('No results found'));
+                        }
+                    } catch (error) {
+                        reject(error);
+                    }
+                }, (error) => {
+                    reject(error);
+                });
+            } else {
+                reject(new Error('Geolocation is not supported by this browser.'));
+            }
+        });
     };
 
     return (
@@ -153,27 +225,34 @@ function SearchBar() {
                 onSubmit={handleSearch}
                 sx={{
                     display: 'flex',
+                    flexDirection: isMobile ? 'column' : 'row',
                     alignItems: 'center',
-                    height: 65,
+                    height: isMobile ? 'auto' : 65,
                     width: '100%',
-                    borderRadius: '0 8px 8px 0',
+                    borderRadius: isMobile ? '8px' : '0 8px 8px 0',
                     boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
                     border: '1px solid #ccc',
                 }}
             >
-                <Box sx={{ position: 'relative', flex: 1, borderRight: '1px solid #ccc' }}>
+                <Box sx={{ 
+                    position: 'relative', 
+                    flex: 1, 
+                    width: '100%',
+                    borderRight: isMobile ? 'none' : '1px solid #ccc',
+                    borderBottom: isMobile ? '1px solid #ccc' : 'none',
+                }}>
                     <InputBase
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Name"
                         sx={{
                             ml: 2,
-                            width: 'calc(100% - 50px)', // Ensure input width leaves space for clear button
+                            width: 'calc(100% - 50px)',
                             flex: 1,
+                            height: isMobile ? 65 : 'auto',
                         }}
                         inputProps={{ 'aria-label': 'name' }}
                     />
-
                     {error && (
                         <Typography
                             color="error"
@@ -207,7 +286,7 @@ function SearchBar() {
                     )}
                 </Box>
 
-                <Box sx={{ position: 'relative', flex: 1 }}>
+                <Box sx={{ position: 'relative', flex: 1, width: '100%' }}>
                     <InputBase
                         value={location}
                         onChange={handleLocationChange}
@@ -217,7 +296,8 @@ function SearchBar() {
                         sx={{
                             ml: 2,
                             flex: 1,
-                            width: 'calc(100% - 50px)', // Ensure input width leaves space for clear button
+                            width: 'calc(100% - 50px)',
+                            height: isMobile ? 65 : 'auto',
                         }}
                         inputProps={{ 'aria-label': 'location' }}
                     />
@@ -316,70 +396,24 @@ function SearchBar() {
                         </List>
                     )}
                 </Box>
-                <IconButton
-                    type="submit"
-                    sx={{
-                        backgroundColor: '#1976d2',
-                        color: '#fff',
-                        height: '100%',
-                        borderRadius: '0 8px 8px 0',
-                        width: 65,
-                    }}
-                    aria-label="search"
-                >
-                    <SearchIcon />
-                </IconButton>
+                {!isMobile && (
+                    <IconButton
+                        type="submit"
+                        sx={{
+                            backgroundColor: '#1976d2',
+                            color: '#fff',
+                            height: '100%',
+                            borderRadius: '0 8px 8px 0',
+                            width: 65,
+                        }}
+                        aria-label="search"
+                    >
+                        <SearchIcon />
+                    </IconButton>
+                )}
             </Paper>
         </>
     );
 }
 
 export default SearchBar;
-
-
-// <List
-// sx={{
-//   position: 'absolute',
-//   top: '100%',
-//   left: 0,
-//   right: 0, // Ensures it spans the full width of the location input
-//   width: '100%', // Ensures full width
-//   backgroundColor: '#fff',
-//   boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-//   zIndex: 1,
-//   maxHeight: 200,
-//   overflowY: 'auto',
-//   borderRadius: '0 0 8px 8px',
-// }}
-// >
-// {['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix'].map((suggestion, index) => (
-//   <ListItem key={index} disablePadding>
-//     <ListItemButton onClick={() => handleSuggestionClick(suggestion)}>
-//       <ListItemText primary={suggestion} />
-//     </ListItemButton>
-//   </ListItem>
-// ))}
-// </List>
-// <List
-// sx={{
-//   position: 'absolute',
-//   top: '100%',
-//   left: 0,
-//   right: 0, // Ensures it spans the full width of the location input
-//   width: '100%', // Ensures full width
-//   backgroundColor: '#fff',
-//   boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-//   zIndex: 1,
-//   maxHeight: 200,
-//   overflowY: 'auto',
-//   borderRadius: '0 0 8px 8px',
-// }}
-// >
-// {['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix'].map((suggestion, index) => (
-//   <ListItem key={index} disablePadding>
-//     <ListItemButton onClick={() => handleSuggestionClick(suggestion)}>
-//       <ListItemText primary={suggestion} />
-//     </ListItemButton>
-//   </ListItem>
-// ))}
-// </List>

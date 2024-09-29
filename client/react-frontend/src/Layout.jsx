@@ -4,7 +4,7 @@ function Layout({ children }) {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-white to-red-500">
       {/* Common Header */}
-      <div className="w-full mx-auto max-w-7xl">
+      <div className="w-full max-w-5xl mx-auto">
       <div className="p-4 ">
       <Header />
       </div>

@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { CircularProgress, Rating, Box, Typography } from '@mui/material';
+import { CircularProgress, Rating, Box, Typography, Grid2, Card, CardContent, CardMedia, Divider } from '@mui/material';
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
-import yelp from './assets/yelp.svg'; // Adjust the path based on your folder structure
-import tripAdvisor from './assets/trip_advisor.png'; // Adjust the path based on your folder structure
-import google from './assets/google.svg'; // Adjust the path based on your folder structure
+
+import google from './assets/logos_png/google_logo.png'
+import tripAdvisor from './assets/logos_png/trip_advisor_logo.png'
+import yelp from './assets/logos_png/yelp_logo.png'
+
 import StarIcon from '@mui/icons-material/Star'; // Import the star icon
 
 function RatingResults() {
@@ -23,7 +25,6 @@ function RatingResults() {
     const nameParam = searchParams.get('name') || '';
     const locationParam = searchParams.get('location') || '';
 
-    // Function to map website name to corresponding logo
     const getLogoForWebsite = (website) => {
         switch (website.toLowerCase()) {
             case 'yelp':
@@ -33,12 +34,11 @@ function RatingResults() {
             case 'google':
                 return google;
             default:
-                return null; // Return null or a default placeholder logo if website is unrecognized
+                return null;
         }
     };
 
     useEffect(() => {
-        // Redirect to /search if no data is available (opened directly from a link)
         if (!data && nameParam && locationParam) {
             navigate(`/search?name=${nameParam}&location=${locationParam}`);
         }
@@ -48,7 +48,6 @@ function RatingResults() {
     }, [data, nameParam, locationParam, navigate]);
 
     useEffect(() => {
-        // Clear localStorage when new data (restaurant) is selected
         if (data) {
             localStorage.removeItem('siteRatings');
             localStorage.removeItem('starAverage');
@@ -63,7 +62,7 @@ function RatingResults() {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(data), // Send the entire data object
+                    body: JSON.stringify(data),
                 });
 
                 if (!response.ok) {
@@ -75,7 +74,6 @@ function RatingResults() {
                 setStarAverage(result.star_average);
                 setTotalReviewCount(result.total_review_count);
 
-                // Save the fetched data to localStorage
                 localStorage.setItem('siteRatings', JSON.stringify(result.site_ratings));
                 localStorage.setItem('starAverage', JSON.stringify(result.star_average));
                 localStorage.setItem('totalReviewCount', JSON.stringify(result.total_review_count));
@@ -92,101 +90,96 @@ function RatingResults() {
     }, [data]);
 
     if (loading) {
-        return (
-            <div className="flex items-center justify-center mt-20">
-                <CircularProgress style={{ color: 'black' }} />
-            </div>
-        );
-    }
+        return <div className='flex items-center justify-center mt-20 '>
+          <CircularProgress style={{ color: 'black' }} />
+        </div>;
+      }
 
+      
     if (error) {
         return <div>Error: {error}</div>;
     }
 
     return (
-        <div>
-            <h1 className="items-start mb-4 text-3xl font-bold">
-                Showing results for <em>{data?.name} - {data?.location}</em>
-            </h1>
+        <Card sx={{ display: 'flex', flexDirection: 'column', padding: 2, boxShadow: 3, marginBottom: 4 }}>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, justifyContent: 'space-between', width: '100%' }}>
+                {/* Left Column: Photo, Name, Location */}
+                <Box sx={{ flex: 1, marginRight: { md: 2 }, marginBottom: { xs: 2, md: 0 } }}>
+                    <CardMedia
+                        component="img"
+                        sx={{ width: '100%', height: 250, borderRadius: '8px' }}
+                        image={data?.imageUrl || google} // Replace with actual photo
+                        alt={`${data?.name}`}
+                    />
+                    <CardContent>
+                        <Typography variant="h5" component="div" gutterBottom>
+                            {data?.name}
+                        </Typography>
+                        <Typography variant="body1" color="text.secondary">
+                            {data?.location}
+                        </Typography>
+                    </CardContent>
+                </Box>
 
-            {siteRatings.length > 0 ? (
-                <div>
-                    <ul className="space-y-12 text-2xl font-semibold ">
-                        {siteRatings.map(([website, rating, reviews], index) => (
-                            <li key={index}>
-                                {rating ? (
-                                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                        <div className="flex items-center w-full">
-                                            {/* Fixed width container for the logo */}
-                                            <div className="flex-shrink-0 w-[150px] h-[100]px">
+                {/* Divider */}
+                <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', md: 'block' }, marginRight: 2 }} />
+                <Divider orientation="horizontal" flexItem sx={{ display: { xs: 'block', md: 'none' }, marginBottom: 2 }} />
+
+                {/* Right Column: Ratings and Reviews */}
+                <Box sx={{ flex: 1 }}>
+                    {siteRatings.length > 0 ? (
+                        <div>
+                            <ul>
+                                {siteRatings.map(([website, rating, reviews], index) => (
+                                    <li key={index} style={{ marginBottom: '16px' }}>
+                                        {rating ? (
+                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                                 <img
                                                     src={getLogoForWebsite(website)}
                                                     alt={`${website} Logo`}
-                                                    className="object-contain w-full h-full align-middle"
+                                                    style={{ width: '150px', minWidth: '150px', marginRight: '16px' }} // Added minWidth
                                                 />
-                                            </div>
-                                            {/* Flexible container for the rating and review count */}
-                                            <div className="flex items-center flex-grow ml-4">
                                                 <Rating
                                                     value={rating}
                                                     precision={0.5}
                                                     readOnly
-                                                    icon={<StarIcon style={{ color: '#FFF700' }} />} // Bright yellow stars
-                                                    emptyIcon={<StarIcon style={{ color: 'rgba(255, 255, 255, 0.5)' }} />} // Semi-transparent white stars
+                                                    icon={<StarIcon style={{ color: '#FFD700' }} />}
+                                                    sx={{ marginLeft: '8px' }}
                                                 />
-                                                <Typography sx={{ marginLeft: '5px' }}>
+                                                <Typography sx={{ marginLeft: '8px' }}>
                                                     {rating} ({reviews} reviews)
                                                 </Typography>
-                                            </div>
-                                        </div>
-                                    </Box>
-                                ) : (
-                                    <Typography component="div" style={{ display: 'inline-flex', alignItems: 'center' }}>
-                                        <img
-                                            src={getLogoForWebsite(website)}
-                                            alt={`${website} Logo`}
-                                            className="object-contain"
-                                            style={{ marginRight: '8px', width: '150px', height: '100px' }}  // Adjust size here
-                                        />
-                                        Ratings could not be found for this site
-                                    </Typography>
+                                            </Box>
+                                        ) : (
+                                            <Typography>No ratings for {website}</Typography>
+                                        )}
+                                    </li>
+                                ))}
+                            </ul>
 
-
-                                )}
-                            </li>
-                        ))}
-                    </ul>
-
-                    <div className="mt-20 text-2xl font-semibold">
-                        {/* Black line above "Overall" */}
-                        <div style={{ borderTop: '2px solid black', width: '100%', marginBottom: '20px' }}></div>
-
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                            <Typography sx={{ marginRight: '5px', fontSize: '1.5rem' }} className="mt-10 font-semibold">
-                                Overall
-                            </Typography>
-                            <div className="flex items-center flex-grow ml-20">
+                            <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 7 }}>
+                                <Typography 
+                                variant="h5" // make h6 if mobile
+                                component="div" sx={{ marginRight: '16px', minWidth: '150px' }}> {/* Added minWidth */}
+                                    Overall Rating:
+                                </Typography>
                                 <Rating
                                     value={starAverage}
                                     precision={0.5}
                                     readOnly
-                                    icon={<StarIcon style={{ color: '#FFF700' }} />} // Bright yellow stars
-                                    emptyIcon={<StarIcon style={{ color: 'rgba(255, 255, 255, 0.5)' }} />} // Semi-transparent white stars
+                                    icon={<StarIcon style={{ color: '#FFD700' }} />}
                                 />
-                                <Typography sx={{ marginLeft: '5px' }}>
+                                <Typography sx={{ marginLeft: '8px' }}>
                                     {starAverage} ({totalReviewCount} reviews)
                                 </Typography>
-                            </div>
-                        </Box>
-                    </div>
-
-
-
-                </div>
-            ) : (
-                <p>No ratings found.</p>
-            )}
-        </div>
+                            </Box>
+                        </div>
+                    ) : (
+                        <Typography>No ratings found.</Typography>
+                    )}
+                </Box>
+            </Box>
+        </Card>
     );
 }
 
