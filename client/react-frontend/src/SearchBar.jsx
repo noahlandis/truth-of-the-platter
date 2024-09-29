@@ -299,7 +299,10 @@ function SearchBar() {
                             width: 'calc(100% - 50px)',
                             height: isMobile ? 65 : 'auto',
                         }}
-                        inputProps={{ 'aria-label': 'location' }}
+                        inputProps={{ 
+                            'aria-label': 'location',
+                            enterKeyHint: 'search'
+                        }}
                     />
                     {location && (
                         <IconButton
