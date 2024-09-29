@@ -152,7 +152,7 @@ function SearchBar() {
         }
     };
 
-    // Handle search and navigate with query params
+    // Updated handleSearch function
     const handleSearch = async (e) => {
         e.preventDefault();
 
@@ -163,7 +163,57 @@ function SearchBar() {
         }
 
         setError(''); // Clear error if validation passes
-        navigate(`/search?name=${name}&location=${location}`);
+
+        let searchLocation = location;
+
+        // If location is blank, get current location
+        if (!location.trim()) {
+            try {
+                const currentLocation = await getCurrentLocation();
+                searchLocation = currentLocation;
+            } catch (error) {
+                console.error('Error getting current location:', error);
+                // You might want to set an error state here or handle it differently
+            }
+        }
+
+        navigate(`/search?name=${name}&location=${searchLocation}`);
+    };
+
+    // New function to get current location
+    const getCurrentLocation = () => {
+        return new Promise((resolve, reject) => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async (position) => {
+                    const { latitude, longitude } = position.coords;
+                    const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}`;
+                    
+                    try {
+                        const response = await axios.get(apiUrl);
+                        const results = response.data.results;
+                        if (results.length > 0) {
+                            const addressComponents = results[0].address_components;
+                            const city = addressComponents.find((component) =>
+                                component.types.includes('locality')
+                            )?.long_name;
+                            const state = addressComponents.find((component) =>
+                                component.types.includes('administrative_area_level_1')
+                            )?.long_name;
+                            const userLocation = `${city}, ${state}`;
+                            resolve(userLocation);
+                        } else {
+                            reject(new Error('No results found'));
+                        }
+                    } catch (error) {
+                        reject(error);
+                    }
+                }, (error) => {
+                    reject(error);
+                });
+            } else {
+                reject(new Error('Geolocation is not supported by this browser.'));
+            }
+        });
     };
 
     return (
@@ -355,4 +405,3 @@ function SearchBar() {
 }
 
 export default SearchBar;
-
