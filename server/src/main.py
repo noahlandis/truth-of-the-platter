@@ -7,7 +7,7 @@ import logging
 import os
 import sys
 
-import bugsnag
+import bugsnag 
 from bugsnag.handlers import BugsnagHandler
 from dotenv import load_dotenv
 
@@ -15,6 +15,7 @@ from client.cli.src.main import run_cli
 from web_app import app
 
 logger = logging.getLogger()
+
 
 def setup():
     load_dotenv()

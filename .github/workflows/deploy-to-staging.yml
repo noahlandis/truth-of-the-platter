@@ -24,5 +24,6 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         port: ${{ secrets.EC2_SSH_PORT }}  # Optional, default is 22
         script: |
-          cd ~/true-reviews
+          cd ~   # Go to the home directory where deploy.sh is located
           ./deploy.sh
+

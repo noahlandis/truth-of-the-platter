@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
-import { Card, CardContent, Typography, CircularProgress } from '@mui/material';
+import { Card, CardContent, CardMedia, CardActionArea, Typography, CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 function MatchList() {

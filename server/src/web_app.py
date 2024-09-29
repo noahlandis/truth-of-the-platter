@@ -21,6 +21,7 @@ CORS(app)  # This will allow all origins
 
 
 
+
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def catch_all(path):
@@ -79,8 +80,8 @@ def google_places_autocomplete():
     # Set up parameters for the request, including filtering for cities and US locations
     params = {
         'input': input_text,
-        'types': 'geocode',  # Filter results to only cities
-        'components': 'country:us',  # Limit results to the US
+        'types': 'geocode',  
+        'components': 'country:us',  
         'key': os.getenv('GOOGLE_API_KEY')
     }
 
