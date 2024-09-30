@@ -1,8 +1,10 @@
 import SearchBar from "./SearchBar";
 import logo from './assets/logo.svg'; // Adjust the path based on your folder structure
-import { Link } from 'react-router-dom'; // Import Link from react-router-dom
+import { Link, useLocation } from 'react-router-dom'; // Import useLocation
 
 function Header() {
+    const location = useLocation(); // Get current location
+
     return (
         <div className="flex flex-col items-center">
             <span className="flex items-center mb-2">
@@ -15,7 +17,7 @@ function Header() {
                     <div className="ml-2 text-2xl md:text-4xl font-abel">Truth of the Platter</div> {/* Smaller text on mobile */}
                 </Link>
             </span>
-            <SearchBar />
+            {location.pathname !== '/terms' && <SearchBar />} {/* Conditionally render SearchBar */}
         </div>
     );
 }

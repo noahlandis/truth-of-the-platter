@@ -106,26 +106,24 @@ function MatchList() {
               sx={{ width: '100%', cursor: 'pointer' }}
               onClick={() => handleCardClick(data)}
             >
-              <div className="flex items-center">
+              <div className="flex">
                 {data.imageUrl && (
-                  <div>
+                  <div className="flex-shrink-0">
                     <img
                       src={data.imageUrl}
                       alt={`${data.name} example`}
-                      style={{ width: 100, height: 100 }}
+                      className="object-cover w-24 h-full"
                     />
                   </div>
                 )}
-                <div>
-                  <CardContent>
-                    <Typography variant="h5" component="div">
-                      {data.name}
-                    </Typography>
-                    <Typography variant="body1" color="textSecondary">
-                      {data.location}
-                    </Typography>
-                  </CardContent>
-                </div>
+                <CardContent className="flex-grow py-2">
+                  <Typography variant="h5" component="div">
+                    {data.name}
+                  </Typography>
+                  <Typography variant="body1" color="textSecondary">
+                    {data.location}
+                  </Typography>
+                </CardContent>
               </div>
             </Card>
           </div>
