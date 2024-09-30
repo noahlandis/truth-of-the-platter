@@ -1,9 +1,13 @@
+import React from 'react';
 import SearchBar from "./SearchBar";
+import MobileSearchBar from "./MobileSearchBar";
 import logo from './assets/logo.svg'; // Adjust the path based on your folder structure
 import { Link, useLocation } from 'react-router-dom'; // Import useLocation
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 function Header() {
     const location = useLocation(); // Get current location
+    const isMobile = useMediaQuery('(max-width:600px)');
 
     return (
         <div className="flex flex-col items-center">
@@ -17,7 +21,9 @@ function Header() {
                     <div className="ml-2 text-2xl md:text-4xl font-abel">Truth of the Platter</div> {/* Smaller text on mobile */}
                 </Link>
             </span>
-            {location.pathname !== '/terms' && <SearchBar />} {/* Conditionally render SearchBar */}
+            {location.pathname !== '/terms' && (
+                isMobile ? <MobileSearchBar /> : <SearchBar />
+            )}
         </div>
     );
 }
