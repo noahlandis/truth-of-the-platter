@@ -97,10 +97,13 @@ function MobileSearchBar() {
         setActiveInput(inputType);
     };
 
-    const handleInputBlur = () => {
-        setTimeout(() => {
-            setActiveInput(null);
-        }, 100);
+    const handleInputBlur = (e) => {
+        // Check if the new focused element is within the form
+        if (!e.currentTarget.contains(e.relatedTarget)) {
+            setTimeout(() => {
+                setActiveInput(null);
+            }, 100);
+        }
     };
 
     return (
@@ -115,13 +118,13 @@ function MobileSearchBar() {
                 boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
                 border: '1px solid #ccc',
             }}
+            onBlur={handleInputBlur}
         >
             <Box sx={{ display: 'flex', alignItems: 'center', borderBottom: activeInput ? '1px solid #ccc' : 'none' }}>
                 <InputBase
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     onFocus={() => handleInputFocus('name')}
-                    onBlur={handleInputBlur}
                     placeholder="Name"
                     sx={{ ml: 2, flex: 1, py: 1 }}
                     inputProps={{ 'aria-label': 'name' }}
@@ -138,7 +141,6 @@ function MobileSearchBar() {
                         value={location}
                         onChange={handleLocationChange}
                         onFocus={() => handleInputFocus('location')}
-                        onBlur={handleInputBlur}
                         placeholder="Location"
                         sx={{ ml: 2, flex: 1, py: 1 }}
                         inputProps={{ 'aria-label': 'location' }}
