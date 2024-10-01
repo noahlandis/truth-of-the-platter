@@ -117,6 +117,7 @@ function MobileSearchBar() {
                 borderRadius: '8px',
                 boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
                 border: '1px solid #ccc',
+                position: 'relative', // Add this line
             }}
             onBlur={handleInputBlur}
         >
@@ -158,7 +159,21 @@ function MobileSearchBar() {
                 </Typography>
             )}
             {activeInput === 'location' && suggestions.length > 0 && (
-                <List sx={{ maxHeight: 200, overflowY: 'auto', bgcolor: 'background.paper' }}>
+                <List 
+                    sx={{ 
+                        maxHeight: 200, 
+                        overflowY: 'auto', 
+                        bgcolor: 'background.paper',
+                        position: 'absolute',
+                        top: '100%',
+                        left: 0,
+                        right: 0,
+                        zIndex: 1,
+                        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                        border: '1px solid #ccc',
+                        borderTop: 'none',
+                    }}
+                >
                     <ListItem disablePadding>
                         <ListItemButton onClick={handleUserLocationClick}>
                             <LocationOnIcon sx={{ mr: 2, color: '#0688DB' }} />
