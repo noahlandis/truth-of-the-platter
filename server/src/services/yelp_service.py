@@ -3,7 +3,7 @@ import os
 
 import requests
 
-from server.src.model.api_handler import YelpApiGraphQLHandler, YelpApiRegularHandler
+from server.src.model.api_handler import YelpApiGraphQLHandler, YelpApiRegularHandler, GooglePlacesApiHandler
 from exceptions import NoResultsFoundError, UnknownLocationError
 from utils.string_utils import is_potential_match
 
@@ -11,7 +11,8 @@ logger = logging.getLogger()
 
 def get_yelp_matches(name, location):
     chain = YelpApiGraphQLHandler(      
-        YelpApiRegularHandler(          
+        YelpApiRegularHandler(
+            GooglePlacesApiHandler()
         )
     )
     response = chain.handle(name, location)
@@ -46,5 +47,4 @@ def get_filtered_yelp_matches(yelp_restaurants, name):
     print("The filtered restaurants are: ", filtered_restaurants)
     
     return filtered_restaurants
-    
-    
+
