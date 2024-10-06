@@ -33,6 +33,7 @@ def scrape(name, location, source) -> tuple:
     results = []
     for i in range(len(WEBSITES)):
         if WEBSITES[i].__name__ == source:
+            print("SKIPPING WEBSITE: ", WEBSITES[i].__name__)
             continue
         url = WEBSITES[i].build_url(name, location)
 
