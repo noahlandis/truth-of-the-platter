@@ -7,7 +7,7 @@ class YelpApiGraphQL(YelpApi):
         url = 'https://api.yelp.com/v3/graphql'
         query = '''
         query SearchBusinesses($term: String!, $location: String!) {
-            search(term: $term, location: $location, limit: 5) {
+            search(term: $term, location: $location, limit: 4) {
                 business {
                     name
                     location {

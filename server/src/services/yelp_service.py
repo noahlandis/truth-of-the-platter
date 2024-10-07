@@ -34,6 +34,7 @@ def get_filtered_yelp_matches(yelp_restaurants, name, handler):
     """
     Filters the Yelp matches to only include potential matches
     """
+    print("The yelp restaurants are: ", yelp_restaurants)
     # filter matches
     filtered_restaurants = [
         handler.get_formatted_restaurant_data(yelp_restaurant)

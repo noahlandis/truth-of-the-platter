@@ -40,6 +40,12 @@ class YelpApiGraphQLHandler(ApiHandler):
         if response == 'TRIAL_EXPIRED':
             print("GraphQL API trial expired, passing to next handler")
             raise Exception("GraphQL API trial expired")
+        if response == 'TOKEN_INVALID':
+            print("GraphQL API token invalid, passing to next handler")
+            raise Exception("GraphQL API token invalid")
+        if response == 'VALIDATION_ERROR':
+            print("GraphQL API validation error, passing to next handler")
+            raise Exception("GraphQL API validation error")
         return response
     
     def get_formatted_restaurant_data(self, restaurant):
@@ -54,6 +60,12 @@ class YelpApiRegularHandler(ApiHandler):
         if response == 'TRIAL_EXPIRED':
             print("Regular API trial expired, passing to next handler")
             raise Exception("Regular API trial expired")
+        if response == 'TOKEN_INVALID':
+            print("Regular API token invalid, passing to next handler")
+            raise Exception("Regular API token invalid")
+        if response == 'VALIDATION_ERROR':
+            print("Regular API validation error, passing to next handler")
+            raise Exception("Regular API validation error")
         return response
 
     def get_formatted_restaurant_data(self, restaurant):
