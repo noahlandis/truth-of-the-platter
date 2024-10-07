@@ -23,7 +23,7 @@ function MatchList() {
   const isMd = useMediaQuery(theme.breakpoints.only('md'));
 
   const getTruncateLength = () => {
-    if (isXs) return 25;
+    if (isXs) return 30;
     if (isSm) return 35;
     if (isMd) return 45;
     return 60; // for larger screens
@@ -113,7 +113,7 @@ function MatchList() {
 
   return (
     <div className="flex flex-col ">
-      <h1 className="items-start mb-2 text-xl font-bold md:mb-4 md:text-3xl">Select the restaurant you want to see the ratings for</h1>
+      <h1 className="items-start mb-2 text-xl font-bold md:mb-4 md:text-3xl">Select the restaurant you want to see ratings for</h1>
       
       {matches.length > 0 ? (
         matches.map((data, index) => (
@@ -133,10 +133,30 @@ function MatchList() {
                   </div>
                 )}
                 <CardContent className="flex-grow py-2">
-                  <Typography variant="h5" component="div" className="text-lg md:text-xl">
-                    {data.name}
+                  <Typography 
+                    variant="h5" 
+                    component="div" 
+                    sx={{
+                      fontSize: {
+                        xs: '1rem',
+                        sm: '1.25rem',
+                        md: '1.5rem',
+                      },
+                    }}
+                  >
+                    {truncateText(data.name, getTruncateLength())}
                   </Typography>
-                  <Typography variant="body1" color="textSecondary" className="text-sm md:text-xs">
+                  <Typography 
+                    variant="body1" 
+                    color="textSecondary" 
+                    sx={{
+                      fontSize: {
+                        xs: '0.875rem',
+                        sm: '1rem',
+                        md: '1rem',
+                      },
+                    }}
+                  >
                     {truncateText(data.location, getTruncateLength())}
                   </Typography>
                 </CardContent>
