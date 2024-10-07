@@ -45,7 +45,14 @@ function Header() {
                 )}
             </div>
             {location.pathname !== '/terms' && (
-                isMobile ? <MobileSearchBar onFocus={() => setIsSearchFocused(true)} /> : <SearchBar />
+                isMobile ? (
+                    <MobileSearchBar 
+                        onFocus={() => setIsSearchFocused(true)}
+                        onBlur={() => setIsSearchFocused(false)}
+                    />
+                ) : (
+                    <SearchBar />
+                )
             )}
         </div>
     );

@@ -4,7 +4,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { useSearchParams, useNavigate } from "react-router-dom";
 
-function MobileSearchBar({ onFocus }) {
+function MobileSearchBar({ onFocus, onBlur }) {
     const apiUrl = import.meta.env.VITE_API_BASE_URL;
     const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
@@ -103,6 +103,7 @@ function MobileSearchBar({ onFocus }) {
         if (!e.currentTarget.contains(e.relatedTarget)) {
             setTimeout(() => {
                 setActiveInput(null);
+                onBlur();
             }, 100);
         }
     };
