@@ -56,13 +56,25 @@ def select_match():
     print(request.json)
     intended_restaurant = request.json
     site_ratings = []
-    site_ratings.append(("Yelp", str(intended_restaurant['rating']), str(intended_restaurant['review_count'])))
+    print("INTENDED RESTAURANT: ", intended_restaurant['source'])
+    site_ratings.append((intended_restaurant['source'], str(intended_restaurant['rating']), str(intended_restaurant['review_count'])))
     full_name = intended_restaurant['name']
     full_location = intended_restaurant['location']
-    site_ratings.extend(scrape(full_name, full_location))
-    star_average, total_review_count = get_weighted_average_and_total_review_count(site_ratings)
+    # we pass in the source to the scrape function so we know which website data we already have and don't need to scrape 
+    scraped_ratings = scrape(full_name, full_location, intended_restaurant['source'])
+    
+    # Ensure the order is Yelp, Google, TripAdvisor
+    ordered_ratings = []
+    sources = ['Yelp', 'Google', 'TripAdvisor']
+    for source in sources:
+        rating = next((r for r in site_ratings + scraped_ratings if r[0] == source), None)
+        if rating:
+            ordered_ratings.append(rating)
+    
+    star_average, total_review_count = get_weighted_average_and_total_review_count(ordered_ratings)
+    print("SITE RATINGS: ", ordered_ratings)
     return jsonify({
-        'site_ratings': site_ratings,
+        'site_ratings': ordered_ratings,
         'star_average': star_average,
         'total_review_count': total_review_count
     })

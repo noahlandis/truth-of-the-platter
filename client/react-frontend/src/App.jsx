@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Layout from './Layout';  // Import your Layout component
 import MatchList from './MatchList';  // Import your MatchList component
 import RatingResults from './RatingResults';  // Import your RatingResults component
+import Terms from './Terms';  // Import the Terms component
 
 import { Box, Typography, Paper, Stepper, Step, StepLabel } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
@@ -83,6 +84,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/search" element={<MatchList />} />
           <Route path="/ratings" element={<RatingResults />} />
+          <Route path="/terms" element={<Terms />} />  {/* New route for Terms */}
           <Route path="*" element={<Home />} />
         </Routes>
       </Layout>

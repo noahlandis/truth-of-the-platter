@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Paper, InputBase, IconButton, Box, List, ListItem, ListItemButton, ListItemText, Typography, useMediaQuery, useTheme } from '@mui/material';
+import { Paper, InputBase, IconButton, Box, List, ListItem, ListItemButton, ListItemText, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import axios from 'axios';
@@ -26,8 +26,6 @@ function SearchBar() {
 
     const autocompleteServiceRef = useRef(null);
 
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
     // On component mount, populate input fields from query params
     useEffect(() => {
@@ -55,13 +53,10 @@ function SearchBar() {
     const handleClearName = () => setName('');
     const handleClearLocation = () => setLocation('');
 
-    // Updated handleSuggestionClick function
+    // Handle suggestion click
     const handleSuggestionClick = (suggestion) => {
         setLocation(suggestion);
-        // Don't hide suggestions immediately
-        if (!isMobile) {
-            setShowSuggestions(false);
-        }
+        setShowSuggestions(false);
     };
 
     // Show suggestions on focus
@@ -69,11 +64,8 @@ function SearchBar() {
         setShowSuggestions(true);
     };
 
-    // Updated handleBlur function
     const handleBlur = () => {
-        if (!isMobile) {
-            setTimeout(() => setShowSuggestions(false), 100);
-        }
+        setTimeout(() => setShowSuggestions(false), 100);
     };
 
     useEffect(() => {
@@ -160,17 +152,9 @@ function SearchBar() {
         }
     };
 
-    // Add this new function
-    const handleKeyPress = (event) => {
-        if (event.key === 'Enter') {
-            handleSearch(event);
-        }
-    };
-
-    // Modified handleSearch function
+    // Updated handleSearch function
     const handleSearch = async (e) => {
         e.preventDefault();
-        console.log('handleSearch called'); // Add this line for debugging
 
         // Check if name is empty and set error if true
         if (!name.trim()) {
@@ -239,38 +223,27 @@ function SearchBar() {
                 onSubmit={handleSearch}
                 sx={{
                     display: 'flex',
-                    flexDirection: isMobile ? 'column' : 'row',
                     alignItems: 'center',
-                    height: isMobile ? 'auto' : 65,
+                    height: 65,
                     width: '100%',
-                    borderRadius: isMobile ? '8px' : '0 8px 8px 0',
+                    borderRadius: '0 8px 8px 0',
                     boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
                     border: '1px solid #ccc',
                 }}
             >
-                <Box sx={{ 
-                    position: 'relative', 
-                    flex: 1, 
-                    width: '100%',
-                    borderRight: isMobile ? 'none' : '1px solid #ccc',
-                    borderBottom: isMobile ? '1px solid #ccc' : 'none',
-                }}>
+                <Box sx={{ position: 'relative', flex: 1, borderRight: '1px solid #ccc' }}>
                     <InputBase
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        onKeyPress={handleKeyPress} // Add this line
                         placeholder="Name"
                         sx={{
                             ml: 2,
-                            width: 'calc(100% - 50px)',
+                            width: 'calc(100% - 50px)', // Ensure input width leaves space for clear button
                             flex: 1,
-                            height: isMobile ? 65 : 'auto',
                         }}
-                        inputProps={{ 
-                            'aria-label': 'name',
-                            enterKeyHint: 'search'  // Added this line
-                        }}
+                        inputProps={{ 'aria-label': 'name' }}
                     />
+
                     {error && (
                         <Typography
                             color="error"
@@ -304,24 +277,19 @@ function SearchBar() {
                     )}
                 </Box>
 
-                <Box sx={{ position: 'relative', flex: 1, width: '100%' }}>
+                <Box sx={{ position: 'relative', flex: 1 }}>
                     <InputBase
                         value={location}
                         onChange={handleLocationChange}
-                        onKeyPress={handleKeyPress} // Add this line
                         onFocus={handleFocus}
                         onBlur={handleBlur}
                         placeholder="Location"
                         sx={{
                             ml: 2,
                             flex: 1,
-                            width: 'calc(100% - 50px)',
-                            height: isMobile ? 65 : 'auto',
+                            width: 'calc(100% - 50px)', // Ensure input width leaves space for clear button
                         }}
-                        inputProps={{ 
-                            'aria-label': 'location',
-                            enterKeyHint: 'search'
-                        }}
+                        inputProps={{ 'aria-label': 'location' }}
                     />
                     {location && (
                         <IconButton
@@ -410,15 +378,7 @@ function SearchBar() {
 
                             {suggestions.map((suggestion, index) => (
                                 <ListItem key={index} disablePadding>
-                                    <ListItemButton 
-                                        onMouseDown={() => handleSuggestionClick(suggestion.description)}
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            if (isMobile) {
-                                                handleSuggestionClick(suggestion.description);
-                                            }
-                                        }}
-                                    >
+                                    <ListItemButton onMouseDown={() => handleSuggestionClick(suggestion.description)}>
                                         <ListItemText primary={suggestion.description} />
                                     </ListItemButton>
                                 </ListItem>
@@ -426,21 +386,19 @@ function SearchBar() {
                         </List>
                     )}
                 </Box>
-                {!isMobile && (
-                    <IconButton
-                        type="submit"
-                        sx={{
-                            backgroundColor: '#1976d2',
-                            color: '#fff',
-                            height: '100%',
-                            borderRadius: '0 8px 8px 0',
-                            width: 65,
-                        }}
-                        aria-label="search"
-                    >
-                        <SearchIcon />
-                    </IconButton>
-                )}
+                <IconButton
+                    type="submit"
+                    sx={{
+                        backgroundColor: '#1976d2',
+                        color: '#fff',
+                        height: '100%',
+                        borderRadius: '0 8px 8px 0',
+                        width: 65,
+                    }}
+                    aria-label="search"
+                >
+                    <SearchIcon />
+                </IconButton>
             </Paper>
         </>
     );
