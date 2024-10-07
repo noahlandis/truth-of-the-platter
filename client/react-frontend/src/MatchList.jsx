@@ -112,7 +112,7 @@ function MatchList() {
                     <img
                       src={data.imageUrl}
                       alt={`${data.name} example`}
-                      className="object-cover w-24 h-full"
+                      className="object-cover w-24 h-24" // Changed from h-full to h-24
                     />
                   </div>
                 )}
