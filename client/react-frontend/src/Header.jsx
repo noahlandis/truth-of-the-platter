@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import SearchBar from "./SearchBar";
 import MobileSearchBar from "./MobileSearchBar";
 import logo from './assets/logo.svg'; // Adjust the path based on your folder structure
@@ -10,13 +10,21 @@ function Header() {
     const location = useLocation(); // Get current location
     const isMobile = useMediaQuery('(max-width:600px)');
     const [isSearchFocused, setIsSearchFocused] = useState(false);
+    const cancelSearchRef = useRef(null);
+
+    const handleCancel = () => {
+        setIsSearchFocused(false);
+        if (cancelSearchRef.current) {
+            cancelSearchRef.current();
+        }
+    };
 
     return (
         <div className="flex flex-col items-center w-full">
             <div className={`flex items-center justify-between w-full ${isMobile ? 'px-2' : ''}`}>
                 {isMobile && isSearchFocused && (
                     <Button 
-                        onClick={() => setIsSearchFocused(false)} 
+                        onClick={handleCancel}
                         variant="text" 
                         size="small"
                     >
@@ -49,6 +57,7 @@ function Header() {
                     <MobileSearchBar 
                         onFocus={() => setIsSearchFocused(true)}
                         onBlur={() => setIsSearchFocused(false)}
+                        cancelSearchRef={cancelSearchRef}
                     />
                 ) : (
                     <SearchBar />

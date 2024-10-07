@@ -4,7 +4,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { useSearchParams, useNavigate } from "react-router-dom";
 
-function MobileSearchBar({ onFocus, onBlur }) {
+function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
     const apiUrl = import.meta.env.VITE_API_BASE_URL;
     const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
@@ -15,6 +15,7 @@ function MobileSearchBar({ onFocus, onBlur }) {
     const [activeInput, setActiveInput] = useState(null);
     const [searchParams, setSearchParams] = useSearchParams();
     const navigate = useNavigate();
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const autocompleteServiceRef = useRef(null);
     const debounceTimeoutRef = useRef(null);
@@ -35,6 +36,20 @@ function MobileSearchBar({ onFocus, onBlur }) {
             autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
         }
     }, [searchParams]);
+
+    useEffect(() => {
+        if (cancelSearchRef) {
+            cancelSearchRef.current = () => {
+                setActiveInput(null);
+                setError(null);
+                setName('');
+                setLocation('');
+                setSuggestions([]);
+                setIsSubmitting(false);
+                onBlur();
+            };
+        }
+    }, [cancelSearchRef, onBlur]);
 
     const handleClearName = () => setName('');
     const handleClearLocation = () => setLocation('');
@@ -83,14 +98,19 @@ function MobileSearchBar({ onFocus, onBlur }) {
         // ... (keep the existing handleUserLocationClick function)
     };
 
-    const handleSearch = () => {
+    const handleSearch = (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
         if (!name.trim()) {
             setError('Name field cannot be left blank');
+            setActiveInput('name');
+            setIsSubmitting(false);
             return;
         }
 
         setError('');
         navigate(`/search?name=${name}&location=${location}`);
+        setIsSubmitting(false);
     };
 
     const handleInputFocus = (inputType) => {
@@ -99,20 +119,22 @@ function MobileSearchBar({ onFocus, onBlur }) {
     };
 
     const handleInputBlur = (e) => {
-        // Check if the new focused element is within the form
-        if (!e.currentTarget.contains(e.relatedTarget)) {
-            setTimeout(() => {
-                setActiveInput(null);
-                onBlur();
-            }, 100);
-        }
+        // Delay the blur effect to allow for error checking
+        setTimeout(() => {
+            if (!e.currentTarget.contains(document.activeElement) && !isSubmitting) {
+                if (!error) {
+                    setActiveInput(null);
+                    onBlur();
+                }
+            }
+        }, 100);
     };
 
     return (
         <Paper
             component="form"
             id="mobile-search-form"
-            onSubmit={(e) => { e.preventDefault(); handleSearch(); }}
+            onSubmit={handleSearch}
             sx={{
                 display: 'flex',
                 flexDirection: 'column',
