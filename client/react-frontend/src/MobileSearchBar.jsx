@@ -4,7 +4,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { useSearchParams, useNavigate } from "react-router-dom";
 
-function MobileSearchBar() {
+function MobileSearchBar({ onFocus }) {
     const apiUrl = import.meta.env.VITE_API_BASE_URL;
     const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
@@ -95,6 +95,7 @@ function MobileSearchBar() {
 
     const handleInputFocus = (inputType) => {
         setActiveInput(inputType);
+        onFocus();
     };
 
     const handleInputBlur = (e) => {
@@ -109,6 +110,7 @@ function MobileSearchBar() {
     return (
         <Paper
             component="form"
+            id="mobile-search-form"
             onSubmit={(e) => { e.preventDefault(); handleSearch(); }}
             sx={{
                 display: 'flex',
