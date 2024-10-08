@@ -3,6 +3,7 @@ import { Paper, InputBase, IconButton, Box, List, ListItem, ListItemButton, List
 import ClearIcon from '@mui/icons-material/Clear';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { useSearchParams, useNavigate } from "react-router-dom";
+import axios from 'axios';
 
 function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
     const apiUrl = import.meta.env.VITE_API_BASE_URL;
@@ -19,6 +20,7 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
     const [nameError, setNameError] = useState('');
     const [showNameError, setShowNameError] = useState(false);
     const [nameErrorOpacity, setNameErrorOpacity] = useState(1);
+    const [showSuggestions, setShowSuggestions] = useState(true);
 
     const autocompleteServiceRef = useRef(null);
     const debounceTimeoutRef = useRef(null);
@@ -58,10 +60,48 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
     const handleSuggestionClick = (suggestion) => {
         setLocation(suggestion);
         setSuggestions([]);
+        setShowSuggestions(false);  // Hide suggestions after selecting
+    };
+
+    const handleUserLocationClick = async () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                const { latitude, longitude } = position.coords;
+                const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}`;
+                
+                try {
+                    const response = await axios.get(apiUrl);
+                    const results = response.data.results;
+                    if (results.length > 0) {
+                        const addressComponents = results[0].address_components;
+
+                        const city = addressComponents.find((component) =>
+                            component.types.includes('locality')
+                        )?.long_name;
+
+                        const state = addressComponents.find((component) =>
+                            component.types.includes('administrative_area_level_1')
+                        )?.long_name;
+
+                        const userLocation = `${city}, ${state}`;
+                        setLocation(userLocation);
+                        setSuggestions([]);
+                        setShowSuggestions(false);  // Hide suggestions after setting location
+                    }
+                } catch (error) {
+                    console.error('Error reverse geocoding location:', error);
+                }
+            }, (error) => {
+                console.error('Error getting user location:', error);
+            });
+        } else {
+            alert('Geolocation is not supported by this browser.');
+        }
     };
 
     const handleLocationChange = (e) => {
         setLocation(e.target.value);
+        setShowSuggestions(true);  // Show suggestions when user starts typing
         if (e.target.value.length > 0) {
             if (debounceTimeoutRef.current) {
                 clearTimeout(debounceTimeoutRef.current);
@@ -93,10 +133,6 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
         } else {
             setSuggestions([]);
         }
-    };
-
-    const handleUserLocationClick = async () => {
-        // ... (keep the existing handleUserLocationClick function)
     };
 
     const handleSearch = (e) => {
@@ -203,7 +239,10 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                     <InputBase
                         value={location}
                         onChange={handleLocationChange}
-                        onFocus={() => handleInputFocus('location')}
+                        onFocus={() => {
+                            handleInputFocus('location');
+                            setShowSuggestions(true);  // Show suggestions when input is focused
+                        }}
                         placeholder="Location"
                         sx={{ ml: 2, flex: 1, py: 1 }}
                         inputProps={{ 'aria-label': 'location' }}
@@ -215,7 +254,7 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                     )}
                 </Box>
             )}
-            {activeInput === 'location' && suggestions.length > 0 && (
+            {activeInput === 'location' && showSuggestions && (
                 <List 
                     sx={{ 
                         maxHeight: 200, 
