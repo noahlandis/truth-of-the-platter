@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useSearchParams } from 'react-router-dom';
-import { Card, CardContent, CardMedia, CardActionArea, Typography, CircularProgress } from '@mui/material';
+import { Card, CardContent, CardMedia, CardActionArea, Typography, CircularProgress, useMediaQuery, useTheme } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 function MatchList() {
@@ -16,6 +16,18 @@ function MatchList() {
   const [searchParams] = useSearchParams();
   const name = searchParams.get('name') || '';
   const location = searchParams.get('location') || '';
+
+  const theme = useTheme();
+  const isXs = useMediaQuery(theme.breakpoints.only('xs'));
+  const isSm = useMediaQuery(theme.breakpoints.only('sm'));
+  const isMd = useMediaQuery(theme.breakpoints.only('md'));
+
+  const getTruncateLength = () => {
+    if (isXs) return 30;
+    if (isSm) return 35;
+    if (isMd) return 45;
+    return 60; // for larger screens
+  };
 
   useEffect(() => {
     const fetchMatches = async () => {
@@ -64,6 +76,10 @@ function MatchList() {
     navigate(`/ratings?name=${name}&location=${location}`, { state: { data } });
   };
 
+  const truncateText = (text, maxLength) => {
+    return text.length > maxLength ? text.slice(0, maxLength - 3) + '...' : text;
+  };
+
   if (loading) {
     return <div className='flex items-center justify-center mt-20 '>
       <CircularProgress style={{ color: 'black' }} />
@@ -97,7 +113,7 @@ function MatchList() {
 
   return (
     <div className="flex flex-col ">
-      <h1 className="items-start mb-4 text-3xl font-bold">Select the restaurant you want to see the ratings for</h1>
+      <h1 className="items-start mb-2 text-xl font-bold md:mb-4 md:text-3xl">Select the restaurant you want to see ratings for</h1>
       
       {matches.length > 0 ? (
         matches.map((data, index) => (
@@ -112,16 +128,36 @@ function MatchList() {
                     <img
                       src={data.imageUrl}
                       alt={`${data.name} example`}
-                      className="object-cover w-24 h-24" // Changed from h-full to h-24
+                      className="object-cover w-24 h-24"
                     />
                   </div>
                 )}
                 <CardContent className="flex-grow py-2">
-                  <Typography variant="h5" component="div">
-                    {data.name}
+                  <Typography 
+                    variant="h5" 
+                    component="div" 
+                    sx={{
+                      fontSize: {
+                        xs: '1rem',
+                        sm: '1.25rem',
+                        md: '1.5rem',
+                      },
+                    }}
+                  >
+                    {truncateText(data.name, getTruncateLength())}
                   </Typography>
-                  <Typography variant="body1" color="textSecondary">
-                    {data.location}
+                  <Typography 
+                    variant="body1" 
+                    color="textSecondary" 
+                    sx={{
+                      fontSize: {
+                        xs: '0.875rem',
+                        sm: '1rem',
+                        md: '1rem',
+                      },
+                    }}
+                  >
+                    {truncateText(data.location, getTruncateLength())}
                   </Typography>
                 </CardContent>
               </div>

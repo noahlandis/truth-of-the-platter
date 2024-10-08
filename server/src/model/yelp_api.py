@@ -22,7 +22,7 @@ class YelpApi(SearchApi):
         return {
             'name': restaurant['name'],
             'location': f"{restaurant['location']['address1']} {restaurant['location']['city']}, {restaurant['location']['state']}",
-            'review_count': restaurant['review_count'],
+            'review_count': f"{restaurant['review_count']:,}",
             'rating': restaurant['rating'],
             'imageUrl': restaurant['image_url'] if 'image_url' in restaurant else restaurant['photos'][0] if 'photos' in restaurant else None,
             'source': 'Yelp'

@@ -33,6 +33,7 @@ class ApiHandler(ABC):
 
 class YelpApiGraphQLHandler(ApiHandler):
     def process_request(self, name, location):
+        print("Yelp API GraphQL handler hit")
         response = YelpApiGraphQL.get_response(name, location)
         if response == 'DAILY_POINTS_LIMIT_REACHED':
             print("GraphQL API limit reached, passing to next handler")
@@ -53,6 +54,7 @@ class YelpApiGraphQLHandler(ApiHandler):
 
 class YelpApiRegularHandler(ApiHandler):
     def process_request(self, name, location):
+        print("Yelp API Regular handler hit")
         response = YelpApiRegular.get_response(name, location)
         if response == 'DAILY_POINTS_LIMIT_REACHED':
             print("Regular API limit reached, passing to next handler")

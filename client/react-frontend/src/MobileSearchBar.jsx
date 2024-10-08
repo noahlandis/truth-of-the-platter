@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Paper, InputBase, IconButton, Box, List, ListItem, ListItemButton, ListItemText, Typography } from '@mui/material';
+import { Paper, InputBase, IconButton, Box, List, ListItem, ListItemButton, ListItemText, Typography, Fade } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { useSearchParams, useNavigate } from "react-router-dom";
 
-function MobileSearchBar({ onFocus }) {
+function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
     const apiUrl = import.meta.env.VITE_API_BASE_URL;
     const GOOGLE_MAPS_API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
@@ -15,6 +15,10 @@ function MobileSearchBar({ onFocus }) {
     const [activeInput, setActiveInput] = useState(null);
     const [searchParams, setSearchParams] = useSearchParams();
     const navigate = useNavigate();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [nameError, setNameError] = useState('');
+    const [showNameError, setShowNameError] = useState(false);
+    const [nameErrorOpacity, setNameErrorOpacity] = useState(1);
 
     const autocompleteServiceRef = useRef(null);
     const debounceTimeoutRef = useRef(null);
@@ -35,6 +39,20 @@ function MobileSearchBar({ onFocus }) {
             autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
         }
     }, [searchParams]);
+
+    useEffect(() => {
+        if (cancelSearchRef) {
+            cancelSearchRef.current = () => {
+                setActiveInput(null);
+                setError(null);
+                setName('');
+                setLocation('');
+                setSuggestions([]);
+                setIsSubmitting(false);
+                onBlur();
+            };
+        }
+    }, [cancelSearchRef, onBlur]);
 
     const handleClearName = () => setName('');
     const handleClearLocation = () => setLocation('');
@@ -83,14 +101,21 @@ function MobileSearchBar({ onFocus }) {
         // ... (keep the existing handleUserLocationClick function)
     };
 
-    const handleSearch = () => {
+    const handleSearch = (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
         if (!name.trim()) {
-            setError('Name field cannot be left blank');
+            setNameError('Name field cannot be left blank');
+            setShowNameError(true);
+            setActiveInput('name');
+            setIsSubmitting(false);
             return;
         }
 
-        setError('');
+        setNameError('');
+        setShowNameError(false);
         navigate(`/search?name=${name}&location=${location}`);
+        setIsSubmitting(false);
     };
 
     const handleInputFocus = (inputType) => {
@@ -99,19 +124,40 @@ function MobileSearchBar({ onFocus }) {
     };
 
     const handleInputBlur = (e) => {
-        // Check if the new focused element is within the form
-        if (!e.currentTarget.contains(e.relatedTarget)) {
-            setTimeout(() => {
-                setActiveInput(null);
-            }, 100);
-        }
+        // Delay the blur effect to allow for error checking
+        setTimeout(() => {
+            if (!e.currentTarget.contains(document.activeElement) && !isSubmitting) {
+                if (!error) {
+                    setActiveInput(null);
+                    onBlur();
+                }
+            }
+        }, 100);
     };
+
+    useEffect(() => {
+        if (showNameError) {
+            setNameErrorOpacity(1);
+            const fadeOutTimer = setTimeout(() => {
+                setNameErrorOpacity(0);
+            }, 500); // Start fading out after 2 seconds
+
+            const hideTimer = setTimeout(() => {
+                setShowNameError(false);
+            }, 1000); // Hide completely after 3 seconds
+
+            return () => {
+                clearTimeout(fadeOutTimer);
+                clearTimeout(hideTimer);
+            };
+        }
+    }, [showNameError]);
 
     return (
         <Paper
             component="form"
             id="mobile-search-form"
-            onSubmit={(e) => { e.preventDefault(); handleSearch(); }}
+            onSubmit={handleSearch}
             sx={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -125,14 +171,30 @@ function MobileSearchBar({ onFocus }) {
         >
             <Box sx={{ display: 'flex', alignItems: 'center', borderBottom: activeInput ? '1px solid #ccc' : 'none' }}>
                 <InputBase
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    value={showNameError ? nameError : name}
+                    onChange={(e) => {
+                        setName(e.target.value);
+                        setNameError('');
+                        setShowNameError(false);
+                        setNameErrorOpacity(1);
+                    }}
                     onFocus={() => handleInputFocus('name')}
-                    placeholder="Name"
-                    sx={{ ml: 2, flex: 1, py: 1 }}
-                    inputProps={{ 'aria-label': 'name' }}
+                    sx={{
+                        ml: 2,
+                        flex: 1,
+                        py: 1,
+                        '& input': {
+                            color: showNameError ? 'error.main' : 'inherit',
+                            opacity: showNameError ? nameErrorOpacity : 1,
+                            transition: 'color 0.3s, opacity 1s',
+                        },
+                    }}
+                    inputProps={{
+                        'aria-label': 'name',
+                        placeholder: 'Name',
+                    }}
                 />
-                {name && (
+                {name && !showNameError && (
                     <IconButton onClick={handleClearName} sx={{ padding: 1 }} aria-label="clear name">
                         <ClearIcon fontSize="small" />
                     </IconButton>
@@ -154,11 +216,6 @@ function MobileSearchBar({ onFocus }) {
                         </IconButton>
                     )}
                 </Box>
-            )}
-            {error && (
-                <Typography color="error" sx={{ mt: 1, ml: 2, fontSize: '0.75rem' }}>
-                    {error}
-                </Typography>
             )}
             {activeInput === 'location' && suggestions.length > 0 && (
                 <List 

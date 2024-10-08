@@ -10,7 +10,7 @@ import yelp from './assets/logos_png/yelp_logo.png'
 
 import StarIcon from '@mui/icons-material/Star'; // Import the star icon
 
-function RatingResults() {
+function RatingResultsDesktop() {
     const apiUrl = import.meta.env.VITE_API_BASE_URL;
     const navigate = useNavigate();
     const location = useLocation();
@@ -101,112 +101,88 @@ function RatingResults() {
     }
 
     return (
-        <Card sx={{ display: 'flex', flexDirection: 'column', padding: 2, boxShadow: 3 }}>
-            {/* Top Section: Photo, Name, Location */}
-            <Box sx={{ width: '100%', marginBottom: 2 }}>
-                <CardMedia
-                    component="img"
-                    sx={{ width: '100%', height: 250, borderRadius: '8px' }}
-                    image={data?.imageUrl || google}
-                    alt={`${data?.name}`}
-                />
-                <CardContent sx={{ paddingBottom: 0 }}> {/* Reduced bottom padding */}
-                    <Typography variant="h6" component="div" gutterBottom>
-                        {data?.name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                        {data?.location}
-                    </Typography>
-                </CardContent>
-            </Box>
+        <Card sx={{ display: 'flex', flexDirection: 'column', padding: 2, boxShadow: 3, marginBottom: 4 }}>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, justifyContent: 'space-between', width: '100%' }}>
+                {/* Left Column: Photo, Name, Location */}
+                <Box sx={{ flex: 1, marginRight: { md: 2 }, marginBottom: { xs: 2, md: 0 } }}>
+                    <CardMedia
+                        component="img"
+                        sx={{ width: '100%', height: 250, borderRadius: '8px' }}
+                        image={data?.imageUrl || google} // Replace with actual photo
+                        alt={`${data?.name}`}
+                    />
+                    <CardContent>
+                        <Typography variant="h5" component="div" gutterBottom>
+                            {data?.name}
+                        </Typography>
+                        <Typography variant="body1" color="text.secondary">
+                            {data?.location}
+                        </Typography>
+                    </CardContent>
+                </Box>
 
-            {/* Horizontal Divider */}
-            <Divider sx={{ marginTop: -2, marginBottom: 2 }} /> {/* Added negative top margin */}
+                {/* Divider */}
+                <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', md: 'block' }, marginRight: 2 }} />
+                <Divider orientation="horizontal" flexItem sx={{ display: { xs: 'block', md: 'none' }, marginBottom: 2 }} />
 
-            {/* Bottom Section: Ratings and Reviews */}
-            <Box>
-                {siteRatings.length > 0 ? (
-                    <div>
-                        <ul style={{ padding: 0, listStyle: 'none' }}>
-                            {siteRatings.map(([website, rating, reviews], index) => (
-                                <li key={index} style={{ marginBottom: '24px' }}>
-                                    {rating ? (
-                                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                            <Box sx={{ 
-                                                width: '140px', 
-                                                marginRight: '16px', 
-                                                display: 'flex', 
-                                                alignItems: 'center', 
-                                                justifyContent: 'flex-start',
-                                                height: '48px'
-                                            }}>
+                {/* Right Column: Ratings and Reviews */}
+                <Box sx={{ flex: 1 }}>
+                    {siteRatings.length > 0 ? (
+                        <div>
+                            <ul>
+                                {siteRatings.map(([website, rating, reviews], index) => (
+                                    <li key={index} style={{ marginBottom: '16px' }}>
+                                        {rating ? (
+                                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
                                                 <img
                                                     src={getLogoForWebsite(website)}
                                                     alt={`${website} Logo`}
-                                                    style={{ 
-                                                        maxWidth: website.toLowerCase() === 'google' ? '100%' : '85%', 
-                                                        maxHeight: '100%', 
-                                                        objectFit: 'contain'
-                                                    }}
+                                                    style={{ width: '150px', minWidth: '150px', marginRight: '16px' }} // Added minWidth
                                                 />
-                                            </Box>
-                                            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                                                 <Rating
                                                     value={rating}
                                                     precision={0.5}
                                                     readOnly
                                                     icon={<StarIcon style={{ color: '#FFD700' }} />}
+                                                    sx={{ marginLeft: '8px' }}
                                                 />
-                                                <Typography variant="body2" sx={{ marginTop: '4px' }}>
+                                                <Typography sx={{ marginLeft: '8px' }}>
                                                     <span style={{ color: 'black' }}>{rating}</span>
                                                     <span style={{ color: 'gray' }}> ({reviews} reviews)</span>
                                                 </Typography>
                                             </Box>
-                                        </Box>
-                                    ) : (
-                                        <Typography>No ratings for {website}</Typography>
-                                    )}
-                                </li>
-                            ))}
-                        </ul>
+                                        ) : (
+                                            <Typography>No ratings for {website}</Typography>
+                                        )}
+                                    </li>
+                                ))}
+                            </ul>
 
-                        <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 2 }}>
-                            <Box sx={{ 
-                                width: '140px', 
-                                marginRight: '16px', 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                justifyContent: 'flex-start',
-                                height: '48px'
-                            }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 7 }}>
                                 <Typography 
-                                    variant="h6"
-                                    component="div" 
-                                    sx={{ fontWeight: 'bold' }}  // Added this line to make the text bold
-                                >
-                                    Overall
+                                variant="h5" // make h6 if mobile
+                                component="div" sx={{ marginRight: '16px', minWidth: '150px' }}> {/* Added minWidth */}
+                                    Overall Rating:
                                 </Typography>
-                            </Box>
-                            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                                 <Rating
                                     value={starAverage}
                                     precision={0.5}
                                     readOnly
                                     icon={<StarIcon style={{ color: '#FFD700' }} />}
                                 />
-                                <Typography variant="body2" sx={{ marginTop: '4px' }}>
+                                <Typography sx={{ marginLeft: '8px' }}>
                                     <span style={{ color: 'black' }}>{starAverage}</span>
                                     <span style={{ color: 'gray' }}> ({totalReviewCount} reviews)</span>
                                 </Typography>
                             </Box>
-                        </Box>
-                    </div>
-                ) : (
-                    <Typography>No ratings found.</Typography>
-                )}
+                        </div>
+                    ) : (
+                        <Typography>No ratings found.</Typography>
+                    )}
+                </Box>
             </Box>
         </Card>
     );
 }
 
-export default RatingResults;
+export default RatingResultsDesktop;
