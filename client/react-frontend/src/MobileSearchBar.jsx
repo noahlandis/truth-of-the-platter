@@ -61,7 +61,13 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
     const handleSuggestionClick = (suggestion) => {
         setLocation(suggestion);
         setSuggestions([]);
-        setShowSuggestions(false);  // Hide suggestions after selecting
+        setShowSuggestions(false);
+        // Focus the input and move cursor to the end
+        const inputElement = document.querySelector('input[aria-label="location"]');
+        if (inputElement) {
+            inputElement.focus();
+            inputElement.setSelectionRange(suggestion.length, suggestion.length);
+        }
     };
 
     // Memoize the debounced function
@@ -169,6 +175,11 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
         setShowNameError(false);
         navigate(`/search?name=${name}&location=${location}`);
         setIsSubmitting(false);
+        
+        // Trigger handleCancel if there's no error
+        if (cancelSearchRef && cancelSearchRef.current) {
+            cancelSearchRef.current();
+        }
     };
 
     // Add this new function to handle key press events
