@@ -70,7 +70,7 @@ function Header() {
                         isMobile ? (
                             <MobileSearchBar 
                                 onFocus={() => setIsSearchFocused(true)}
-                                onBlur={() => {}} // Remove the onBlur here
+                                onBlur={() => setIsSearchFocused(false)} // Add this line
                                 cancelSearchRef={cancelSearchRef}
                             />
                         ) : (

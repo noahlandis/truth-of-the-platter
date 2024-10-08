@@ -152,6 +152,10 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
 
     const handleSearch = (e) => {
         e.preventDefault();
+        performSearch();
+    };
+
+    const performSearch = () => {
         setIsSubmitting(true);
         if (!name.trim()) {
             setNameError('Name field cannot be left blank');
@@ -165,6 +169,14 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
         setShowNameError(false);
         navigate(`/search?name=${name}&location=${location}`);
         setIsSubmitting(false);
+    };
+
+    // Add this new function to handle key press events
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            performSearch();
+        }
     };
 
     const handleInputFocus = (inputType) => {
@@ -241,7 +253,9 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                     inputProps={{
                         'aria-label': 'name',
                         placeholder: 'Name',
+                        enterKeyHint: 'search', // Add this line
                     }}
+                    onKeyPress={handleKeyPress}
                 />
                 {name && !showNameError && (
                     <IconButton onClick={handleClearName} sx={{ padding: 1 }} aria-label="clear name">
@@ -260,7 +274,11 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                         }}
                         placeholder="Location"
                         sx={{ ml: 2, flex: 1, py: 1 }}
-                        inputProps={{ 'aria-label': 'location' }}
+                        inputProps={{ 
+                            'aria-label': 'location',
+                            enterKeyHint: 'search', // Add this line
+                        }}
+                        onKeyPress={handleKeyPress}
                     />
                     {location && (
                         <IconButton onClick={handleClearLocation} sx={{ padding: 1 }} aria-label="clear location">
