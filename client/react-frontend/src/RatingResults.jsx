@@ -132,11 +132,22 @@ function RatingResults() {
                                 <li key={index} style={{ marginBottom: '24px' }}>
                                     {rating ? (
                                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                            <Box sx={{ width: '120px', marginRight: '16px', display: 'flex', alignItems: 'center', height: '40px' }}>
+                                            <Box sx={{ 
+                                                width: '140px', 
+                                                marginRight: '16px', 
+                                                display: 'flex', 
+                                                alignItems: 'center', 
+                                                justifyContent: 'flex-start',
+                                                height: '48px'
+                                            }}>
                                                 <img
                                                     src={getLogoForWebsite(website)}
                                                     alt={`${website} Logo`}
-                                                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                                                    style={{ 
+                                                        maxWidth: website.toLowerCase() === 'google' ? '100%' : '85%', 
+                                                        maxHeight: '100%', 
+                                                        objectFit: 'contain'
+                                                    }}
                                                 />
                                             </Box>
                                             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
@@ -160,12 +171,20 @@ function RatingResults() {
                         </ul>
 
                         <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 2 }}>
-                            <Box sx={{ width: '120px', marginRight: '16px' }}>
+                            <Box sx={{ 
+                                width: '140px', 
+                                marginRight: '16px', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'flex-start',
+                                height: '48px'
+                            }}>
                                 <Typography 
                                     variant="h6"
                                     component="div" 
+                                    sx={{ fontWeight: 'bold' }}  // Added this line to make the text bold
                                 >
-                                    Overall:
+                                    Overall
                                 </Typography>
                             </Box>
                             <Box sx={{ display: 'flex', flexDirection: 'column' }}>

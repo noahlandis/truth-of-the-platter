@@ -147,7 +147,8 @@ function RatingResultsDesktop() {
                                                     sx={{ marginLeft: '8px' }}
                                                 />
                                                 <Typography sx={{ marginLeft: '8px' }}>
-                                                    {rating} ({reviews} reviews)
+                                                    <span style={{ color: 'black' }}>{rating}</span>
+                                                    <span style={{ color: 'gray' }}> ({reviews} reviews)</span>
                                                 </Typography>
                                             </Box>
                                         ) : (
@@ -170,7 +171,8 @@ function RatingResultsDesktop() {
                                     icon={<StarIcon style={{ color: '#FFD700' }} />}
                                 />
                                 <Typography sx={{ marginLeft: '8px' }}>
-                                    {starAverage} ({totalReviewCount} reviews)
+                                    <span style={{ color: 'black' }}>{starAverage}</span>
+                                    <span style={{ color: 'gray' }}> ({totalReviewCount} reviews)</span>
                                 </Typography>
                             </Box>
                         </div>
