@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Paper, InputBase, IconButton, Box, List, ListItem, ListItemButton, ListItemText, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import axios from 'axios';
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
+import { debounce } from 'lodash'; // Add this import
 
 function SearchBar() {
     const apiUrl = import.meta.env.VITE_API_BASE_URL;
@@ -26,28 +27,40 @@ function SearchBar() {
 
     const autocompleteServiceRef = useRef(null);
 
+    // New function to initialize the Autocomplete service
+    const initializeAutocompleteService = useCallback(() => {
+        if (window.google && window.google.maps && window.google.maps.places) {
+            autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
+        }
+    }, []);
 
-    // On component mount, populate input fields from query params
+    // Separate effect to initialize the Autocomplete service
+    useEffect(() => {
+        const checkGoogleMapsLoaded = setInterval(() => {
+            if (window.google && window.google.maps && window.google.maps.places) {
+                initializeAutocompleteService();
+                clearInterval(checkGoogleMapsLoaded);
+            }
+        }, 100);
+
+        return () => clearInterval(checkGoogleMapsLoaded);
+    }, [initializeAutocompleteService]);
+
+    // Existing effect for populating input fields
     useEffect(() => {
         const initialName = searchParams.get('name') || '';
         const initialLocation = searchParams.get('location') || '';
         
-        // Check if the current route is '/'
         if (window.location.pathname === '/') {
-            setLocation('');  // Clear location if on home page
-            setName('');  // Clear name if on home page
+            setLocation('');
+            setName('');
         } else {
             setName(initialName);
             setLocation(initialLocation);
         }
     
-        // Initialize Google Places AutocompleteService
-        if (window.google && window.google.maps && window.google.maps.places) {
-            autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
-        }
+        // Remove the Autocomplete service initialization from here
     }, [searchParams]);
-
-
 
     // Clear name input
     const handleClearName = () => setName('');
@@ -114,39 +127,50 @@ function SearchBar() {
         setShowSuggestions(true);
     };
 
-    // Updated function to get user location and reverse geocode it to city and state
-    const handleUserLocationClick = async () => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(async (position) => {
-                const { latitude, longitude } = position.coords;
-                console.log('User location:', latitude, longitude);
-                const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}`;
-                
-                try {
-                    const response = await axios.get(apiUrl);
-                    const results = response.data.results;
-                    console.log('Reverse geocoding results:', response);
-                    if (results.length > 0) {
-                        const addressComponents = results[0].address_components;
+    // Memoize the debounced function
+    const debouncedReverseGeocode = useCallback(
+        debounce(async (latitude, longitude) => {
+            const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}`;
+            
+            try {
+                const response = await axios.get(apiUrl);
+                const results = response.data.results;
+                if (results.length > 0) {
+                    const addressComponents = results[0].address_components;
 
-                        const city = addressComponents.find((component) =>
-                            component.types.includes('locality')
-                        )?.long_name;
+                    const city = addressComponents.find((component) =>
+                        component.types.includes('locality')
+                    )?.long_name;
 
-                        const state = addressComponents.find((component) =>
-                            component.types.includes('administrative_area_level_1')
-                        )?.long_name;
+                    const state = addressComponents.find((component) =>
+                        component.types.includes('administrative_area_level_1')
+                    )?.short_name; // Use short_name for state abbreviation
 
-                        const userLocation = `${city}, ${state}`;
-                        setLocation(userLocation);  // Update location state with city and state
-                        setShowSuggestions(false);
-                    }
-                } catch (error) {
-                    console.error('Error reverse geocoding location:', error);
+                    const userLocation = `${city}, ${state}`;
+                    setLocation(userLocation);
+                    setShowSuggestions(false);
                 }
-            }, (error) => {
-                console.error('Error getting user location:', error);
-            });
+            } catch (error) {
+                console.error('Error reverse geocoding location:', error);
+            }
+        }, 300),
+        [GOOGLE_MAPS_API_KEY]
+    );
+
+    const handleUserLocationClick = () => {
+        if (navigator.geolocation) {
+            setLocation('Fetching location...'); // Provide immediate feedback
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    debouncedReverseGeocode(latitude, longitude);
+                },
+                (error) => {
+                    console.error('Error getting user location:', error);
+                    setLocation(''); // Clear the input if there's an error
+                },
+                { timeout: 10000, maximumAge: 60000 } // Add options for better performance
+            );
         } else {
             alert('Geolocation is not supported by this browser.');
         }
