@@ -202,6 +202,10 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                 if (!error) {
                     setActiveInput(null);
                     onBlur();
+                    // Add this line to trigger handleCancel when the input loses focus
+                    if (cancelSearchRef && cancelSearchRef.current) {
+                        cancelSearchRef.current();
+                    }
                 }
             }
         }, 100);
@@ -267,6 +271,7 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                         enterKeyHint: 'search', // Add this line
                     }}
                     onKeyPress={handleKeyPress}
+                    onBlur={handleInputBlur}
                 />
                 {name && !showNameError && (
                     <IconButton onClick={handleClearName} sx={{ padding: 1 }} aria-label="clear name">
@@ -290,6 +295,7 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                             enterKeyHint: 'search', // Add this line
                         }}
                         onKeyPress={handleKeyPress}
+                        onBlur={handleInputBlur}
                     />
                     {location && (
                         <IconButton onClick={handleClearLocation} sx={{ padding: 1 }} aria-label="clear location">
