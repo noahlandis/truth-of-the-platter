@@ -45,8 +45,6 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
             cancelSearchRef.current = () => {
                 setActiveInput(null);
                 setError(null);
-                setName('');
-                setLocation('');
                 setSuggestions([]);
                 setIsSubmitting(false);
                 onBlur();

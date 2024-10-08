@@ -158,10 +158,10 @@ function RatingResultsDesktop() {
                                 ))}
                             </ul>
 
-                            <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 7 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', marginTop: 6.3 }}>
                                 <Typography 
                                 variant="h5" // make h6 if mobile
-                                component="div" sx={{ marginRight: '16px', minWidth: '150px' }}> {/* Added minWidth */}
+                                component="div" sx={{ marginRight: '16px', minWidth: '150px', }}> {/* Added minWidth */}
                                     Overall Rating:
                                 </Typography>
                                 <Rating
