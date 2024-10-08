@@ -110,7 +110,7 @@ function RatingResults() {
                     image={data?.imageUrl || google}
                     alt={`${data?.name}`}
                 />
-                <CardContent>
+                <CardContent sx={{ paddingBottom: 0 }}> {/* Reduced bottom padding */}
                     <Typography variant="h6" component="div" gutterBottom>
                         {data?.name}
                     </Typography>
@@ -121,7 +121,7 @@ function RatingResults() {
             </Box>
 
             {/* Horizontal Divider */}
-            <Divider sx={{ marginBottom: 2 }} />
+            <Divider sx={{ marginTop: -2, marginBottom: 2 }} /> {/* Added negative top margin */}
 
             {/* Bottom Section: Ratings and Reviews */}
             <Box>
