@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Paper, InputBase, IconButton, Box, List, ListItem, ListItemButton, ListItemText, Typography, Fade } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { useSearchParams, useNavigate } from "react-router-dom";
 import axios from 'axios';
+import { debounce } from 'lodash'; // Add this import
 
 function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
     const apiUrl = import.meta.env.VITE_API_BASE_URL;
@@ -63,37 +64,51 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
         setShowSuggestions(false);  // Hide suggestions after selecting
     };
 
-    const handleUserLocationClick = async () => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(async (position) => {
-                const { latitude, longitude } = position.coords;
-                const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}`;
-                
-                try {
-                    const response = await axios.get(apiUrl);
-                    const results = response.data.results;
-                    if (results.length > 0) {
-                        const addressComponents = results[0].address_components;
+    // Memoize the debounced function
+    const debouncedReverseGeocode = useCallback(
+        debounce(async (latitude, longitude) => {
+            const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}`;
+            
+            try {
+                const response = await axios.get(apiUrl);
+                const results = response.data.results;
+                if (results.length > 0) {
+                    const addressComponents = results[0].address_components;
 
-                        const city = addressComponents.find((component) =>
-                            component.types.includes('locality')
-                        )?.long_name;
+                    const city = addressComponents.find((component) =>
+                        component.types.includes('locality')
+                    )?.long_name;
 
-                        const state = addressComponents.find((component) =>
-                            component.types.includes('administrative_area_level_1')
-                        )?.long_name;
+                    const state = addressComponents.find((component) =>
+                        component.types.includes('administrative_area_level_1')
+                    )?.short_name; // Use short_name for state abbreviation
 
-                        const userLocation = `${city}, ${state}`;
-                        setLocation(userLocation);
-                        setSuggestions([]);
-                        setShowSuggestions(false);  // Hide suggestions after setting location
-                    }
-                } catch (error) {
-                    console.error('Error reverse geocoding location:', error);
+                    const userLocation = `${city}, ${state}`;
+                    setLocation(userLocation);
+                    setSuggestions([]);
+                    setShowSuggestions(false);
                 }
-            }, (error) => {
-                console.error('Error getting user location:', error);
-            });
+            } catch (error) {
+                console.error('Error reverse geocoding location:', error);
+            }
+        }, 300),
+        [GOOGLE_MAPS_API_KEY]
+    );
+
+    const handleUserLocationClick = () => {
+        if (navigator.geolocation) {
+            setLocation('Fetching location...'); // Provide immediate feedback
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    debouncedReverseGeocode(latitude, longitude);
+                },
+                (error) => {
+                    console.error('Error getting user location:', error);
+                    setLocation(''); // Clear the input if there's an error
+                },
+                { timeout: 10000, maximumAge: 60000 } // Add options for better performance
+            );
         } else {
             alert('Geolocation is not supported by this browser.');
         }
