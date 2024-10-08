@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Paper, InputBase, IconButton, Box, List, ListItem, ListItemButton, ListItemText, Typography } from '@mui/material';
+import { Paper, InputBase, IconButton, Box, List, ListItem, ListItemButton, ListItemText, Typography, Fade } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { useSearchParams, useNavigate } from "react-router-dom";
@@ -16,6 +16,9 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
     const [searchParams, setSearchParams] = useSearchParams();
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [nameError, setNameError] = useState('');
+    const [showNameError, setShowNameError] = useState(false);
+    const [nameErrorOpacity, setNameErrorOpacity] = useState(1);
 
     const autocompleteServiceRef = useRef(null);
     const debounceTimeoutRef = useRef(null);
@@ -102,13 +105,15 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
         e.preventDefault();
         setIsSubmitting(true);
         if (!name.trim()) {
-            setError('Name field cannot be left blank');
+            setNameError('Name field cannot be left blank');
+            setShowNameError(true);
             setActiveInput('name');
             setIsSubmitting(false);
             return;
         }
 
-        setError('');
+        setNameError('');
+        setShowNameError(false);
         navigate(`/search?name=${name}&location=${location}`);
         setIsSubmitting(false);
     };
@@ -130,6 +135,24 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
         }, 100);
     };
 
+    useEffect(() => {
+        if (showNameError) {
+            setNameErrorOpacity(1);
+            const fadeOutTimer = setTimeout(() => {
+                setNameErrorOpacity(0);
+            }, 500); // Start fading out after 2 seconds
+
+            const hideTimer = setTimeout(() => {
+                setShowNameError(false);
+            }, 1000); // Hide completely after 3 seconds
+
+            return () => {
+                clearTimeout(fadeOutTimer);
+                clearTimeout(hideTimer);
+            };
+        }
+    }, [showNameError]);
+
     return (
         <Paper
             component="form"
@@ -148,14 +171,30 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
         >
             <Box sx={{ display: 'flex', alignItems: 'center', borderBottom: activeInput ? '1px solid #ccc' : 'none' }}>
                 <InputBase
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    value={showNameError ? nameError : name}
+                    onChange={(e) => {
+                        setName(e.target.value);
+                        setNameError('');
+                        setShowNameError(false);
+                        setNameErrorOpacity(1);
+                    }}
                     onFocus={() => handleInputFocus('name')}
-                    placeholder="Name"
-                    sx={{ ml: 2, flex: 1, py: 1 }}
-                    inputProps={{ 'aria-label': 'name' }}
+                    sx={{
+                        ml: 2,
+                        flex: 1,
+                        py: 1,
+                        '& input': {
+                            color: showNameError ? 'error.main' : 'inherit',
+                            opacity: showNameError ? nameErrorOpacity : 1,
+                            transition: 'color 0.3s, opacity 1s',
+                        },
+                    }}
+                    inputProps={{
+                        'aria-label': 'name',
+                        placeholder: 'Name',
+                    }}
                 />
-                {name && (
+                {name && !showNameError && (
                     <IconButton onClick={handleClearName} sx={{ padding: 1 }} aria-label="clear name">
                         <ClearIcon fontSize="small" />
                     </IconButton>
@@ -177,11 +216,6 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                         </IconButton>
                     )}
                 </Box>
-            )}
-            {error && (
-                <Typography color="error" sx={{ mt: 1, ml: 2, fontSize: '0.75rem' }}>
-                    {error}
-                </Typography>
             )}
             {activeInput === 'location' && suggestions.length > 0 && (
                 <List 

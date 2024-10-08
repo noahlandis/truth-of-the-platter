@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import SearchBar from "./SearchBar";
 import MobileSearchBar from "./MobileSearchBar";
 import logo from './assets/logo.svg'; // Adjust the path based on your folder structure
@@ -11,6 +11,11 @@ function Header() {
     const isMobile = useMediaQuery('(max-width:600px)');
     const [isSearchFocused, setIsSearchFocused] = useState(false);
     const cancelSearchRef = useRef(null);
+
+    // Add this useEffect to listen for route changes
+    useEffect(() => {
+        handleCancel();
+    }, [location]);
 
     const handleCancel = () => {
         setIsSearchFocused(false);
