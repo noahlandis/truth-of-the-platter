@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Paper, InputBase, IconButton, Box, List, ListItem, ListItemButton, ListItemText, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -26,28 +26,40 @@ function SearchBar() {
 
     const autocompleteServiceRef = useRef(null);
 
+    // New function to initialize the Autocomplete service
+    const initializeAutocompleteService = useCallback(() => {
+        if (window.google && window.google.maps && window.google.maps.places) {
+            autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
+        }
+    }, []);
 
-    // On component mount, populate input fields from query params
+    // Separate effect to initialize the Autocomplete service
+    useEffect(() => {
+        const checkGoogleMapsLoaded = setInterval(() => {
+            if (window.google && window.google.maps && window.google.maps.places) {
+                initializeAutocompleteService();
+                clearInterval(checkGoogleMapsLoaded);
+            }
+        }, 100);
+
+        return () => clearInterval(checkGoogleMapsLoaded);
+    }, [initializeAutocompleteService]);
+
+    // Existing effect for populating input fields
     useEffect(() => {
         const initialName = searchParams.get('name') || '';
         const initialLocation = searchParams.get('location') || '';
         
-        // Check if the current route is '/'
         if (window.location.pathname === '/') {
-            setLocation('');  // Clear location if on home page
-            setName('');  // Clear name if on home page
+            setLocation('');
+            setName('');
         } else {
             setName(initialName);
             setLocation(initialLocation);
         }
     
-        // Initialize Google Places AutocompleteService
-        if (window.google && window.google.maps && window.google.maps.places) {
-            autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
-        }
+        // Remove the Autocomplete service initialization from here
     }, [searchParams]);
-
-
 
     // Clear name input
     const handleClearName = () => setName('');
