@@ -1,7 +1,9 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { useMediaQuery, useTheme } from '@mui/material';
 import Layout from './Layout';  // Import your Layout component
 import MatchList from './MatchList';  // Import your MatchList component
 import RatingResults from './RatingResults';  // Import your RatingResults component
+import RatingResultsDesktop from './RatingResultsDesktop';
 import Terms from './Terms';  // Import the Terms component
 
 import { Box, Typography, Paper, Stepper, Step, StepLabel } from '@mui/material';
@@ -77,14 +79,17 @@ function Home() {
 }
 
 function App() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   return (
     <Router>
       <Layout>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/search" element={<MatchList />} />
-          <Route path="/ratings" element={<RatingResults />} />
-          <Route path="/terms" element={<Terms />} />  {/* New route for Terms */}
+          <Route path="/ratings" element={isMobile ? <RatingResults /> : <RatingResultsDesktop />} />
+          <Route path="/terms" element={<Terms />} />
           <Route path="*" element={<Home />} />
         </Routes>
       </Layout>
