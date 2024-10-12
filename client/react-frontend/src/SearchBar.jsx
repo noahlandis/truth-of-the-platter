@@ -21,6 +21,7 @@ function SearchBar() {
     const [suggestions, setSuggestions] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [error, setError] = useState(''); // Error state
+    const [locationError, setLocationError] = useState(''); // New state for location error
 
     // Ref for storing timeout ID for debouncing
     const debounceTimeoutRef = useRef(null);
@@ -125,6 +126,7 @@ function SearchBar() {
     const handleLocationChange = (e) => {
         setLocation(e.target.value);
         setShowSuggestions(true);
+        setLocationError('');
     };
 
     // Memoize the debounced function
@@ -167,6 +169,7 @@ function SearchBar() {
                 },
                 (error) => {
                     console.error('Error getting user location:', error);
+                    setLocationError('Location access denied. Please enter a location or allow access.');
                     setLocation(''); // Clear the input if there's an error
                 },
                 { timeout: 10000, maximumAge: 60000 } // Add options for better performance
@@ -186,7 +189,8 @@ function SearchBar() {
             return; // Prevent form submission
         }
 
-        setError(''); // Clear error if validation passes
+        setError(''); // Clear name error if validation passes
+        setLocationError(''); // Clear location error
 
         let searchLocation = location;
 
@@ -197,14 +201,15 @@ function SearchBar() {
                 searchLocation = currentLocation;
             } catch (error) {
                 console.error('Error getting current location:', error);
-                // You might want to set an error state here or handle it differently
+                setLocationError('Location access denied. Please enter a location or allow access.');
+                return; // Prevent form submission
             }
         }
 
         navigate(`/search?name=${name}&location=${searchLocation}`);
     };
 
-    // New function to get current location
+    // Updated getCurrentLocation function
     const getCurrentLocation = () => {
         return new Promise((resolve, reject) => {
             if (navigator.geolocation) {
@@ -232,7 +237,11 @@ function SearchBar() {
                         reject(error);
                     }
                 }, (error) => {
-                    reject(error);
+                    reject(new Error('Location access denied'));
+                }, {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
                 });
             } else {
                 reject(new Error('Geolocation is not supported by this browser.'));
@@ -337,11 +346,27 @@ function SearchBar() {
                             <ClearIcon fontSize="small" />
                         </IconButton>
                     )}
+                    {locationError && (
+                        <Typography
+                            color="error"
+                            sx={{
+                                position: 'absolute',
+                                bottom: '-8px',
+                                left: 6,
+                                fontSize: '0.75rem',
+                                paddingLeft: '10px',
+                                borderTop: '2px solid red',
+                                width: 'calc(100% - 12px)',
+                            }}
+                        >
+                            {locationError}
+                        </Typography>
+                    )}
                     {showSuggestions && (
                         <List
                             sx={{
                                 position: 'absolute',
-                                top: '97%',
+                                top: '115%',
                                 left: 0,
                                 right: 0,
                                 width: '100%',
