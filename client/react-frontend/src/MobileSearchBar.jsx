@@ -265,7 +265,7 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                         'aria-label': 'name',
                         placeholder: 'Name',
                         enterKeyHint: 'search',
-                        autoComplete: 'new-password',  // Add this line
+                        autocomplete: 'off',  // Add this line
                     }}
                     onKeyPress={handleKeyPress}
                 />
@@ -289,7 +289,7 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                         inputProps={{ 
                             'aria-label': 'location',
                             enterKeyHint: 'search',
-                            autoComplete: 'new-password',  // Add this line
+                            autocomplete: 'off',  // Add this line
                         }}
                         onKeyPress={handleKeyPress}
                     />
