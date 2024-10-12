@@ -7,11 +7,11 @@ import axios from 'axios';
 import { debounce } from 'lodash'; // Add this import
 import { styled } from '@mui/material/styles';
 
-// Add this styled component for a custom Snackbar
+// Update this styled component for a custom error Snackbar
 const StyledSnackbar = styled(Snackbar)(({ theme }) => ({
   '& .MuiSnackbarContent-root': {
-    backgroundColor: theme.palette.primary.main,
-    color: theme.palette.primary.contrastText,
+    backgroundColor: theme.palette.error.main,
+    color: theme.palette.error.contrastText,
     borderRadius: '8px',
     boxShadow: '0px 3px 5px -1px rgba(0,0,0,0.2), 0px 6px 10px 0px rgba(0,0,0,0.14), 0px 1px 18px 0px rgba(0,0,0,0.12)',
   },
@@ -314,7 +314,7 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                             value={name}
                             onChange={(e) => {
                                 setName(e.target.value);
-                                setFloatingError(null);
+                                setToastMessage(null);
                             }}
                             onFocus={() => handleInputFocus('name')}
                             sx={{
@@ -351,7 +351,7 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                                 value={location}
                                 onChange={(e) => {
                                     handleLocationChange(e);
-                                    setFloatingError(null);
+                                    setToastMessage(null);
                                 }}
                                 onFocus={() => {
                                     handleInputFocus('location');
