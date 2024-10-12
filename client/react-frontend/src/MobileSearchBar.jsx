@@ -122,8 +122,7 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
         [GOOGLE_MAPS_API_KEY]
     );
 
-    const handleUserLocationClick = (e) => {
-        e.preventDefault();
+    const handleUserLocationClick = () => {
         if (navigator.geolocation) {
             setLocation('Fetching location...');
             navigator.geolocation.getCurrentPosition(
@@ -141,7 +140,6 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
         } else {
             setLocationToast("Your browser doesn't support geolocation. Please enter a location manually.");
         }
-        document.querySelector('input[aria-label="location"]').focus();
     };
 
     const handleNameChange = (e) => {
@@ -191,18 +189,12 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
         
         if (!name.trim()) {
             setNameToast('Please enter a restaurant name');
-            // Keep the focus on the currently active input
-            if (activeInput === 'name') {
-                document.querySelector('input[aria-label="nаme"]').focus();
-            } else if (activeInput === 'location') {
-                document.querySelector('input[aria-label="location"]').focus();
-            }
             return;
         }
-        
 
         setNameToast(null);
         setLocationToast(null);
+        setLocationError('');
 
         performSearch();
     };
@@ -239,34 +231,20 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                 navigator.geolocation.getCurrentPosition(async (position) => {
                     const { latitude, longitude } = position.coords;
                     try {
-                        const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}`;
-                        const response = await axios.get(apiUrl);
-                        const results = response.data.results;
-                        if (results.length > 0) {
-                            const addressComponents = results[0].address_components;
-                            const city = addressComponents.find((component) =>
-                                component.types.includes('locality')
-                            )?.long_name;
-                            const state = addressComponents.find((component) =>
-                                component.types.includes('administrative_area_level_1')
-                            )?.short_name; // Use short_name for state abbreviation
-                            const userLocation = `${city}, ${state}`;
-                            resolve(userLocation);
-                        } else {
-                            reject(new Error('No results found'));
-                        }
+                        const userLocation = await debouncedReverseGeocode(latitude, longitude);
+                        resolve(userLocation);
                     } catch (error) {
                         reject(error);
                     }
                 }, (error) => {
-                    reject(new Error("We couldn't access your location. Please try again or enter a location manually."));
+                    reject(new Error('Location access denied'));
                 }, {
                     enableHighAccuracy: true,
                     timeout: 5000,
                     maximumAge: 0
                 });
             } else {
-                reject(new Error("Your browser doesn't support geolocation. Please enter a location manually."));
+                reject(new Error('Geolocation is not supported by this browser.'));
             }
         });
     };
