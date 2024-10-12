@@ -22,6 +22,7 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
     const [showNameError, setShowNameError] = useState(false);
     const [nameErrorOpacity, setNameErrorOpacity] = useState(1);
     const [showSuggestions, setShowSuggestions] = useState(true);
+    const [isGoogleMapsLoaded, setIsGoogleMapsLoaded] = useState(false);
 
     const autocompleteServiceRef = useRef(null);
     const debounceTimeoutRef = useRef(null);
@@ -38,9 +39,16 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
             setLocation(initialLocation);
         }
     
-        if (window.google && window.google.maps && window.google.maps.places) {
-            autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
-        }
+        const checkGoogleMapsLoaded = () => {
+            if (window.google && window.google.maps && window.google.maps.places) {
+                setIsGoogleMapsLoaded(true);
+                autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
+            } else {
+                setTimeout(checkGoogleMapsLoaded, 100);
+            }
+        };
+
+        checkGoogleMapsLoaded();
     }, [searchParams]);
 
     useEffect(() => {
@@ -122,8 +130,8 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
 
     const handleLocationChange = (e) => {
         setLocation(e.target.value);
-        setShowSuggestions(true);  // Show suggestions when user starts typing
-        if (e.target.value.length > 0) {
+        setShowSuggestions(true);
+        if (e.target.value.length > 0 && isGoogleMapsLoaded) {
             if (debounceTimeoutRef.current) {
                 clearTimeout(debounceTimeoutRef.current);
             }
