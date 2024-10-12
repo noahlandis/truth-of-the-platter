@@ -39,7 +39,8 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
     const [nameErrorOpacity, setNameErrorOpacity] = useState(1);
     const [showSuggestions, setShowSuggestions] = useState(true);
     const [locationError, setLocationError] = useState('');
-    const [toastMessage, setToastMessage] = useState(null);
+    const [nameToast, setNameToast] = useState(null);
+    const [locationToast, setLocationToast] = useState(null);
 
     const autocompleteServiceRef = useRef(null);
     const debounceTimeoutRef = useRef(null);
@@ -59,6 +60,7 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
         if (window.google && window.google.maps && window.google.maps.places) {
             autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
         }
+        
     }, [searchParams]);
 
     useEffect(() => {
@@ -129,19 +131,25 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                 },
                 (error) => {
                     console.error('Error getting user location:', error);
-                    setToastMessage('Location access denied. Please enter a location or allow access.');
+                    setLocationToast('Location access denied. Please enter a location or allow access.');
                     setLocation('');
                 },
                 { timeout: 10000, maximumAge: 60000 }
             );
         } else {
-            setToastMessage('Geolocation is not supported by this browser.');
+            setLocationToast('Geolocation is not supported by this browser.');
         }
+    };
+
+    const handleNameChange = (e) => {
+        setName(e.target.value);
+        setNameToast(null);
     };
 
     const handleLocationChange = (e) => {
         setLocation(e.target.value);
-        setShowSuggestions(true);  // Show suggestions when user starts typing
+        setLocationToast(null);
+        setShowSuggestions(true);
         if (e.target.value.length > 0) {
             if (debounceTimeoutRef.current) {
                 clearTimeout(debounceTimeoutRef.current);
@@ -179,11 +187,12 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
         e.preventDefault();
         
         if (!name.trim()) {
-            setToastMessage('Name field cannot be left blank');
+            setNameToast('Name field cannot be left blank');
             return;
         }
 
-        setToastMessage(null);
+        setNameToast(null);
+        setLocationToast(null);
         setLocationError('');
 
         performSearch();
@@ -200,7 +209,7 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                 searchLocation = currentLocation;
             } catch (error) {
                 console.error('Error getting current location:', error);
-                setToastMessage('Location access denied. Please enter a location or allow access.');
+                setLocationToast('Location access denied. Please enter a location or allow access.');
                 setIsSubmitting(false);
                 return;
             }
@@ -282,12 +291,15 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
         }
     }, [showNameError]);
 
-    // Add this function to handle closing the toast
-    const handleCloseToast = (event, reason) => {
+    const handleCloseToast = (toastType) => (event, reason) => {
         if (reason === 'clickaway') {
             return;
         }
-        setToastMessage(null);
+        if (toastType === 'name') {
+            setNameToast(null);
+        } else if (toastType === 'location') {
+            setLocationToast(null);
+        }
     };
 
     return (
@@ -312,10 +324,7 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                     <Box sx={{ display: 'flex', alignItems: 'center', borderBottom: activeInput ? '1px solid #ccc' : 'none' }}>
                         <InputBase
                             value={name}
-                            onChange={(e) => {
-                                setName(e.target.value);
-                                setToastMessage(null);
-                            }}
+                            onChange={handleNameChange}
                             onFocus={() => handleInputFocus('name')}
                             sx={{
                                 ml: 2,
@@ -349,10 +358,7 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                             <InputBase
                                 value={location}
-                                onChange={(e) => {
-                                    handleLocationChange(e);
-                                    setToastMessage(null);
-                                }}
+                                onChange={handleLocationChange}
                                 onFocus={() => {
                                     handleInputFocus('location');
                                     setShowSuggestions(true);
@@ -409,10 +415,19 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                 )}
             </Paper>
             <StyledSnackbar
-                open={!!toastMessage}
+                open={!!nameToast}
                 autoHideDuration={4000}
-                onClose={handleCloseToast}
-                message={toastMessage}
+                onClose={handleCloseToast('name')}
+                message={nameToast}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                TransitionComponent={SlideTransition}
+                TransitionProps={{ enter: true, exit: true }}
+            />
+            <StyledSnackbar
+                open={!!locationToast}
+                autoHideDuration={4000}
+                onClose={handleCloseToast('location')}
+                message={locationToast}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
                 TransitionComponent={SlideTransition}
                 TransitionProps={{ enter: true, exit: true }}
