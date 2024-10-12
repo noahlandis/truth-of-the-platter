@@ -26,6 +26,23 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
     const autocompleteServiceRef = useRef(null);
     const debounceTimeoutRef = useRef(null);
 
+    const initializeAutocompleteService = useCallback(() => {
+        if (window.google && window.google.maps && window.google.maps.places) {
+            autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
+        }
+    }, []);
+
+    useEffect(() => {
+        const checkGoogleMapsLoaded = setInterval(() => {
+            if (window.google && window.google.maps && window.google.maps.places) {
+                initializeAutocompleteService();
+                clearInterval(checkGoogleMapsLoaded);
+            }
+        }, 100);
+
+        return () => clearInterval(checkGoogleMapsLoaded);
+    }, [initializeAutocompleteService]);
+
     useEffect(() => {
         const initialName = searchParams.get('name') || '';
         const initialLocation = searchParams.get('location') || '';
@@ -38,9 +55,7 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
             setLocation(initialLocation);
         }
     
-        if (window.google && window.google.maps && window.google.maps.places) {
-            autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
-        }
+        initializeAutocompleteService();
     }, [searchParams]);
 
     useEffect(() => {
