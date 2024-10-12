@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Paper, InputBase, IconButton, Box, List, ListItem, ListItemButton, ListItemText, Typography, Fade } from '@mui/material';
+import { Paper, InputBase, IconButton, Box, List, ListItem, ListItemButton, ListItemText, Typography, Fade, Alert } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { useSearchParams, useNavigate } from "react-router-dom";
@@ -22,26 +22,13 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
     const [showNameError, setShowNameError] = useState(false);
     const [nameErrorOpacity, setNameErrorOpacity] = useState(1);
     const [showSuggestions, setShowSuggestions] = useState(true);
+    const [locationError, setLocationError] = useState('');
 
     const autocompleteServiceRef = useRef(null);
     const debounceTimeoutRef = useRef(null);
 
-    const initializeAutocompleteService = useCallback(() => {
-        if (window.google && window.google.maps && window.google.maps.places) {
-            autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
-        }
-    }, []);
-
-    useEffect(() => {
-        const checkGoogleMapsLoaded = setInterval(() => {
-            if (window.google && window.google.maps && window.google.maps.places) {
-                initializeAutocompleteService();
-                clearInterval(checkGoogleMapsLoaded);
-            }
-        }, 100);
-
-        return () => clearInterval(checkGoogleMapsLoaded);
-    }, [initializeAutocompleteService]);
+    // Add this new state for the floating error
+    const [floatingError, setFloatingError] = useState(null);
 
     useEffect(() => {
         const initialName = searchParams.get('name') || '';
@@ -55,7 +42,9 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
             setLocation(initialLocation);
         }
     
-        initializeAutocompleteService();
+        if (window.google && window.google.maps && window.google.maps.places) {
+            autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
+        }
     }, [searchParams]);
 
     useEffect(() => {
@@ -126,6 +115,7 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                 },
                 (error) => {
                     console.error('Error getting user location:', error);
+                    setFloatingError('Location access denied. Please enter a location or allow access.');
                     setLocation(''); // Clear the input if there's an error
                 },
                 { timeout: 10000, maximumAge: 60000 } // Add options for better performance
@@ -173,28 +163,66 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
 
     const handleSearch = (e) => {
         e.preventDefault();
-        performSearch();
-    };
-
-    const performSearch = () => {
-        setIsSubmitting(true);
+        
         if (!name.trim()) {
-            setNameError('Name field cannot be left blank');
-            setShowNameError(true);
-            setActiveInput('name');
-            setIsSubmitting(false);
+            setFloatingError('Name field cannot be left blank');
             return;
         }
 
-        setNameError('');
-        setShowNameError(false);
-        navigate(`/search?name=${name}&location=${location}`);
+        setFloatingError(null);
+        setLocationError('');
+
+        performSearch();
+    };
+
+    const performSearch = async () => {
+        setIsSubmitting(true);
+
+        let searchLocation = location;
+
+        if (!location.trim()) {
+            try {
+                const currentLocation = await getCurrentLocation();
+                searchLocation = currentLocation;
+            } catch (error) {
+                console.error('Error getting current location:', error);
+                setFloatingError('Location access denied. Please enter a location or allow access.');
+                setIsSubmitting(false);
+                return;
+            }
+        }
+
+        navigate(`/search?name=${name}&location=${searchLocation}`);
         setIsSubmitting(false);
         
         // Trigger handleCancel if there's no error
         if (cancelSearchRef && cancelSearchRef.current) {
             cancelSearchRef.current();
         }
+    };
+
+    const getCurrentLocation = () => {
+        return new Promise((resolve, reject) => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async (position) => {
+                    const { latitude, longitude } = position.coords;
+                    try {
+                        const userLocation = await debouncedReverseGeocode(latitude, longitude);
+                        resolve(userLocation);
+                    } catch (error) {
+                        reject(error);
+                    }
+                }, (error) => {
+                    reject(new Error('Location access denied'));
+                }, {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                });
+            } else {
+                reject(new Error('Geolocation is not supported by this browser.'));
+            }
+        });
     };
 
     // Add this new function to handle key press events
@@ -252,69 +280,96 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                 borderRadius: '8px',
                 boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
                 border: '1px solid #ccc',
-                position: 'relative', // Add this line
+                position: 'relative', // Ensure this is set
             }}
             onBlur={handleInputBlur}
         >
-            <Box sx={{ display: 'flex', alignItems: 'center', borderBottom: activeInput ? '1px solid #ccc' : 'none' }}>
-                <InputBase
-                    value={showNameError ? nameError : name}
-                    onChange={(e) => {
-                        setName(e.target.value);
-                        setNameError('');
-                        setShowNameError(false);
-                        setNameErrorOpacity(1);
-                    }}
-                    onFocus={() => handleInputFocus('name')}
+            {/* Floating error message */}
+            {floatingError && (
+                <Alert 
+                    severity="error" 
                     sx={{
-                        ml: 2,
-                        flex: 1,
-                        py: 1,
-                        '& input': {
-                            color: showNameError ? 'error.main' : 'inherit',
-                            opacity: showNameError ? nameErrorOpacity : 1,
-                            transition: 'color 0.3s, opacity 1s',
-                        },
+                        position: 'absolute',
+                        top: '-50px', // Adjust as needed
+                        left: 0,
+                        right: 0,
+                        zIndex: 2,
+                        boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.1)',
                     }}
-                    inputProps={{
-                        'aria-label': 'nаme',  // Using Cyrillic 'а' here
-                        placeholder: "What's the nаme of the restaurant?",  // Using Cyrillic 'а'
-                        enterKeyHint: 'search',
-                        autoComplete: 'off'
-                    }}
-                    onKeyPress={handleKeyPress}
-                />
-                {name && !showNameError && (
-                    <IconButton onClick={handleClearName} sx={{ padding: 1 }} aria-label="clear name">
-                        <ClearIcon fontSize="small" />
-                    </IconButton>
-                )}
-            </Box>
-            {activeInput && (
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                >
+                    {floatingError}
+                </Alert>
+            )}
+
+            {/* Name input */}
+            <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', borderBottom: activeInput ? '1px solid #ccc' : 'none' }}>
                     <InputBase
-                        value={location}
-                        onChange={handleLocationChange}
-                        onFocus={() => {
-                            handleInputFocus('location');
-                            setShowSuggestions(true);  // Show suggestions when input is focused
+                        value={name}
+                        onChange={(e) => {
+                            setName(e.target.value);
+                            setFloatingError(null);
                         }}
-                        placeholder="Where is it located?"
-                        sx={{ ml: 2, flex: 1, py: 1 }}
-                        inputProps={{ 
-                            'aria-label': 'location',
+                        onFocus={() => handleInputFocus('name')}
+                        sx={{
+                            ml: 2,
+                            flex: 1,
+                            py: 1,
+                            '& input': {
+                                color: showNameError ? 'error.main' : 'inherit',
+                                opacity: showNameError ? nameErrorOpacity : 1,
+                                transition: 'color 0.3s, opacity 1s',
+                            },
+                        }}
+                        inputProps={{
+                            'aria-label': 'nаme',  // Using Cyrillic 'а' here
+                            placeholder: "What's the nаme of the restaurant?",  // Using Cyrillic 'а'
                             enterKeyHint: 'search',
-                            autoComplete: 'off',  // Add this line
+                            autoComplete: 'off'
                         }}
                         onKeyPress={handleKeyPress}
                     />
-                    {location && (
-                        <IconButton onClick={handleClearLocation} sx={{ padding: 1 }} aria-label="clear location">
+                    {name && (
+                        <IconButton onClick={handleClearName} sx={{ padding: 1 }} aria-label="clear name">
                             <ClearIcon fontSize="small" />
                         </IconButton>
                     )}
                 </Box>
+            </Box>
+
+            {/* Location input */}
+            {activeInput && (
+                <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <InputBase
+                            value={location}
+                            onChange={(e) => {
+                                handleLocationChange(e);
+                                setFloatingError(null);
+                            }}
+                            onFocus={() => {
+                                handleInputFocus('location');
+                                setShowSuggestions(true);
+                            }}
+                            placeholder="Where is it located?"
+                            sx={{ ml: 2, flex: 1, py: 1 }}
+                            inputProps={{ 
+                                'aria-label': 'location',
+                                enterKeyHint: 'search',
+                                autoComplete: 'off',
+                            }}
+                            onKeyPress={handleKeyPress}
+                        />
+                        {location && (
+                            <IconButton onClick={handleClearLocation} sx={{ padding: 1 }} aria-label="clear location">
+                                <ClearIcon fontSize="small" />
+                            </IconButton>
+                        )}
+                    </Box>
+                </Box>
             )}
+
+            {/* Suggestions list */}
             {activeInput === 'location' && showSuggestions && (
                 <List 
                     sx={{ 
