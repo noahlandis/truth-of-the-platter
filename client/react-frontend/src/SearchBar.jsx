@@ -259,7 +259,7 @@ function SearchBar() {
                     <InputBase
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        placeholder="Name"
+                        placeholder="What's the name of the restaurant?"
                         sx={{
                             ml: 2,
                             width: 'calc(100% - 50px)', // Ensure input width leaves space for clear button
@@ -307,7 +307,7 @@ function SearchBar() {
                         onChange={handleLocationChange}
                         onFocus={handleFocus}
                         onBlur={handleBlur}
-                        placeholder="Location"
+                        placeholder="Where is it located?"
                         sx={{
                             ml: 2,
                             flex: 1,
