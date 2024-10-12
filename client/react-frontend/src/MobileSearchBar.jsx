@@ -60,7 +60,8 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
         if (window.google && window.google.maps && window.google.maps.places) {
             autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
         }
-        
+        setNameToast(null);
+        setLocationToast(null);
     }, [searchParams]);
 
     useEffect(() => {
@@ -131,13 +132,13 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                 },
                 (error) => {
                     console.error('Error getting user location:', error);
-                    setLocationToast('Location access denied. Please enter a location or allow access.');
+                    setLocationToast("We couldn't access your location. Please enter a city or allow location access.");
                     setLocation('');
                 },
                 { timeout: 10000, maximumAge: 60000 }
             );
         } else {
-            setLocationToast('Geolocation is not supported by this browser.');
+            setLocationToast("Your browser doesn't support geolocation. Please enter a location manually.");
         }
     };
 
@@ -187,7 +188,7 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
         e.preventDefault();
         
         if (!name.trim()) {
-            setNameToast('Name field cannot be left blank');
+            setNameToast('Please enter a restaurant name');
             return;
         }
 
@@ -209,7 +210,7 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                 searchLocation = currentLocation;
             } catch (error) {
                 console.error('Error getting current location:', error);
-                setLocationToast('Location access denied. Please enter a location or allow access.');
+                setLocationToast("We couldn't access your location. Please enter a city or allow location access.");
                 setIsSubmitting(false);
                 return;
             }

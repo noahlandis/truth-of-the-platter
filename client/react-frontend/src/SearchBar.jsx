@@ -169,7 +169,7 @@ function SearchBar() {
                 },
                 (error) => {
                     console.error('Error getting user location:', error);
-                    setLocationError('Location access denied. Please enter a location or allow access.');
+                    setLocationError("We couldn't access your location. Please enter a city or allow location access.");
                     setLocation(''); // Clear the input if there's an error
                 },
                 { timeout: 10000, maximumAge: 60000 } // Add options for better performance
@@ -185,7 +185,7 @@ function SearchBar() {
 
         // Check if name is empty and set error if true
         if (!name.trim()) {
-            setError('Name field cannot be left blank');
+            setError("Please enter a restaurant name");
             return; // Prevent form submission
         }
 
@@ -201,7 +201,7 @@ function SearchBar() {
                 searchLocation = currentLocation;
             } catch (error) {
                 console.error('Error getting current location:', error);
-                setLocationError('Location access denied. Please enter a location or allow access.');
+                setLocationError("We couldn't access your location. Please enter a city or allow location access.");
                 return; // Prevent form submission
             }
         }
@@ -237,14 +237,14 @@ function SearchBar() {
                         reject(error);
                     }
                 }, (error) => {
-                    reject(new Error('Location access denied'));
+                    reject(new Error("We couldn't access your location. Please try again or enter a location manually."));
                 }, {
                     enableHighAccuracy: true,
                     timeout: 5000,
                     maximumAge: 0
                 });
             } else {
-                reject(new Error('Geolocation is not supported by this browser.'));
+                reject(new Error("Your browser doesn't support geolocation. Please enter a location manually."));
             }
         });
     };
