@@ -258,12 +258,17 @@ function SearchBar() {
                 <Box sx={{ position: 'relative', flex: 1, borderRight: '1px solid #ccc' }}>
                     <InputBase
                         value={name}
-                        onChange={(e) => setName(e.target.value)}
+                        onChange={(e) => {
+                            setName(e.target.value);
+                            setError('');
+                        }}
                         placeholder="What's the name of the restaurant?"
                         sx={{
-                            ml: 2,
-                            width: 'calc(100% - 50px)', // Ensure input width leaves space for clear button
-                            flex: 1,
+                            pl: 2,
+                            pr: 6, // Increased right padding to accommodate the clear button
+                            py: 1,
+                            width: '100%', // Changed from calc to 100%
+                            height: '100%',
                         }}
                         inputProps={{ 'aria-label': 'name' }}
                     />
@@ -273,7 +278,7 @@ function SearchBar() {
                             color="error"
                             sx={{
                                 position: 'absolute',
-                                bottom: '-15px', // Adjust this value to control the spacing
+                                bottom: '-8px', // Adjust this value to control the spacing
                                 left: 6,
                                 fontSize: '0.75rem',
                                 paddingLeft: '10px',
@@ -309,9 +314,11 @@ function SearchBar() {
                         onBlur={handleBlur}
                         placeholder="Where is it located?"
                         sx={{
-                            ml: 2,
-                            flex: 1,
-                            width: 'calc(100% - 50px)', // Ensure input width leaves space for clear button
+                            pl: 2,
+                            pr: 6, // Increased right padding to accommodate the clear button
+                            py: 1,
+                            width: '100%', // Changed from calc to 100%
+                            height: '100%',
                         }}
                         inputProps={{ 'aria-label': 'location' }}
                     />
