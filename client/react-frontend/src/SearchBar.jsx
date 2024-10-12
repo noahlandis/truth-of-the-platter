@@ -21,6 +21,7 @@ function SearchBar() {
     const [suggestions, setSuggestions] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [error, setError] = useState(''); // Error state
+    const [locationError, setLocationError] = useState(''); // New state for location error
 
     // Ref for storing timeout ID for debouncing
     const debounceTimeoutRef = useRef(null);
@@ -125,6 +126,7 @@ function SearchBar() {
     const handleLocationChange = (e) => {
         setLocation(e.target.value);
         setShowSuggestions(true);
+        setLocationError('');
     };
 
     // Memoize the debounced function
@@ -167,6 +169,7 @@ function SearchBar() {
                 },
                 (error) => {
                     console.error('Error getting user location:', error);
+                    setLocationError("We couldn't access your location. Please enter a city or allow location access.");
                     setLocation(''); // Clear the input if there's an error
                 },
                 { timeout: 10000, maximumAge: 60000 } // Add options for better performance
@@ -182,11 +185,12 @@ function SearchBar() {
 
         // Check if name is empty and set error if true
         if (!name.trim()) {
-            setError('Name field cannot be left blank');
+            setError("Please enter a restaurant name");
             return; // Prevent form submission
         }
 
-        setError(''); // Clear error if validation passes
+        setError(''); // Clear name error if validation passes
+        setLocationError(''); // Clear location error
 
         let searchLocation = location;
 
@@ -197,14 +201,15 @@ function SearchBar() {
                 searchLocation = currentLocation;
             } catch (error) {
                 console.error('Error getting current location:', error);
-                // You might want to set an error state here or handle it differently
+                setLocationError("We couldn't access your location. Please enter a city or allow location access.");
+                return; // Prevent form submission
             }
         }
 
         navigate(`/search?name=${name}&location=${searchLocation}`);
     };
 
-    // New function to get current location
+    // Updated getCurrentLocation function
     const getCurrentLocation = () => {
         return new Promise((resolve, reject) => {
             if (navigator.geolocation) {
@@ -232,10 +237,14 @@ function SearchBar() {
                         reject(error);
                     }
                 }, (error) => {
-                    reject(error);
+                    reject(new Error("We couldn't access your location. Please try again or enter a location manually."));
+                }, {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
                 });
             } else {
-                reject(new Error('Geolocation is not supported by this browser.'));
+                reject(new Error("Your browser doesn't support geolocation. Please enter a location manually."));
             }
         });
     };
@@ -258,12 +267,17 @@ function SearchBar() {
                 <Box sx={{ position: 'relative', flex: 1, borderRight: '1px solid #ccc' }}>
                     <InputBase
                         value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="Name"
+                        onChange={(e) => {
+                            setName(e.target.value);
+                            setError('');
+                        }}
+                        placeholder="What's the name of the restaurant?"
                         sx={{
-                            ml: 2,
-                            width: 'calc(100% - 50px)', // Ensure input width leaves space for clear button
-                            flex: 1,
+                            pl: 2,
+                            pr: 6, // Increased right padding to accommodate the clear button
+                            py: 1,
+                            width: '100%', // Changed from calc to 100%
+                            height: '100%',
                         }}
                         inputProps={{ 'aria-label': 'name' }}
                     />
@@ -273,7 +287,7 @@ function SearchBar() {
                             color="error"
                             sx={{
                                 position: 'absolute',
-                                bottom: '-15px', // Adjust this value to control the spacing
+                                bottom: '-8px', // Adjust this value to control the spacing
                                 left: 6,
                                 fontSize: '0.75rem',
                                 paddingLeft: '10px',
@@ -307,11 +321,13 @@ function SearchBar() {
                         onChange={handleLocationChange}
                         onFocus={handleFocus}
                         onBlur={handleBlur}
-                        placeholder="Location"
+                        placeholder="Where is it located?"
                         sx={{
-                            ml: 2,
-                            flex: 1,
-                            width: 'calc(100% - 50px)', // Ensure input width leaves space for clear button
+                            pl: 2,
+                            pr: 6, // Increased right padding to accommodate the clear button
+                            py: 1,
+                            width: '100%', // Changed from calc to 100%
+                            height: '100%',
                         }}
                         inputProps={{ 'aria-label': 'location' }}
                     />
@@ -330,11 +346,27 @@ function SearchBar() {
                             <ClearIcon fontSize="small" />
                         </IconButton>
                     )}
+                    {locationError && (
+                        <Typography
+                            color="error"
+                            sx={{
+                                position: 'absolute',
+                                bottom: '-8px',
+                                left: 6,
+                                fontSize: '0.75rem',
+                                paddingLeft: '10px',
+                                borderTop: '2px solid red',
+                                width: 'calc(100% - 12px)',
+                            }}
+                        >
+                            {locationError}
+                        </Typography>
+                    )}
                     {showSuggestions && (
                         <List
                             sx={{
                                 position: 'absolute',
-                                top: '97%',
+                                top: '115%',
                                 left: 0,
                                 right: 0,
                                 width: '100%',

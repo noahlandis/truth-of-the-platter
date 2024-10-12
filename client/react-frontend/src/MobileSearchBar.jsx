@@ -1,10 +1,26 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Paper, InputBase, IconButton, Box, List, ListItem, ListItemButton, ListItemText, Typography, Fade } from '@mui/material';
+import { Paper, InputBase, IconButton, Box, List, ListItem, ListItemButton, ListItemText, Typography, Fade, Alert, Snackbar, Slide } from '@mui/material';
 import ClearIcon from '@mui/icons-material/Clear';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { useSearchParams, useNavigate } from "react-router-dom";
 import axios from 'axios';
 import { debounce } from 'lodash'; // Add this import
+import { styled } from '@mui/material/styles';
+
+// Update this styled component for a custom error Snackbar
+const StyledSnackbar = styled(Snackbar)(({ theme }) => ({
+  '& .MuiSnackbarContent-root': {
+    backgroundColor: theme.palette.error.main,
+    color: theme.palette.error.contrastText,
+    borderRadius: '8px',
+    boxShadow: '0px 3px 5px -1px rgba(0,0,0,0.2), 0px 6px 10px 0px rgba(0,0,0,0.14), 0px 1px 18px 0px rgba(0,0,0,0.12)',
+  },
+}));
+
+// Add this transition component
+function SlideTransition(props) {
+  return <Slide {...props} direction="up" />;
+}
 
 function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
     const apiUrl = import.meta.env.VITE_API_BASE_URL;
@@ -22,26 +38,12 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
     const [showNameError, setShowNameError] = useState(false);
     const [nameErrorOpacity, setNameErrorOpacity] = useState(1);
     const [showSuggestions, setShowSuggestions] = useState(true);
+    const [locationError, setLocationError] = useState('');
+    const [nameToast, setNameToast] = useState(null);
+    const [locationToast, setLocationToast] = useState(null);
 
     const autocompleteServiceRef = useRef(null);
     const debounceTimeoutRef = useRef(null);
-
-    const initializeAutocompleteService = useCallback(() => {
-        if (window.google && window.google.maps && window.google.maps.places) {
-            autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
-        }
-    }, []);
-
-    useEffect(() => {
-        const checkGoogleMapsLoaded = setInterval(() => {
-            if (window.google && window.google.maps && window.google.maps.places) {
-                initializeAutocompleteService();
-                clearInterval(checkGoogleMapsLoaded);
-            }
-        }, 100);
-
-        return () => clearInterval(checkGoogleMapsLoaded);
-    }, [initializeAutocompleteService]);
 
     useEffect(() => {
         const initialName = searchParams.get('name') || '';
@@ -55,7 +57,11 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
             setLocation(initialLocation);
         }
     
-        initializeAutocompleteService();
+        if (window.google && window.google.maps && window.google.maps.places) {
+            autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
+        }
+        setNameToast(null);
+        setLocationToast(null);
     }, [searchParams]);
 
     useEffect(() => {
@@ -118,7 +124,7 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
 
     const handleUserLocationClick = () => {
         if (navigator.geolocation) {
-            setLocation('Fetching location...'); // Provide immediate feedback
+            setLocation('Fetching location...');
             navigator.geolocation.getCurrentPosition(
                 (position) => {
                     const { latitude, longitude } = position.coords;
@@ -126,18 +132,25 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                 },
                 (error) => {
                     console.error('Error getting user location:', error);
-                    setLocation(''); // Clear the input if there's an error
+                    setLocationToast("We couldn't access your location. Please enter a city or allow location access.");
+                    setLocation('');
                 },
-                { timeout: 10000, maximumAge: 60000 } // Add options for better performance
+                { timeout: 10000, maximumAge: 60000 }
             );
         } else {
-            alert('Geolocation is not supported by this browser.');
+            setLocationToast("Your browser doesn't support geolocation. Please enter a location manually.");
         }
+    };
+
+    const handleNameChange = (e) => {
+        setName(e.target.value);
+        setNameToast(null);
     };
 
     const handleLocationChange = (e) => {
         setLocation(e.target.value);
-        setShowSuggestions(true);  // Show suggestions when user starts typing
+        setLocationToast(null);
+        setShowSuggestions(true);
         if (e.target.value.length > 0) {
             if (debounceTimeoutRef.current) {
                 clearTimeout(debounceTimeoutRef.current);
@@ -173,28 +186,67 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
 
     const handleSearch = (e) => {
         e.preventDefault();
-        performSearch();
-    };
-
-    const performSearch = () => {
-        setIsSubmitting(true);
+        
         if (!name.trim()) {
-            setNameError('Name field cannot be left blank');
-            setShowNameError(true);
-            setActiveInput('name');
-            setIsSubmitting(false);
+            setNameToast('Please enter a restaurant name');
             return;
         }
 
-        setNameError('');
-        setShowNameError(false);
-        navigate(`/search?name=${name}&location=${location}`);
+        setNameToast(null);
+        setLocationToast(null);
+        setLocationError('');
+
+        performSearch();
+    };
+
+    const performSearch = async () => {
+        setIsSubmitting(true);
+
+        let searchLocation = location;
+
+        if (!location.trim()) {
+            try {
+                const currentLocation = await getCurrentLocation();
+                searchLocation = currentLocation;
+            } catch (error) {
+                console.error('Error getting current location:', error);
+                setLocationToast("We couldn't access your location. Please enter a city or allow location access.");
+                setIsSubmitting(false);
+                return;
+            }
+        }
+
+        navigate(`/search?name=${name}&location=${searchLocation}`);
         setIsSubmitting(false);
         
         // Trigger handleCancel if there's no error
         if (cancelSearchRef && cancelSearchRef.current) {
             cancelSearchRef.current();
         }
+    };
+
+    const getCurrentLocation = () => {
+        return new Promise((resolve, reject) => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(async (position) => {
+                    const { latitude, longitude } = position.coords;
+                    try {
+                        const userLocation = await debouncedReverseGeocode(latitude, longitude);
+                        resolve(userLocation);
+                    } catch (error) {
+                        reject(error);
+                    }
+                }, (error) => {
+                    reject(new Error('Location access denied'));
+                }, {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                });
+            } else {
+                reject(new Error('Geolocation is not supported by this browser.'));
+            }
+        });
     };
 
     // Add this new function to handle key press events
@@ -240,113 +292,148 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
         }
     }, [showNameError]);
 
+    const handleCloseToast = (toastType) => (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        if (toastType === 'name') {
+            setNameToast(null);
+        } else if (toastType === 'location') {
+            setLocationToast(null);
+        }
+    };
+
     return (
-        <Paper
-            component="form"
-            id="mobile-search-form"
-            onSubmit={handleSearch}
-            sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                width: '100%',
-                borderRadius: '8px',
-                boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-                border: '1px solid #ccc',
-                position: 'relative', // Add this line
-            }}
-            onBlur={handleInputBlur}
-        >
-            <Box sx={{ display: 'flex', alignItems: 'center', borderBottom: activeInput ? '1px solid #ccc' : 'none' }}>
-                <InputBase
-                    value={showNameError ? nameError : name}
-                    onChange={(e) => {
-                        setName(e.target.value);
-                        setNameError('');
-                        setShowNameError(false);
-                        setNameErrorOpacity(1);
-                    }}
-                    onFocus={() => handleInputFocus('name')}
-                    sx={{
-                        ml: 2,
-                        flex: 1,
-                        py: 1,
-                        '& input': {
-                            color: showNameError ? 'error.main' : 'inherit',
-                            opacity: showNameError ? nameErrorOpacity : 1,
-                            transition: 'color 0.3s, opacity 1s',
-                        },
-                    }}
-                    inputProps={{
-                        'aria-label': 'nаme',  // Using Cyrillic 'а' here
-                        placeholder: "What's the nаme of the restaurant?",  // Using Cyrillic 'а'
-                        enterKeyHint: 'search',
-                        autoComplete: 'off'
-                    }}
-                    onKeyPress={handleKeyPress}
-                />
-                {name && !showNameError && (
-                    <IconButton onClick={handleClearName} sx={{ padding: 1 }} aria-label="clear name">
-                        <ClearIcon fontSize="small" />
-                    </IconButton>
-                )}
-            </Box>
-            {activeInput && (
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <InputBase
-                        value={location}
-                        onChange={handleLocationChange}
-                        onFocus={() => {
-                            handleInputFocus('location');
-                            setShowSuggestions(true);  // Show suggestions when input is focused
-                        }}
-                        placeholder="Where is it located?"
-                        sx={{ ml: 2, flex: 1, py: 1 }}
-                        inputProps={{ 
-                            'aria-label': 'location',
-                            enterKeyHint: 'search',
-                            autoComplete: 'off',  // Add this line
-                        }}
-                        onKeyPress={handleKeyPress}
-                    />
-                    {location && (
-                        <IconButton onClick={handleClearLocation} sx={{ padding: 1 }} aria-label="clear location">
-                            <ClearIcon fontSize="small" />
-                        </IconButton>
-                    )}
+        <>
+            <Paper
+                component="form"
+                id="mobile-search-form"
+                onSubmit={handleSearch}
+                sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    width: '100%',
+                    borderRadius: '8px',
+                    boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                    border: '1px solid #ccc',
+                    position: 'relative', // Ensure this is set
+                }}
+                onBlur={handleInputBlur}
+            >
+                {/* Name input */}
+                <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', borderBottom: activeInput ? '1px solid #ccc' : 'none' }}>
+                        <InputBase
+                            value={name}
+                            onChange={handleNameChange}
+                            onFocus={() => handleInputFocus('name')}
+                            sx={{
+                                ml: 2,
+                                flex: 1,
+                                py: 1,
+                                '& input': {
+                                    color: showNameError ? 'error.main' : 'inherit',
+                                    opacity: showNameError ? nameErrorOpacity : 1,
+                                    transition: 'color 0.3s, opacity 1s',
+                                },
+                            }}
+                            inputProps={{
+                                'aria-label': 'nаme',  // Using Cyrillic 'а' here
+                                placeholder: "What's the nаme of the restaurant?",  // Using Cyrillic 'а'
+                                enterKeyHint: 'search',
+                                autoComplete: 'off'
+                            }}
+                            onKeyPress={handleKeyPress}
+                        />
+                        {name && (
+                            <IconButton onClick={handleClearName} sx={{ padding: 1 }} aria-label="clear name">
+                                <ClearIcon fontSize="small" />
+                            </IconButton>
+                        )}
+                    </Box>
                 </Box>
-            )}
-            {activeInput === 'location' && showSuggestions && (
-                <List 
-                    sx={{ 
-                        maxHeight: 200, 
-                        overflowY: 'auto', 
-                        bgcolor: 'background.paper',
-                        position: 'absolute',
-                        top: '100%',
-                        left: 0,
-                        right: 0,
-                        zIndex: 1,
-                        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-                        border: '1px solid #ccc',
-                        borderTop: 'none',
-                    }}
-                >
-                    <ListItem disablePadding>
-                        <ListItemButton onClick={handleUserLocationClick}>
-                            <LocationOnIcon sx={{ mr: 2, color: '#0688DB' }} />
-                            <ListItemText primary="Use Current Location" sx={{ color: '#0688DB' }} />
-                        </ListItemButton>
-                    </ListItem>
-                    {suggestions.map((suggestion, index) => (
-                        <ListItem key={index} disablePadding>
-                            <ListItemButton onClick={() => handleSuggestionClick(suggestion.description)}>
-                                <ListItemText primary={suggestion.description} />
+
+                {/* Location input */}
+                {activeInput && (
+                    <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <InputBase
+                                value={location}
+                                onChange={handleLocationChange}
+                                onFocus={() => {
+                                    handleInputFocus('location');
+                                    setShowSuggestions(true);
+                                }}
+                                placeholder="Where is it located?"
+                                sx={{ ml: 2, flex: 1, py: 1 }}
+                                inputProps={{ 
+                                    'aria-label': 'location',
+                                    enterKeyHint: 'search',
+                                    autoComplete: 'off',
+                                }}
+                                onKeyPress={handleKeyPress}
+                            />
+                            {location && (
+                                <IconButton onClick={handleClearLocation} sx={{ padding: 1 }} aria-label="clear location">
+                                    <ClearIcon fontSize="small" />
+                                </IconButton>
+                            )}
+                        </Box>
+                    </Box>
+                )}
+
+                {/* Suggestions list */}
+                {activeInput === 'location' && showSuggestions && (
+                    <List 
+                        sx={{ 
+                            maxHeight: 200, 
+                            overflowY: 'auto', 
+                            bgcolor: 'background.paper',
+                            position: 'absolute',
+                            top: '100%',
+                            left: 0,
+                            right: 0,
+                            zIndex: 1,
+                            boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+                            border: '1px solid #ccc',
+                            borderTop: 'none',
+                        }}
+                    >
+                        <ListItem disablePadding>
+                            <ListItemButton onClick={handleUserLocationClick}>
+                                <LocationOnIcon sx={{ mr: 2, color: '#0688DB' }} />
+                                <ListItemText primary="Use Current Location" sx={{ color: '#0688DB' }} />
                             </ListItemButton>
                         </ListItem>
-                    ))}
-                </List>
-            )}
-        </Paper>
+                        {suggestions.map((suggestion, index) => (
+                            <ListItem key={index} disablePadding>
+                                <ListItemButton onClick={() => handleSuggestionClick(suggestion.description)}>
+                                    <ListItemText primary={suggestion.description} />
+                                </ListItemButton>
+                            </ListItem>
+                        ))}
+                    </List>
+                )}
+            </Paper>
+            <StyledSnackbar
+                open={!!nameToast}
+                autoHideDuration={4000}
+                onClose={handleCloseToast('name')}
+                message={nameToast}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                TransitionComponent={SlideTransition}
+                TransitionProps={{ enter: true, exit: true }}
+            />
+            <StyledSnackbar
+                open={!!locationToast}
+                autoHideDuration={4000}
+                onClose={handleCloseToast('location')}
+                message={locationToast}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                TransitionComponent={SlideTransition}
+                TransitionProps={{ enter: true, exit: true }}
+            />
+        </>
     );
 }
 
