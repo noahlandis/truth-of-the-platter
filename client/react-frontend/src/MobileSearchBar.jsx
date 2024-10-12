@@ -189,6 +189,8 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
         
         if (!name.trim()) {
             setNameToast('Please enter a restaurant name');
+            // Keep focus on the name input
+            document.querySelector('input[aria-label="nаme"]').focus();
             return;
         }
 
@@ -212,6 +214,8 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                 console.error('Error getting current location:', error);
                 setLocationToast("We couldn't access your location. Please enter a city or allow location access.");
                 setIsSubmitting(false);
+                // Keep focus on the location input
+                document.querySelector('input[aria-label="location"]').focus();
                 return;
             }
         }
@@ -219,8 +223,8 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
         navigate(`/search?name=${name}&location=${searchLocation}`);
         setIsSubmitting(false);
         
-        // Trigger handleCancel if there's no error
-        if (cancelSearchRef && cancelSearchRef.current) {
+        // Only trigger handleCancel if there's no error
+        if (!nameToast && !locationToast && cancelSearchRef && cancelSearchRef.current) {
             cancelSearchRef.current();
         }
     };
