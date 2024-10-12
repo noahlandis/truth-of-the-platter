@@ -263,9 +263,9 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                     }}
                     inputProps={{
                         'aria-label': 'nаme',  // Using Cyrillic 'а' here
-                        placeholder: "What's the nаme of the restaurant?",  // Using Cyrillic 'а' here
+                        placeholder: "What's the nаme of the restaurant?",  // Using Cyrillic 'а'
                         enterKeyHint: 'search',
-                        autoComplete: 'nope',  
+                        autoComplete: 'off'
                     }}
                     onKeyPress={handleKeyPress}
                 />
@@ -287,9 +287,9 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                         placeholder="Where is it located?"
                         sx={{ ml: 2, flex: 1, py: 1 }}
                         inputProps={{ 
-                            'aria-label': 'random_string',
+                            'aria-label': 'location',
                             enterKeyHint: 'search',
-                            autoComplete: 'no',  // Add this line
+                            autoComplete: 'off',  // Add this line
                         }}
                         onKeyPress={handleKeyPress}
                     />
