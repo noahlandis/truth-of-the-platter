@@ -127,7 +127,7 @@ function MatchList() {
                   <div className="flex-shrink-0">
                     <img
                       src={data.imageUrl}
-                      alt={`${data.name} example`}
+                      alt={`${data.name}`}
                       className="object-cover w-24 h-24"
                     />
                   </div>
