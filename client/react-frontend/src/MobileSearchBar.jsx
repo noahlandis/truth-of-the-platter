@@ -263,9 +263,9 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                     }}
                     inputProps={{
                         'aria-label': 'name',
-                        placeholder: 'Name',
+                        placeholder: "What's the name of the restaurant?",
                         enterKeyHint: 'search',
-                        autocomplete: 'off',  // Add this line
+                        autoComplete: 'nope',  
                     }}
                     onKeyPress={handleKeyPress}
                 />
@@ -284,12 +284,12 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                             handleInputFocus('location');
                             setShowSuggestions(true);  // Show suggestions when input is focused
                         }}
-                        placeholder="Location"
+                        placeholder="Where is it located?"
                         sx={{ ml: 2, flex: 1, py: 1 }}
                         inputProps={{ 
                             'aria-label': 'location',
                             enterKeyHint: 'search',
-                            autocomplete: 'off',  // Add this line
+                            autoComplete: 'nope',  // Add this line
                         }}
                         onKeyPress={handleKeyPress}
                     />
