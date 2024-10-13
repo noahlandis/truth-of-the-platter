@@ -14,18 +14,18 @@ import StarRateIcon from '@mui/icons-material/StarRate';
 function Home() {
   const steps = [
     {
-      label: 'Find Restaurants Near You',
-      description: 'Enter a restaurant name or use automatic location detection to discover places around you.',
+      label: 'Search for a Restaurant',
+      description: 'Enter the name and location of the restaurant you want to find ratings for.',
       icon: <SearchIcon sx={{ fontSize: 50, color: '#1976d2' }} />,
     },
     {
-      label: 'Choose a Restaurant',
-      description: 'Browse through search results and select a restaurant to see detailed ratings from Yelp, Google, and TripAdvisor.',
+      label: 'Compare Ratings',
+      description: 'View aggregated ratings and review counts from Yelp, Google, and TripAdvisor.',
       icon: <RestaurantIcon sx={{ fontSize: 50, color: '#1976d2' }} />,
     },
     {
-      label: 'View Aggregated Ratings',
-      description: 'Check the weighted average rating and review counts from all platforms to make an informed decision.',
+      label: 'Make an Informed Decision',
+      description: 'Check the weighted average rating based on data from all sources to get a more accurate picture.',
       icon: <StarRateIcon sx={{ fontSize: 50, color: '#1976d2' }} />,
     },
   ];
