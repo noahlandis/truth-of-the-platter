@@ -51,6 +51,25 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
     const autocompleteServiceRef = useRef(null);
     const debounceTimeoutRef = useRef(null);
 
+    // Add this new function
+    const initializeAutocompleteService = useCallback(() => {
+        if (window.google && window.google.maps && window.google.maps.places) {
+            autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
+        }
+    }, []);
+
+    // Replace the existing useEffect for Google Maps initialization with this
+    useEffect(() => {
+        const checkGoogleMapsLoaded = setInterval(() => {
+            if (window.google && window.google.maps && window.google.maps.places) {
+                initializeAutocompleteService();
+                clearInterval(checkGoogleMapsLoaded);
+            }
+        }, 100);
+
+        return () => clearInterval(checkGoogleMapsLoaded);
+    }, [initializeAutocompleteService]);
+
     useEffect(() => {
         const initialName = searchParams.get('name') || '';
         const initialLocation = searchParams.get('location') || '';
@@ -63,9 +82,6 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
             setLocation(initialLocation);
         }
     
-        if (window.google && window.google.maps && window.google.maps.places) {
-            autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
-        }
         setNameToast(null);
         setLocationToast(null);
     }, [searchParams]);
@@ -139,7 +155,7 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                 },
                 (error) => {
                     console.error('Error getting user location:', error);
-                    setLocationToast("We couldn't access your location. Please enter a city or allow location access.");
+                    setLocationToast("Please enter a city or allow location access.");
                     setLocation('');
                 },
                 { timeout: 10000, maximumAge: 60000 }
