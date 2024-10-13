@@ -7,19 +7,25 @@ import axios from 'axios';
 import { debounce } from 'lodash'; // Add this import
 import { styled } from '@mui/material/styles';
 
-// Update this styled component for a custom error Snackbar
+// Update the StyledSnackbar component
 const StyledSnackbar = styled(Snackbar)(({ theme }) => ({
   '& .MuiSnackbarContent-root': {
     backgroundColor: theme.palette.error.main,
     color: theme.palette.error.contrastText,
-    borderRadius: '8px',
+    borderRadius: '4px',
     boxShadow: '0px 3px 5px -1px rgba(0,0,0,0.2), 0px 6px 10px 0px rgba(0,0,0,0.14), 0px 1px 18px 0px rgba(0,0,0,0.12)',
+    minHeight: '32px',
+    padding: '4px 16px',
+  },
+  '& .MuiSnackbarContent-message': {
+    padding: 0,
+    fontSize: '0.875rem',
   },
 }));
 
-// Add this transition component
+// Update the SlideTransition component
 function SlideTransition(props) {
-  return <Slide {...props} direction="up" />;
+  return <Slide {...props} direction="down" />;
 }
 
 function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
@@ -442,18 +448,32 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                 autoHideDuration={4000}
                 onClose={handleCloseToast('name')}
                 message={nameToast}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
                 TransitionComponent={SlideTransition}
                 TransitionProps={{ enter: true, exit: true }}
+                sx={{
+                  top: '0px !important',
+                  '& .MuiSnackbarContent-root': {
+                    width: 'calc(100% - 32px)',
+                    maxWidth: 'none',
+                  },
+                }}
             />
             <StyledSnackbar
                 open={!!locationToast}
                 autoHideDuration={4000}
                 onClose={handleCloseToast('location')}
                 message={locationToast}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
                 TransitionComponent={SlideTransition}
                 TransitionProps={{ enter: true, exit: true }}
+                sx={{
+                  top: '0px !important',
+                  '& .MuiSnackbarContent-root': {
+                    width: 'calc(100% - 32px)',
+                    maxWidth: 'none',
+                  },
+                }}
             />
         </>
     );

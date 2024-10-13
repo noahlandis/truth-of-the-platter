@@ -32,7 +32,7 @@ function Header() {
     };
 
     return (
-        <div className="flex flex-col items-center w-full">
+        <div className={`flex flex-col items-center w-full ${isMobile ? 'mt-2' : ''}`}>
             <ClickAwayListener onClickAway={handleClickAway}>
                 <div className={`flex flex-col items-center w-full`}>
                     <div className={`flex items-center justify-between w-full ${isMobile ? 'px-2' : ''}`}>
