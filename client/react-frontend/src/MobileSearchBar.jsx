@@ -47,6 +47,7 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
     const [locationError, setLocationError] = useState('');
     const [nameToast, setNameToast] = useState(null);
     const [locationToast, setLocationToast] = useState(null);
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
 
     const autocompleteServiceRef = useRef(null);
     const debounceTimeoutRef = useRef(null);
@@ -97,6 +98,32 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
             };
         }
     }, [cancelSearchRef, onBlur]);
+
+    useEffect(() => {
+        const handleFormBlur = (e) => {
+            // Delay the check to allow for other actions to complete
+            setTimeout(() => {
+                const activeElement = document.activeElement;
+                const form = document.getElementById('mobile-search-form');
+                const isFormActive = form && form.contains(activeElement);
+                const isSearchButtonActive = activeElement && activeElement.type === 'submit';
+
+                if (!isFormActive && !isSearchButtonActive && isSearchFocused) {
+                    if (cancelSearchRef && cancelSearchRef.current) {
+                        cancelSearchRef.current();
+                    }
+                    onBlur();
+                    setIsSearchFocused(false);
+                }
+            }, 100);
+        };
+
+        document.addEventListener('focusout', handleFormBlur);
+
+        return () => {
+            document.removeEventListener('focusout', handleFormBlur);
+        };
+    }, [onBlur, isSearchFocused]);
 
     const handleClearName = () => setName('');
     const handleClearLocation = () => setLocation('');
@@ -252,6 +279,7 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
         // Trigger handleCancel if there's no error
         if (cancelSearchRef && cancelSearchRef.current) {
             cancelSearchRef.current();
+            setIsSearchFocused(false);
         }
     };
 
@@ -303,6 +331,7 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
 
     const handleInputFocus = (inputType) => {
         setActiveInput(inputType);
+        setIsSearchFocused(true);
         onFocus();
     };
 
@@ -313,6 +342,10 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                 if (!error) {
                     setActiveInput(null);
                     onBlur();
+                    // Call cancelSearchRef.current() when neither input is in focus
+                    if (cancelSearchRef && cancelSearchRef.current) {
+                        cancelSearchRef.current();
+                    }
                 }
             }
         }, 100);
@@ -362,7 +395,6 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                     border: '1px solid #ccc',
                     position: 'relative', // Ensure this is set
                 }}
-                onBlur={handleInputBlur}
             >
                 {/* Name input */}
                 <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
