@@ -12,14 +12,18 @@ const StyledSnackbar = styled(Snackbar)(({ theme }) => ({
   '& .MuiSnackbarContent-root': {
     backgroundColor: theme.palette.error.main,
     color: theme.palette.error.contrastText,
-    borderRadius: '4px',
+    borderRadius: 0,
     boxShadow: '0px 3px 5px -1px rgba(0,0,0,0.2), 0px 6px 10px 0px rgba(0,0,0,0.14), 0px 1px 18px 0px rgba(0,0,0,0.12)',
     minHeight: '32px',
     padding: '4px 16px',
+    width: '100%',
+    maxWidth: 'none',
   },
   '& .MuiSnackbarContent-message': {
     padding: 0,
     fontSize: '0.875rem',
+    width: '100%',
+    textAlign: 'center',
   },
 }));
 
@@ -125,8 +129,15 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
         };
     }, [onBlur, isSearchFocused]);
 
-    const handleClearName = () => setName('');
-    const handleClearLocation = () => setLocation('');
+    const handleClearName = (e) => {
+        setName('');
+        // Refocus on the name input
+    };
+
+    const handleClearLocation = (e) => {
+        setLocation('');
+        // Refocus on the location input
+    };
 
     const handleSuggestionClick = (suggestion) => {
         setLocation(suggestion);
@@ -267,7 +278,7 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                 searchLocation = currentLocation;
             } catch (error) {
                 console.error('Error getting current location:', error);
-                setLocationToast("We couldn't access your location. Please enter a city or allow location access.");
+                setLocationToast("Please enter a city or allow location access.");
                 setIsSubmitting(false);
                 return;
             }
@@ -422,7 +433,12 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                             onKeyPress={handleKeyPress}
                         />
                         {name && (
-                            <IconButton onClick={handleClearName} sx={{ padding: 1 }} aria-label="clear name">
+                            <IconButton 
+                                onClick={handleClearName} 
+                                sx={{ padding: 1 }} 
+                                aria-label="clear name"
+                                onMouseDown={(e) => e.preventDefault()} // Prevent blur on mousedown
+                            >
                                 <ClearIcon fontSize="small" />
                             </IconButton>
                         )}
@@ -450,7 +466,12 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                                 onKeyPress={handleKeyPress}
                             />
                             {location && (
-                                <IconButton onClick={handleClearLocation} sx={{ padding: 1 }} aria-label="clear location">
+                                <IconButton 
+                                    onClick={handleClearLocation} 
+                                    sx={{ padding: 1 }} 
+                                    aria-label="clear location"
+                                    onMouseDown={(e) => e.preventDefault()} // Prevent blur on mousedown
+                                >
                                     <ClearIcon fontSize="small" />
                                 </IconButton>
                             )}
@@ -501,10 +522,9 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                 TransitionProps={{ enter: true, exit: true }}
                 sx={{
                   top: '0px !important',
-                  '& .MuiSnackbarContent-root': {
-                    width: 'calc(100% - 32px)',
-                    maxWidth: 'none',
-                  },
+                  left: '0px !important',
+                  right: '0px !important',
+                  width: '100%',
                 }}
             />
             <StyledSnackbar
@@ -517,10 +537,9 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                 TransitionProps={{ enter: true, exit: true }}
                 sx={{
                   top: '0px !important',
-                  '& .MuiSnackbarContent-root': {
-                    width: 'calc(100% - 32px)',
-                    maxWidth: 'none',
-                  },
+                  left: '0px !important',
+                  right: '0px !important',
+                  width: '100%',
                 }}
             />
         </>
