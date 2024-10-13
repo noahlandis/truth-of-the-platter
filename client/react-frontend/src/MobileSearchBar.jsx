@@ -297,7 +297,7 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
     const handleKeyPress = (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            performSearch();
+            handleSearch(e);
         }
     };
 
