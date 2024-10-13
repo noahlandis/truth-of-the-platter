@@ -267,7 +267,7 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                 searchLocation = currentLocation;
             } catch (error) {
                 console.error('Error getting current location:', error);
-                setLocationToast("We couldn't access your location. Please enter a city or allow location access.");
+                setLocationToast("Please enter a city or allow location access.");
                 setIsSubmitting(false);
                 return;
             }
@@ -518,7 +518,7 @@ function MobileSearchBar({ onFocus, onBlur, cancelSearchRef }) {
                 sx={{
                   top: '0px !important',
                   '& .MuiSnackbarContent-root': {
-                    width: 'calc(100% - 32px)',
+                    width: '100%',
                     maxWidth: 'none',
                   },
                 }}
