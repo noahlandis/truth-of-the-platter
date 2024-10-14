@@ -7,7 +7,7 @@ function Terms() {
             {[
                 {
                     title: "1. Service Description",
-                    content: "Truth of the Platter is a web application that aggregates restaurant reviews from multiple sources, including Yelp, TripAdvisor, and Google, to provide a more comprehensive rating."
+                    content: "Truth of the Platter is an application that aggregates restaurant reviews from multiple sources, including Yelp, TripAdvisor, and Google, to provide a more comprehensive rating."
                 },
                 {
                     title: "2. Use of Third-Party Data",
