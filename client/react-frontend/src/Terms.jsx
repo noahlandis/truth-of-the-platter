@@ -23,7 +23,7 @@ function Terms() {
                 },
                 {
                     title: "5. Use of Location Data",
-                    content: "Truth of the Platter may request access to your device's location data to provide location-based services, such as finding nearby restaurants. We only access your location when you grant permission and while you are using the app. You can revoke this permission at any time through your device settings. We do not store your precise location data on our servers or share it with third parties."
+                    content: "Truth of the Platter may request access to your device's location data to provide location-based services, such as finding nearby restaurants. We only access your location when you grant permission and while you're using the app. You can revoke this permission at any time through your device settings. We do not store your precise location data on our servers or share it with third parties."
                 },
                 {
                     title: "6. Limitations of Liability",
