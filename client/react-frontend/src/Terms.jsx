@@ -11,7 +11,7 @@ function Terms() {
                 },
                 {
                     title: "2. Use of Third-Party Data",
-                    content: "Our service utilizes data from Yelp, Google, and TripAdvisor to gather restaurant information. By using Truth of the Platter, you agree to comply with the terms of service of these third-party providers. The data displayed on Truth of the Platter is sourced from these providers and remains their property. We do not claim ownership of this data."
+                    content: "Our service utilizes data from Yelp, Google, and TripAdvisor to gather restaurant information. In using Truth of the Platter, you agree to comply with the terms of service of these third-party providers. The data displayed on Truth of the Platter is sourced from these providers and remains their property. We do not claim ownership of this data."
                 },
                 {
                     title: "3. Use of Third-Party Trademarks and Logos",
