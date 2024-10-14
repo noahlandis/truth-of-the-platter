@@ -1,0 +1,29 @@
+name: Deploy to EC2
+
+# Trigger the workflow on push to the staging branch
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout the code from GitHub
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # SSH into your EC2 instance and run the deploy script
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@v0.1.8
+      with:
+        host: ${{ secrets.EC2_PROD_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        port: ${{ secrets.EC2_SSH_PORT }}  # Optional, default is 22
+        script: |
+          cd ~   # Go to the home directory where deploy.sh is located
+          ./deploy.sh
+
