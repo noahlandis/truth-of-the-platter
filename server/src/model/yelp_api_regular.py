@@ -8,7 +8,7 @@ class YelpApiRegular(YelpApi):
         params = {
             'term': name,
             'location': location,
-            'limit': 5
+            'limit': 4
         }
         response = requests.get(url, headers=YelpApi.headers, params=params).json()
         error = YelpApiRegular._get_error_message(response)

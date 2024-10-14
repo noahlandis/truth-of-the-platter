@@ -1,4 +1,5 @@
 import Header from './Header';
+import Footer from './Footer';
 
 function Layout({ children }) {
   return (
@@ -18,7 +19,7 @@ function Layout({ children }) {
         </div>
         </main>
         </div>
-
+        <Footer />
     </div>
   );
 }

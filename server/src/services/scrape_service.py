@@ -13,14 +13,14 @@ from bs4 import BeautifulSoup
 
 from server.src.model.google import Google
 from server.src.model.tripadvisor import TripAdvisor
-
+from server.src.model.yelp import Yelp
 
 logger = logging.getLogger()
 
 # list of websites to scrape
-WEBSITES = [Google, TripAdvisor]
+WEBSITES = [Google, Yelp, TripAdvisor]
 
-def scrape(name, location) -> tuple:
+def scrape(name, location, source) -> tuple:
     """
     Scrapes the ratings and review counts for the given restaurant name and location from Yelp, Google, and TripAdvisor.
     :param dict yelp_info: Dictionary containing restaurant details from Yelp.
@@ -32,6 +32,9 @@ def scrape(name, location) -> tuple:
     last_url = ""    
     results = []
     for i in range(len(WEBSITES)):
+        if WEBSITES[i].__name__ == source:
+            print("SKIPPING WEBSITE: ", WEBSITES[i].__name__)
+            continue
         url = WEBSITES[i].build_url(name, location)
 
         if url != last_url:

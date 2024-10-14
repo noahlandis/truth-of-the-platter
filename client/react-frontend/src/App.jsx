@@ -1,7 +1,10 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { useMediaQuery, useTheme } from '@mui/material';
 import Layout from './Layout';  // Import your Layout component
 import MatchList from './MatchList';  // Import your MatchList component
 import RatingResults from './RatingResults';  // Import your RatingResults component
+import RatingResultsDesktop from './RatingResultsDesktop';
+import Terms from './Terms';  // Import the Terms component
 
 import { Box, Typography, Paper, Stepper, Step, StepLabel } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
@@ -11,18 +14,18 @@ import StarRateIcon from '@mui/icons-material/StarRate';
 function Home() {
   const steps = [
     {
-      label: 'Find Restaurants Near You',
-      description: 'Enter a restaurant name or use automatic location detection to discover places around you.',
+      label: 'Search for a Restaurant',
+      description: 'Enter the name and location of the restaurant you want to find ratings for.',
       icon: <SearchIcon sx={{ fontSize: 50, color: '#1976d2' }} />,
     },
     {
-      label: 'Choose a Restaurant',
-      description: 'Browse through search results and select a restaurant to see detailed ratings from Yelp, Google, and TripAdvisor.',
+      label: 'Compare Ratings',
+      description: 'View aggregated ratings and review counts from Yelp, Google, and TripAdvisor.',
       icon: <RestaurantIcon sx={{ fontSize: 50, color: '#1976d2' }} />,
     },
     {
-      label: 'View Aggregated Ratings',
-      description: 'Check the weighted average rating and review counts from all platforms to make an informed decision.',
+      label: 'Make an Informed Decision',
+      description: 'Check the weighted average rating based on data from all sources to get a more accurate picture.',
       icon: <StarRateIcon sx={{ fontSize: 50, color: '#1976d2' }} />,
     },
   ];
@@ -76,13 +79,17 @@ function Home() {
 }
 
 function App() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
   return (
     <Router>
       <Layout>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/search" element={<MatchList />} />
-          <Route path="/ratings" element={<RatingResults />} />
+          <Route path="/ratings" element={isMobile ? <RatingResults /> : <RatingResultsDesktop />} />
+          <Route path="/terms" element={<Terms />} />
           <Route path="*" element={<Home />} />
         </Routes>
       </Layout>

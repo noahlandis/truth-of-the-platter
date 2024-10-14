@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Paper, InputBase, IconButton, Box, List, ListItem, ListItemButton, ListItemText, Typography, useMediaQuery, useTheme } from '@mui/material';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Paper, InputBase, IconButton, Box, List, ListItem, ListItemButton, ListItemText, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import axios from 'axios';
 import { useSearchParams } from "react-router-dom";
 import { useNavigate } from 'react-router-dom';
+import { debounce } from 'lodash'; // Add this import
 
 function SearchBar() {
     const apiUrl = import.meta.env.VITE_API_BASE_URL;
@@ -20,36 +21,47 @@ function SearchBar() {
     const [suggestions, setSuggestions] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [error, setError] = useState(''); // Error state
+    const [locationError, setLocationError] = useState(''); // New state for location error
 
     // Ref for storing timeout ID for debouncing
     const debounceTimeoutRef = useRef(null);
 
     const autocompleteServiceRef = useRef(null);
 
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    // New function to initialize the Autocomplete service
+    const initializeAutocompleteService = useCallback(() => {
+        if (window.google && window.google.maps && window.google.maps.places) {
+            autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
+        }
+    }, []);
 
-    // On component mount, populate input fields from query params
+    // Separate effect to initialize the Autocomplete service
+    useEffect(() => {
+        const checkGoogleMapsLoaded = setInterval(() => {
+            if (window.google && window.google.maps && window.google.maps.places) {
+                initializeAutocompleteService();
+                clearInterval(checkGoogleMapsLoaded);
+            }
+        }, 100);
+
+        return () => clearInterval(checkGoogleMapsLoaded);
+    }, [initializeAutocompleteService]);
+
+    // Existing effect for populating input fields
     useEffect(() => {
         const initialName = searchParams.get('name') || '';
         const initialLocation = searchParams.get('location') || '';
         
-        // Check if the current route is '/'
         if (window.location.pathname === '/') {
-            setLocation('');  // Clear location if on home page
-            setName('');  // Clear name if on home page
+            setLocation('');
+            setName('');
         } else {
             setName(initialName);
             setLocation(initialLocation);
         }
     
-        // Initialize Google Places AutocompleteService
-        if (window.google && window.google.maps && window.google.maps.places) {
-            autocompleteServiceRef.current = new window.google.maps.places.AutocompleteService();
-        }
+        // Remove the Autocomplete service initialization from here
     }, [searchParams]);
-
-
 
     // Clear name input
     const handleClearName = () => setName('');
@@ -114,41 +126,54 @@ function SearchBar() {
     const handleLocationChange = (e) => {
         setLocation(e.target.value);
         setShowSuggestions(true);
+        setLocationError('');
     };
 
-    // Updated function to get user location and reverse geocode it to city and state
-    const handleUserLocationClick = async () => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(async (position) => {
-                const { latitude, longitude } = position.coords;
-                console.log('User location:', latitude, longitude);
-                const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}`;
-                
-                try {
-                    const response = await axios.get(apiUrl);
-                    const results = response.data.results;
-                    console.log('Reverse geocoding results:', response);
-                    if (results.length > 0) {
-                        const addressComponents = results[0].address_components;
+    // Memoize the debounced function
+    const debouncedReverseGeocode = useCallback(
+        debounce(async (latitude, longitude) => {
+            const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}`;
+            
+            try {
+                const response = await axios.get(apiUrl);
+                const results = response.data.results;
+                if (results.length > 0) {
+                    const addressComponents = results[0].address_components;
 
-                        const city = addressComponents.find((component) =>
-                            component.types.includes('locality')
-                        )?.long_name;
+                    const city = addressComponents.find((component) =>
+                        component.types.includes('locality')
+                    )?.long_name;
 
-                        const state = addressComponents.find((component) =>
-                            component.types.includes('administrative_area_level_1')
-                        )?.long_name;
+                    const state = addressComponents.find((component) =>
+                        component.types.includes('administrative_area_level_1')
+                    )?.short_name; // Use short_name for state abbreviation
 
-                        const userLocation = `${city}, ${state}`;
-                        setLocation(userLocation);  // Update location state with city and state
-                        setShowSuggestions(false);
-                    }
-                } catch (error) {
-                    console.error('Error reverse geocoding location:', error);
+                    const userLocation = `${city}, ${state}`;
+                    setLocation(userLocation);
+                    setShowSuggestions(false);
                 }
-            }, (error) => {
-                console.error('Error getting user location:', error);
-            });
+            } catch (error) {
+                console.error('Error reverse geocoding location:', error);
+            }
+        }, 300),
+        [GOOGLE_MAPS_API_KEY]
+    );
+
+    const handleUserLocationClick = () => {
+        if (navigator.geolocation) {
+            setLocation('Fetching location...'); // Provide immediate feedback
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    debouncedReverseGeocode(latitude, longitude);
+                },
+                (error) => {
+                    console.error('Error getting user location:', error);
+                    setLocationError("We couldn't access your location. Please enter a city or allow location access.");
+                    setLocation(''); // Clear the input if there's an error
+                },
+                { timeout: 10000, maximumAge: 60000 } // Add options for better performance
+            );
         } else {
             alert('Geolocation is not supported by this browser.');
         }
@@ -160,11 +185,12 @@ function SearchBar() {
 
         // Check if name is empty and set error if true
         if (!name.trim()) {
-            setError('Name field cannot be left blank');
+            setError("Please enter a restaurant name");
             return; // Prevent form submission
         }
 
-        setError(''); // Clear error if validation passes
+        setError(''); // Clear name error if validation passes
+        setLocationError(''); // Clear location error
 
         let searchLocation = location;
 
@@ -175,14 +201,15 @@ function SearchBar() {
                 searchLocation = currentLocation;
             } catch (error) {
                 console.error('Error getting current location:', error);
-                // You might want to set an error state here or handle it differently
+                setLocationError("We couldn't access your location. Please enter a city or allow location access.");
+                return; // Prevent form submission
             }
         }
 
         navigate(`/search?name=${name}&location=${searchLocation}`);
     };
 
-    // New function to get current location
+    // Updated getCurrentLocation function
     const getCurrentLocation = () => {
         return new Promise((resolve, reject) => {
             if (navigator.geolocation) {
@@ -210,10 +237,14 @@ function SearchBar() {
                         reject(error);
                     }
                 }, (error) => {
-                    reject(error);
+                    reject(new Error("We couldn't access your location. Please try again or enter a location manually."));
+                }, {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
                 });
             } else {
-                reject(new Error('Geolocation is not supported by this browser.'));
+                reject(new Error("Your browser doesn't support geolocation. Please enter a location manually."));
             }
         });
     };
@@ -225,40 +256,38 @@ function SearchBar() {
                 onSubmit={handleSearch}
                 sx={{
                     display: 'flex',
-                    flexDirection: isMobile ? 'column' : 'row',
                     alignItems: 'center',
-                    height: isMobile ? 'auto' : 65,
+                    height: 65,
                     width: '100%',
-                    borderRadius: isMobile ? '8px' : '0 8px 8px 0',
+                    borderRadius: '0 8px 8px 0',
                     boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
                     border: '1px solid #ccc',
                 }}
             >
-                <Box sx={{ 
-                    position: 'relative', 
-                    flex: 1, 
-                    width: '100%',
-                    borderRight: isMobile ? 'none' : '1px solid #ccc',
-                    borderBottom: isMobile ? '1px solid #ccc' : 'none',
-                }}>
+                <Box sx={{ position: 'relative', flex: 1, borderRight: '1px solid #ccc' }}>
                     <InputBase
                         value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="Name"
+                        onChange={(e) => {
+                            setName(e.target.value);
+                            setError('');
+                        }}
+                        placeholder="What's the name of the restaurant?"
                         sx={{
-                            ml: 2,
-                            width: 'calc(100% - 50px)',
-                            flex: 1,
-                            height: isMobile ? 65 : 'auto',
+                            pl: 2,
+                            pr: 6, // Increased right padding to accommodate the clear button
+                            py: 1,
+                            width: '100%', // Changed from calc to 100%
+                            height: '100%',
                         }}
                         inputProps={{ 'aria-label': 'name' }}
                     />
+
                     {error && (
                         <Typography
                             color="error"
                             sx={{
                                 position: 'absolute',
-                                bottom: '-15px', // Adjust this value to control the spacing
+                                bottom: '-8px', // Adjust this value to control the spacing
                                 left: 6,
                                 fontSize: '0.75rem',
                                 paddingLeft: '10px',
@@ -286,18 +315,19 @@ function SearchBar() {
                     )}
                 </Box>
 
-                <Box sx={{ position: 'relative', flex: 1, width: '100%' }}>
+                <Box sx={{ position: 'relative', flex: 1 }}>
                     <InputBase
                         value={location}
                         onChange={handleLocationChange}
                         onFocus={handleFocus}
                         onBlur={handleBlur}
-                        placeholder="Location"
+                        placeholder="Where is it located?"
                         sx={{
-                            ml: 2,
-                            flex: 1,
-                            width: 'calc(100% - 50px)',
-                            height: isMobile ? 65 : 'auto',
+                            pl: 2,
+                            pr: 6, // Increased right padding to accommodate the clear button
+                            py: 1,
+                            width: '100%', // Changed from calc to 100%
+                            height: '100%',
                         }}
                         inputProps={{ 'aria-label': 'location' }}
                     />
@@ -316,11 +346,27 @@ function SearchBar() {
                             <ClearIcon fontSize="small" />
                         </IconButton>
                     )}
+                    {locationError && (
+                        <Typography
+                            color="error"
+                            sx={{
+                                position: 'absolute',
+                                bottom: '-8px',
+                                left: 6,
+                                fontSize: '0.75rem',
+                                paddingLeft: '10px',
+                                borderTop: '2px solid red',
+                                width: 'calc(100% - 12px)',
+                            }}
+                        >
+                            {locationError}
+                        </Typography>
+                    )}
                     {showSuggestions && (
                         <List
                             sx={{
                                 position: 'absolute',
-                                top: '97%',
+                                top: '115%',
                                 left: 0,
                                 right: 0,
                                 width: '100%',
@@ -396,21 +442,19 @@ function SearchBar() {
                         </List>
                     )}
                 </Box>
-                {!isMobile && (
-                    <IconButton
-                        type="submit"
-                        sx={{
-                            backgroundColor: '#1976d2',
-                            color: '#fff',
-                            height: '100%',
-                            borderRadius: '0 8px 8px 0',
-                            width: 65,
-                        }}
-                        aria-label="search"
-                    >
-                        <SearchIcon />
-                    </IconButton>
-                )}
+                <IconButton
+                    type="submit"
+                    sx={{
+                        backgroundColor: '#1976d2',
+                        color: '#fff',
+                        height: '100%',
+                        borderRadius: '0 8px 8px 0',
+                        width: 65,
+                    }}
+                    aria-label="search"
+                >
+                    <SearchIcon />
+                </IconButton>
             </Paper>
         </>
     );
