@@ -45,5 +45,5 @@ class Google(Website):
         restaurant = results[0]
         print(restaurant['rating'])
         print(restaurant['user_ratings_total'])
-        return str(restaurant['rating']), str(restaurant['user_ratings_total'])
+        return str(restaurant['rating']), "{:,}".format(restaurant['user_ratings_total'])
  
