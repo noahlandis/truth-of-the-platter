@@ -22,5 +22,5 @@ def test_get_rating_and_review_count_google():
         </div>
         '''
     page = BeautifulSoup(html, 'html.parser')
-    actual = Google.get_rating_and_review_count(page)
+    actual = Google._get_rating_and_review_count_scrape(page)
     assert actual == expected

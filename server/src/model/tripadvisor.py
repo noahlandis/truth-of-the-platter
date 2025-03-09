@@ -26,7 +26,7 @@ class TripAdvisor(Website):
         return Google.build_url(name, location)
 
     @staticmethod
-    def _get_rating_and_review_count(page: BeautifulSoup) -> tuple:
+    def _get_rating_and_review_count_scrape(page: BeautifulSoup) -> tuple:
         """
         Scrapes the rating and review count from the TripAdvisor rich snippet
         :param BeautifulSoup page - the page to scrape
@@ -43,4 +43,7 @@ class TripAdvisor(Website):
         review_count = rating_and_review_count[1]
         return rating, extract_review_count(review_count)
 
-  
+    @staticmethod
+    def _get_rating_and_review_count_api(name: str, location: str) -> tuple:
+        print("Trying to get rating and review count from TripAdvisor API")
+        return None, None
