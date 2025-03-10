@@ -43,7 +43,7 @@ def scrape(name, location, source) -> tuple:
 
         # Get the rating and review count for the given website
         website_name = WEBSITES[i].__name__
-        rating, review_count = WEBSITES[i].get_rating_and_review_count(page)
+        rating, review_count = WEBSITES[i].get_rating_and_review_count(name, location, page)
         results.append((website_name, rating, review_count))
 
     return results
