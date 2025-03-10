@@ -43,7 +43,5 @@ class Google(Website):
         results = GooglePlacesApiHandler().process_request(name, location)
         # given that the name and location are fully specified (based on the user selection), we can be fairly confident that the result will be the rating and review count of the restaurant the user intended to find ratings for.
         restaurant = results[0]
-        print(restaurant['rating'])
-        print(restaurant['user_ratings_total'])
         return str(restaurant['rating']), "{:,}".format(restaurant['user_ratings_total'])
  

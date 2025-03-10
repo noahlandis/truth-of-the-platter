@@ -48,7 +48,7 @@ class Website(ABC):
 
     @staticmethod
     @abstractmethod
-    def _get_rating_and_review_count_api(url: str) -> tuple:
+    def _get_rating_and_review_count_api(name: str, location: str) -> tuple:
         pass
 
 
