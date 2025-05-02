@@ -33,13 +33,16 @@ class Website(ABC):
         :param BeautifulSoup page - the page to scrape
         :return tuple (<rating>, <review_count>) - the rating and review count for the restaurant, or (<None>, <None>) if the rating and review couldn't be parsed
         """
-        try:
-            return cls._get_rating_and_review_count_scrape(page)
-        # handle case when the rating and review count couldn't be parsed
-        except AttributeError as e:
-            return cls._get_rating_and_review_count_api(name, location)
-        except Exception as e:
-            return None, None
+        strategies = [
+            lambda: cls._get_rating_and_review_count_scrape(page),
+            lambda: cls._get_rating_and_review_count_api(name, location),
+        ]
+        for strategy in strategies:
+            try:
+                return strategy()
+            except Exception:
+                continue
+        return None, None
         
     @staticmethod
     @abstractmethod
