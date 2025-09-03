@@ -39,7 +39,9 @@ class Website(ABC):
         ]
         for strategy in strategies:
             try:
-                return strategy()
+                result = strategy()
+                if result:
+                    return result
             except Exception:
                 continue
         return None, None
