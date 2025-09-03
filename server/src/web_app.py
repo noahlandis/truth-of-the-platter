@@ -17,7 +17,7 @@ app = Flask(
     static_folder='../../client/react-frontend/dist/assets',  # React static assets like JS and CSS
     template_folder='../../client/react-frontend/dist'  # Path to index.html
 )
-CORS(app)  # This will allow all origins
+CORS(app, origins=[os.getenv('ALLOWED_ORIGIN')]) 
 
 
 
