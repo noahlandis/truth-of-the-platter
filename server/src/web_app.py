@@ -17,7 +17,7 @@ app = Flask(
     static_folder='../../client/react-frontend/dist/assets',  # React static assets like JS and CSS
     template_folder='../../client/react-frontend/dist'  # Path to index.html
 )
-CORS(app)  # This will allow all origins
+CORS(app, origins=[os.getenv('ALLOWED_ORIGIN')]) 
 
 
 
@@ -47,16 +47,10 @@ def search():
         }), 404
     
 
-
-    # Dynamically add the matches as radio butto
-
 @app.route('/api/select', methods=['POST'])
 def select_match():
-    print("CALLED AGAIN")
-    print(request.json)
     intended_restaurant = request.json
     site_ratings = []
-    print("INTENDED RESTAURANT: ", intended_restaurant['source'])
     site_ratings.append((intended_restaurant['source'], str(intended_restaurant['rating']), str(intended_restaurant['review_count'])))
     full_name = intended_restaurant['name']
     full_location = intended_restaurant['location']
@@ -72,7 +66,6 @@ def select_match():
             ordered_ratings.append(rating)
     
     star_average, total_review_count = get_weighted_average_and_total_review_count(ordered_ratings)
-    print("SITE RATINGS: ", ordered_ratings)
     return jsonify({
         'site_ratings': ordered_ratings,
         'star_average': star_average,

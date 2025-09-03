@@ -31,7 +31,6 @@ class YelpApiGraphQL(YelpApi):
         error = YelpApiGraphQL._get_error_message(response)
         if error:
             return error  # This now returns the error code directly
-        print(response)
         return response['data']['search']['business']
     
     @staticmethod

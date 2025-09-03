@@ -33,19 +33,14 @@ class ApiHandler(ABC):
 
 class YelpApiGraphQLHandler(ApiHandler):
     def process_request(self, name, location):
-        print("Yelp API GraphQL handler hit")
         response = YelpApiGraphQL.get_response(name, location)
         if response == 'DAILY_POINTS_LIMIT_REACHED':
-            print("GraphQL API limit reached, passing to next handler")
             raise Exception("GraphQL API limit reached")
         if response == 'TRIAL_EXPIRED':
-            print("GraphQL API trial expired, passing to next handler")
             raise Exception("GraphQL API trial expired")
         if response == 'TOKEN_INVALID':
-            print("GraphQL API token invalid, passing to next handler")
             raise Exception("GraphQL API token invalid")
         if response == 'VALIDATION_ERROR':
-            print("GraphQL API validation error, passing to next handler")
             raise Exception("GraphQL API validation error")
         return response
     
@@ -54,19 +49,14 @@ class YelpApiGraphQLHandler(ApiHandler):
 
 class YelpApiRegularHandler(ApiHandler):
     def process_request(self, name, location):
-        print("Yelp API Regular handler hit")
         response = YelpApiRegular.get_response(name, location)
         if response == 'DAILY_POINTS_LIMIT_REACHED':
-            print("Regular API limit reached, passing to next handler")
             raise Exception("Regular API limit reached")
         if response == 'TRIAL_EXPIRED':
-            print("Regular API trial expired, passing to next handler")
             raise Exception("Regular API trial expired")
         if response == 'TOKEN_INVALID':
-            print("Regular API token invalid, passing to next handler")
             raise Exception("Regular API token invalid")
         if response == 'VALIDATION_ERROR':
-            print("Regular API validation error, passing to next handler")
             raise Exception("Regular API validation error")
         return response
 
@@ -75,7 +65,6 @@ class YelpApiRegularHandler(ApiHandler):
 
 class GooglePlacesApiHandler(ApiHandler):
     def process_request(self, name, location):
-        print("Google Places API handler hit")
         response = GooglePlacesApi.get_response(name, location)
         return response
 
