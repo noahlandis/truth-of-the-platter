@@ -23,7 +23,6 @@ def get_yelp_matches(name, location):
         raise NoResultsFoundError(f'No results could be found for {name} located in {location}. Please try again...')
     
     processed_handler = chain.get_processed_handler()
-    print(f"Request was processed by: {processed_handler.__class__.__name__}")
     
     filtered_restaurants = get_filtered_yelp_matches(response, name, processed_handler)
     if not filtered_restaurants:
@@ -34,14 +33,12 @@ def get_filtered_yelp_matches(yelp_restaurants, name, handler):
     """
     Filters the Yelp matches to only include potential matches
     """
-    print("The yelp restaurants are: ", yelp_restaurants)
     # filter matches
     filtered_restaurants = [
         handler.get_formatted_restaurant_data(yelp_restaurant)
         for yelp_restaurant in yelp_restaurants
         if is_potential_match(name, yelp_restaurant['name'])
     ]
-    print("The filtered restaurants are: ", filtered_restaurants)
     
     return filtered_restaurants
 
