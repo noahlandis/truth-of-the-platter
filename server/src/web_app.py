@@ -17,9 +17,9 @@ app = Flask(
     static_folder='../../client/react-frontend/dist/assets',  # React static assets like JS and CSS
     template_folder='../../client/react-frontend/dist'  # Path to index.html
 )
-CORS(app, origins=[os.getenv('ALLOWED_ORIGIN')]) 
 
-
+allowed_origins  = os.getenv('ALLOWED_ORIGINS').split(',')
+CORS(app, origins=allowed_origins) 
 
 
 @app.route('/', defaults={'path': ''})

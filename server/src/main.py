@@ -12,14 +12,14 @@ from bugsnag.handlers import BugsnagHandler
 from dotenv import load_dotenv
 
 from client.cli.src.main import run_cli
+load_dotenv()
+
 from web_app import app
 
 logger = logging.getLogger()
 
 
 def setup():
-    load_dotenv()
-
     bugsnag.configure(
         api_key=os.getenv('BUGSNAG_API_KEY'),
     )
